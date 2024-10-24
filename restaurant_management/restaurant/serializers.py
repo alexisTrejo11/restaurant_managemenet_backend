@@ -1,0 +1,8 @@
+from restaurant.models import Table
+from rest_framework import serializers
+
+class TableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Table
+        fields = ['number', 'is_available', 'seats']  
+        read_only_fields = ['id']  
