@@ -9,12 +9,28 @@ class Table(models.Model):
     def __str__(self):
         return f"Table {self.number} (Seats: {self.seats})"
     
-
 class Menu(models.Model):
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
-    is_available = models.BooleanField(default=True) 
+    is_available = models.BooleanField(default=True)
+
+    CATEGORY_CHOICES = [
+        ('undefined', 'Undefined'),
+        ('drinks', 'Drinks'),
+        ('alcohol_drinks', 'Alcohol Drinks'),
+        ('starters', 'Starters'),
+        ('breakfasts', 'Breakfasts'),
+        ('meals', 'Meals'),
+        ('desserts', 'Desserts'),
+        ('extras', 'Extras'),
+    ]
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='undefined', null=False)
+
+    def __str__(self):
+        return self.name
 
 
 class Order(models.Model):
