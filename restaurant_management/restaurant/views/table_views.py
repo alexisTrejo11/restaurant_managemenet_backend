@@ -2,7 +2,6 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from restaurant.models import Table 
 from restaurant.services.table_service import TableService
 from rest_framework.exceptions import ValidationError
 
