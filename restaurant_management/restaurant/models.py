@@ -60,18 +60,23 @@ class OrderItem(models.Model):
 
 class Reservation(models.Model):
     customer_name = models.CharField(max_length=100)
-    table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
+    customer_email = models.EmailField(null=True)
+    customers_numbers = models.IntegerField(default=1)
     reservation_time = models.DateTimeField()
+
+    table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Reservation for {self.customer_name} at {self.reservation_time}"
 
 
+
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_method_choices = [  # <- Cambié el guion por un igual
+    payment_method_choices = [
         ('cash', 'Cash'),
         ('credit_card', 'Credit Card'),
         ('digital', 'Digital Payment'),
@@ -102,4 +107,16 @@ class Stock(models.Model):
     
     def is_below_optimal(self):
         return self.current_quantity < self.optimal_quantity  
-    
+
+
+class StockTransaction(models.Model):
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    stock_update_choices = [
+        ('add', 'Add'),
+        ('remove', 'Remove'),
+        ('adjusted', 'Adjusted'),
+    ]
+
+    stock_update = models.CharField(choices=stock_update_choices, max_length=20)
+
