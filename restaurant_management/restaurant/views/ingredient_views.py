@@ -1,49 +1,50 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from restaurant.services.ingredient_service import IngredientService
+from restaurant.utils.result import Result
+from restaurant.utils.response import ApiResponse
+from restaurant.serializers import IngredientSerializer
+
 
 @api_view(['GET'])
 def get_ingredient_by_id(request, ingredient_id):
-    ingredient = IngredientService.get_ingredient_by_id(ingredient_id)
-    if ingredient is None:
-        return Response({
-            'message': f'Ingredient with ID {ingredient_id} not found' 
-        }, status=status.HTTP_404_NOT_FOUND)
+    ingredient_result = IngredientService.get_ingredient_by_id(ingredient_id)
     
-    return Response({
-        'message': f'Ingredient with ID {ingredient_id} successfully fetched',
-        'data': ingredient, 
-    })
+    if ingredient_result.is_failure():
+        return ApiResponse.not_found(ingredient_result.get_error_msg())
+    
+    ingredient_data = IngredientSerializer(ingredient_result.get_data()).data
+
+    return ApiResponse.ok(ingredient_data, f'Ingredient with ID {ingredient_id} successfully fetched',)
+
 
 @api_view(['GET'])
-def get_ingredients(request):
-    ingredients = IngredientService.get_ingredients()
-    return Response({
-        'message': 'Ingredients successfully fetched',
-        'data': ingredients, 
-    })
+def get_all_ingredients(request):
+    ingredients = IngredientService.get_all_ingredients()
+    ingrents_data = IngredientSerializer(ingredients, many=True).data
+
+    return ApiResponse.ok(ingrents_data, 'Ingredients successfully fetched')
+
 
 @api_view(['POST'])
 def create_ingredient(request):
-    try:
-        IngredientService.create_ingredient(request.data)
-        return Response({
-            'message': 'Ingredient successfully created',
-        }, status=status.HTTP_201_CREATED)
-    except ValidationError as e:        
-        return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+    ingredient_serializer = IngredientSerializer(data=request.data)
+
+    if not ingredient_serializer.is_valid():
+        return ApiResponse.bad_request(serializer.errors)
+         
+    IngredientService.create_ingredient(request.data)
+
+    return ApiResponse.created(None, 'Ingredient successfully created')
+
 
 @api_view(['DELETE'])
 def delete_ingredient_by_id(request, ingredient_id):
-    is_deleted = IngredientService.delete_ingredient(ingredient_id)
-    if not is_deleted:
-        return Response({
-            'message': f'Ingredient with ID {ingredient_id} not found' 
-        }, status=status.HTTP_404_NOT_FOUND)
+    delete_result = IngredientService.delete_ingredient(ingredient_id)
     
-    return Response({
-        'message': f'Ingredient with ID {ingredient_id} successfully deleted',
-    })
+    if delete_result.is_failure():
+        return ApiResponse.not_found(delete_result.get_error_msg())
+    
+    return ApiResponse.ok(None, f'Ingredient with ID {ingredient_id} successfully deleted')

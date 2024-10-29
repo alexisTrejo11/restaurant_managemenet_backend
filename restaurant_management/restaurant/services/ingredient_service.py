@@ -1,17 +1,15 @@
 from restaurant.models import Ingredient
-from restaurant.serializers import IngredientSerializer
 from rest_framework.exceptions import ValidationError
+from restaurant.utils.result import Result
 
 class IngredientService:
     @staticmethod
     def get_ingredient_by_id(ingredient_id):
         try:
             ingredient = Ingredient.objects.get(id=ingredient_id)
-            
-            serializer = IngredientSerializer(ingredient)
-            return serializer.data
+            return Result.success(ingredient)
         except Ingredient.DoesNotExist:
-            return None
+            return Result.error(f'Ingredient with ID {ingredient_id} not found')
     
     @staticmethod
     def get_ingredient_entity_by_id(ingredient_id):
@@ -24,20 +22,21 @@ class IngredientService:
 
 
     @staticmethod
-    def get_ingredients():
-        tables = Ingredient.objects.all().order_by('id')
+    def get_all_ingredients():
+        return Ingredient.objects.all().order_by('id')
         
-        serializer = IngredientSerializer(tables, many=True)
-        return serializer.data
-
 
     @staticmethod
     def create_ingredient(data):
-        serializer = IngredientSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            raise ValidationError(serializer.errors) 
+        ingredient = Ingredient(
+            name=data.get('name'),
+            quantity=data.get('quantity'),
+            unit=data.get('unit')
+            )
+
+        ingredient.save()
+
+        return ingredient
 
 
     @staticmethod
@@ -45,6 +44,7 @@ class IngredientService:
         try:
             ingredient = Ingredient.objects.get(id=ingredient_id)
             ingredient.delete()
-            return True
+            
+            return Result.success(None)
         except Ingredient.DoesNotExist:
-            return False
+            return Result.error(f'Ingredient with ID {ingredient_id} successfully deleted')

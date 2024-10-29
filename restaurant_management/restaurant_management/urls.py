@@ -13,7 +13,7 @@ urlpatterns = [
     path('v1/api/tables/<int:table_number>/remove', table_views.delete_table_by_number, name='delete_table_by_number'),
 
     # Ingredient Endpoints
-    path('v1/api/ingredients/all', ingredient_views.get_ingredients, name='get_ingredients'),
+    path('v1/api/ingredients/all', ingredient_views.get_all_ingredients, name='get_all_ingredients'),
     path('v1/api/ingredients/<int:ingredient_id>', ingredient_views.get_ingredient_by_id, name='get_ingredient_by_id'),
 
     path('v1/api/ingredients', ingredient_views.create_ingredient, name='create_ingredients'),
