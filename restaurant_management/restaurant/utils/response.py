@@ -22,18 +22,20 @@ class ApiResponse:
             'time_stamp': datetime.now(),
         }, status=status.HTTP_400_BAD_REQUEST)
 
+
+    @staticmethod
+    def conflict(message):
+        return Response({
+            'data': None,
+            'message': message,
+            'time_stamp': datetime.now(),
+        }, status=status.HTTP_403_FORBIDDEN)
+
+
     @staticmethod
     def ok(data, message):
         return Response({
             'data': data,
-            'message': message,
-            'time_stamp': datetime.now(),
-        })
-
-    @staticmethod
-    def ok(message):
-        return Response({
-            'data': None,
             'message': message,
             'time_stamp': datetime.now(),
         })

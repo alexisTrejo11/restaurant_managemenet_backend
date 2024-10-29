@@ -1,5 +1,4 @@
 from restaurant.models import Table 
-from restaurant.serializers import TableSerializer
 from rest_framework.exceptions import ValidationError
 
 class TableService:
@@ -7,9 +6,7 @@ class TableService:
     def get_table_by_number(number):
         try:
             table = Table.objects.get(number=number)
-            serializer = TableSerializer(table)
-
-            return serializer.data
+            return table
         except Table.DoesNotExist:
             return None
     
@@ -17,8 +14,6 @@ class TableService:
     @staticmethod
     def get_tables_sorted_by_number():
         tables = Table.objects.all().order_by('number')  
-        serializer = TableSerializer(tables, many=True) 
-        return serializer.data
     
 
     @staticmethod
