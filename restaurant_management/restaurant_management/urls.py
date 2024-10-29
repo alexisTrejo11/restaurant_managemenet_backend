@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from restaurant.views import table_views, ingredient_views, menu_views, reservation_views
+from restaurant.views import table_views, ingredient_views, menu_views, reservation_views, stock_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,7 +34,14 @@ urlpatterns = [
     path('v1/api/reservations/start/<str:start_date>/end/<str:end_date>', reservation_views.get_reservations_by_date_range, name='get_reservations_by_date_range'),
 
     path('v1/api/reservations', reservation_views.create_reservation, name='create_reservation'),
-    path('v1/api/reservations/<int:reservation_id>/remove', reservation_views.delete_reservation_by_id, name='delete_reservation_by_id')
+    path('v1/api/reservations/<int:reservation_id>/remove', reservation_views.delete_reservation_by_id, name='delete_reservation_by_id'),
 
+    # Stock Endpoints
+    path('v1/api/stock/<int:stock_id>', stock_views.get_stock_by_id, name='get_stock_by_id'),
+    path('v1/api/stock/ingredient/<int:ingredient_id>', stock_views.get_stock_by_ingredient_id, name='get_stock_by_id'),
+    
+    path('v1/api/stock/ingredient/<int:ingredient_id>/init', stock_views.init_stock, name='init_stock_by_ingredient_id'),
+    path('v1/api/stock/update', stock_views.update_stock_by_ingredient_id, name='update_stock_by_ingredient_id'),
+    path('v1/api/stock/ingredient/<int:ingredient_id>/remove', stock_views.delete_stock_by_ingredient_id, name='deldelete_stock_by_ingredient_id')
 
 ]

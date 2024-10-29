@@ -12,6 +12,15 @@ class IngredientService:
             return serializer.data
         except Ingredient.DoesNotExist:
             return None
+    
+    @staticmethod
+    def get_ingredient_entity_by_id(ingredient_id):
+        try:
+            return Ingredient.objects.get(id=ingredient_id)
+        
+        except Ingredient.DoesNotExist:
+            return None
+
 
 
     @staticmethod

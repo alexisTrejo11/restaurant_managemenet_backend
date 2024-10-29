@@ -87,36 +87,39 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment of ${self.amount} for Order #{self.order.id}"
 
-
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     unit = models.CharField(max_length=20)  # kg, liters, etc.
-
+    
     def __str__(self):
         return self.name
 
-
 class Stock(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.OneToOneField(Ingredient, on_delete=models.CASCADE, related_name='stock')
     current_quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    optimal_quantity = models.DecimalField(max_digits=10, decimal_places=2)  
-
+    optimal_quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    
     def __str__(self):
         return f"Stock of {self.ingredient.name}"
     
     def is_below_optimal(self):
         return self.current_quantity < self.optimal_quantity  
+    
+    def increase_current_quantity(self, quantity):
+        self.current_quantity += quantity
 
+    def decrease_current_quantity(self, quantity):
+        if self.current_quantity - quantity < 0:
+            raise ValueError("Cannot decrease stock below zero")
+        self.current_quantity -= quantity
 
 class StockTransaction(models.Model):
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name="transactions")
     date = models.DateTimeField(auto_now_add=True)
     stock_update_choices = [
-        ('add', 'Add'),
-        ('remove', 'Remove'),
-        ('adjusted', 'Adjusted'),
+        ('IN', 'in'),
+        ('OUT', 'out'),
+        ('ADJUSTED', 'adjusted'),
     ]
-
     stock_update = models.CharField(choices=stock_update_choices, max_length=20)
-
