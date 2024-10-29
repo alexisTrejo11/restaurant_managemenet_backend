@@ -2,7 +2,7 @@ from restaurant.models import Stock, Ingredient, StockTransaction
 from restaurant.serializers import StockInsertSerializer, StockSerializer
 from restaurant.utils.result import Result
 from django.db import transaction
-from restaurant.dtos.stock_dtos import StockUpdateDTO
+
 
 class StockService:
     @staticmethod
@@ -32,8 +32,7 @@ class StockService:
             optimal_quantity=optimal_quantity,
         )
         stock.save()
-        stock_serializer = StockSerializer(stock)
-        return stock_serializer.data
+        return stock
 
     @staticmethod
     def update_stock(data):
