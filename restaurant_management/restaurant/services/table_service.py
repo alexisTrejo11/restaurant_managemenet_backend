@@ -1,5 +1,7 @@
 from restaurant.models import Table 
 from rest_framework.exceptions import ValidationError
+from restaurant.utils.result import Result
+
 
 class TableService:
     @staticmethod
@@ -9,7 +11,6 @@ class TableService:
             return table
         except Table.DoesNotExist:
             return None
-    
 
     @staticmethod
     def get_tables_sorted_by_number():

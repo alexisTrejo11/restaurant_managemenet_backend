@@ -1,4 +1,4 @@
-from restaurant.models import Table, Ingredient, Menu, Reservation, Stock
+from restaurant.models import Table, Ingredient, Menu, Reservation, Stock, Order, OrderItem, Payment
 from rest_framework import serializers
 
 class TableSerializer(serializers.ModelSerializer):
@@ -8,6 +8,12 @@ class TableSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']  
 
 
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+
+
 class IngredientInsertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -15,6 +21,58 @@ class IngredientInsertSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']  
 
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['menu_item', 'quantity', 'notes']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)  
+
+    class Meta:
+        model = Order
+        fields = ['id', 'table', 'created_at', 'status', 'items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')  # Extract items data
+        order = Order.objects.create(**validated_data)  # Create the Order
+
+        # Create related OrderItems
+        OrderItem.objects.bulk_create([
+            OrderItem(order=order, **item_data) for item_data in items_data
+        ])
+        
+        return order
+
+
+class OrderItemInsertSerializer(serializers.Serializer):
+    menu_id = serializers.IntegerField(required=True)
+    quantity = serializers.IntegerField(required=True, min_value=1)
+    notes = serializers.CharField(required=False)
+
+
+class AddItemsSerilizer(serializers.Serializer):
+     order_items = serializers.ListField(
+        child=OrderItemInsertSerializer(),  
+        required=True,
+        allow_empty=False
+    )
+
+class OrderInsertSerializer(serializers.Serializer):
+    table_number = serializers.IntegerField(required=True, min_value=1)
+    order_items = serializers.ListField(
+        child=OrderItemInsertSerializer(),  
+        required=True,
+        allow_empty=False
+    )
+
+    def validate_order_items(self, value):
+        if not value:
+            raise serializers.ValidationError("Order items cannot be empty.")
+        return value
+
+        
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient

@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 
 class ApiResponse:
+    
     @staticmethod
     def not_found(message):
         return Response({

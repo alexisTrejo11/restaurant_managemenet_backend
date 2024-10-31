@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import datetime
+from decimal import Decimal
+
 
 class Table(models.Model):
     id = models.AutoField(primary_key=True)
@@ -6,9 +9,16 @@ class Table(models.Model):
     seats = models.PositiveIntegerField()
     is_available = models.BooleanField(default=True)
 
+    def set_as_available(self):
+        self.is_available = True
+
+    def set_as_unavailable(self):
+        self.is_available = False
+
     def __str__(self):
         return f"Table {self.number} (Seats: {self.seats})"
     
+
 class Menu(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -38,7 +48,6 @@ class Order(models.Model):
     table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     status_choices = [
-        ('pending', 'Pending'),
         ('in_progress', 'In progress'),  
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
@@ -47,15 +56,23 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} for Table {self.table.number}"
+    
+    @classmethod
+    def validate_status(cls, status):
+        return status in dict(cls.status_choices)
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
     menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    notes = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.menu_item.name} for Order #{self.order.id}"
+
+    def get_menu_item(self):
+        return self.menu_item
 
 
 class Reservation(models.Model):
@@ -72,20 +89,36 @@ class Reservation(models.Model):
         return f"Reservation for {self.customer_name} at {self.reservation_time}"
 
 
-
 class Payment(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method_choices = [
         ('cash', 'Cash'),
         ('credit_card', 'Credit Card'),
-        ('digital', 'Digital Payment'),
+        ('digital_payment', 'Digital Payment'),
     ]
-    payment_method = models.CharField(max_length=20, choices=payment_method_choices)
-    paid_at = models.DateTimeField(auto_now=True)
+    
+    status_choices = [
+        ('pending_payment', 'Pending Payment'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    MEX_VAT = Decimal('0.16')
+
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    payment_method = models.CharField(max_length=20, choices=payment_method_choices, default='cash')
+    tip = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    VAT = models.DecimalField(max_digits=4, decimal_places=2, default=0.16)  
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=15, choices=status_choices, default='pending_payment')
 
     def __str__(self):
-        return f"Payment of ${self.amount} for Order #{self.order.id}"
+        return f"Payment of ${self.sub_total} for Order #{self.order.id}"
+
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100)
@@ -94,6 +127,7 @@ class Ingredient(models.Model):
     
     def __str__(self):
         return self.name
+
 
 class Stock(models.Model):
     ingredient = models.OneToOneField(Ingredient, on_delete=models.CASCADE, related_name='stock')
@@ -113,6 +147,7 @@ class Stock(models.Model):
         if self.current_quantity - quantity < 0:
             raise ValueError("Cannot decrease stock below zero")
         self.current_quantity -= quantity
+
 
 class StockTransaction(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name="transactions")

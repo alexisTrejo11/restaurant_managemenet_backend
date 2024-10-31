@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from restaurant.views import table_views, ingredient_views, menu_views, reservation_views, stock_views
+from restaurant.views import table_views, ingredient_views, menu_views, reservation_views, stock_views, order_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -42,6 +42,14 @@ urlpatterns = [
     
     path('v1/api/stock/ingredient/<int:ingredient_id>/init', stock_views.init_stock, name='init_stock_by_ingredient_id'),
     path('v1/api/stock/update', stock_views.update_stock_by_ingredient_id, name='update_stock_by_ingredient_id'),
-    path('v1/api/stock/ingredient/<int:ingredient_id>/remove', stock_views.delete_stock_by_ingredient_id, name='deldelete_stock_by_ingredient_id')
+    path('v1/api/stock/ingredient/<int:ingredient_id>/remove', stock_views.delete_stock_by_ingredient_id, name='deldelete_stock_by_ingredient_id'),
+
+    # Order Endpoints 
+    path('v1/api/orders/<int:order_id>', order_views.get_order_by_id, name='get_order_by_id'),
+    path('v1/api/orders/status/<str:order_status>', order_views.get_orders_by_status, name='get_orders_by_status'),
+    path('v1/api/orders/init', order_views.init_order, name='init_order'),
+    path('v1/api/orders/<int:order_id>/add-items', order_views.add_items_to_order, name='add_items_to_order'),
+    path('v1/api/orders/<int:order_id>/finish', order_views.finish_order, name='finish_order'),
+    path('v1/api/orders/<int:order_id>/cancel', order_views.cancel_order, name='cancel_order'),
 
 ]
