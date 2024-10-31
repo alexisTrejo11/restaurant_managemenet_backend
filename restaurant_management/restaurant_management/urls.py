@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from restaurant.views import table_views, ingredient_views, menu_views, reservation_views, stock_views, order_views
+from restaurant.views import table_views, ingredient_views, menu_views, reservation_views, stock_views, order_views, payment_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -51,5 +51,13 @@ urlpatterns = [
     path('v1/api/orders/<int:order_id>/add-items', order_views.add_items_to_order, name='add_items_to_order'),
     path('v1/api/orders/<int:order_id>/finish', order_views.finish_order, name='finish_order'),
     path('v1/api/orders/<int:order_id>/cancel', order_views.cancel_order, name='cancel_order'),
+
+    # Payment Endpoints
+    path('v1/api/payments/<int:payment_id>', payment_views.get_payment_by_id, name='get_order_by_id'),
+    path('v1/api/payments/status/<str:payment_status>', payment_views.get_payments_by_status, name='get_payments_by_status'),
+    path('v1/api/payments/by-date/start/<str:start_date>/end/<str:end_date>', payment_views.get_payments_by_data_range, name='get_payments_by_data_range'),
+    path('v1/api/payments/today', payment_views.get_today_payments, name='get_today_payments'),
+    path('v1/api/payments/<int:payment_id>/complete', payment_views.complete_payment, name='complete_payment'),
+    path('v1/api/payments/<int:payment_id>/cancel', payment_views.cancel_payment, name='complete_payment'),
 
 ]

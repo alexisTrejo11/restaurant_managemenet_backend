@@ -37,7 +37,7 @@ class OrderService:
      @staticmethod
      def init_order(table: Table, order_items_dtos: list[OrderItemInsertDTO]):
           with transaction.atomic():
-               OrderService.set_table_as_unavailable()
+               OrderService.set_table_as_unavailable(table)
 
                order = Order(table=table, status='in_progress')
                order.save()

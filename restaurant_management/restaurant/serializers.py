@@ -14,6 +14,21 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CompletePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ['payment_method', 'tip']
+
+    tip = serializers.IntegerField(default=0)
+    payment_method = serializers.CharField(required=True)
+
+    def validate_payment_method(self, value):
+        valid_payment_methods = dict(Payment.payment_method_choices).keys()
+        if value not in valid_payment_methods:
+            raise serializers.ValidationError("El método de pago proporcionado no es válido.")
+        return value
+
+
 class IngredientInsertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient

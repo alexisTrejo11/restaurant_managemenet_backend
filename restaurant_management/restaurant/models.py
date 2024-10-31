@@ -80,9 +80,7 @@ class Reservation(models.Model):
     customer_email = models.EmailField(null=True)
     customers_numbers = models.IntegerField(default=1)
     reservation_time = models.DateTimeField()
-
     table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -110,14 +108,28 @@ class Payment(models.Model):
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     VAT = models.DecimalField(max_digits=4, decimal_places=2, default=0.16)  
+    taxes = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
     total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=15, choices=status_choices, default='pending_payment')
 
+    @classmethod
+    def validate_status(cls, status):
+        return status in dict(cls.status_choices)
+
     def __str__(self):
         return f"Payment of ${self.sub_total} for Order #{self.order.id}"
+
+    def add_tip(self, tip):
+        self.tip = tip
+        self.total += tip
+
+    def set_as_complete(self):
+        self.status = 'completed'
+        self.paid_at = datetime.now()
+
 
 
 class Ingredient(models.Model):

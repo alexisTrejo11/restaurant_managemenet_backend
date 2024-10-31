@@ -30,7 +30,7 @@ class ApiResponse:
             'data': None,
             'message': message,
             'time_stamp': datetime.now(),
-        }, status=status.HTTP_403_FORBIDDEN)
+        }, status=status.HTTP_409_CONFLICT)
 
 
     @staticmethod
