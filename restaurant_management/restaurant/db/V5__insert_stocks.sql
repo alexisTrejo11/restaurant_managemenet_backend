@@ -1,0 +1,83 @@
+-- Inserting Stocks
+INSERT INTO stocks (ingredient_id, total_stock) VALUES
+    -- Drinks Stocks
+    (1, 50),   -- Coffee Beans (kg)
+    (2, 100),  -- Water (liter)
+    (3, 20),   -- Tea Leaves (kg)
+    (4, 10),   -- Lemon (piece)
+    (5, 50),   -- Oranges (kg)
+    (6, 50),   -- Coca-Cola Syrup (liter)
+    (7, 100),  -- Mineral Water (liter)
+
+    -- Alcohol Drinks Stocks
+    (8, 50),   -- Red Wine (liter)
+    (9, 50),   -- White Wine (liter)
+    (10, 30),  -- Craft Beer (liter)
+    (11, 20),  -- Champagne (liter)
+    (12, 50),  -- Orange Juice (liter)
+
+    -- Breakfast Stocks
+    (13, 200), -- Eggs (piece)
+    (14, 50),  -- Bacon (kg)
+    (15, 30),  -- Bread (loaf)
+    (16, 100), -- Potatoes (kg)
+    (17, 30),  -- Tofu (kg)
+    (18, 50),  -- Mixed Vegetables (kg)
+    (19, 50),  -- Avocado (piece)
+    (20, 20),  -- Bread (loaf)
+    (21, 50),  -- Flour (kg)
+    (22, 100), -- Milk (liter)
+    (23, 200), -- Eggs (piece)
+    (24, 20),  -- Maple Syrup (liter)
+    (25, 100), -- Eggs (piece)
+    (26, 50),  -- English Muffin (piece)
+    (27, 10),  -- Hollandaise Sauce (liter)
+
+    -- Starters Stocks
+    (28, 50),  -- Chicken Wings (kg)
+    (29, 20),  -- BBQ Sauce (liter)
+    (30, 20),  -- Buffalo Sauce (liter)
+    (31, 10),  -- Honey (liter)
+    (32, 50),  -- Tortilla Chips (kg)
+    (33, 30),  -- Cheese (kg)
+    (34, 20),  -- Jalapeños (kg)
+    (35, 30),  -- Salsa (liter)
+    (36, 20),  -- Sour Cream (liter)
+    (37, 30),  -- Romaine Lettuce (kg)
+    (38, 20),  -- Croutons (kg)
+    (39, 15),  -- Parmesan Cheese (kg)
+    (40, 20),  -- Caesar Dressing (liter)
+
+    -- Meals Stocks
+    (41, 100), -- Beef Patty (kg)
+    (42, 30),  -- Cheese (kg)
+    (43, 50),  -- Lettuce (kg)
+    (44, 50),  -- Tomato (kg)
+    (45, 100), -- Brioche Bun (piece)
+    (46, 50),  -- Salmon (kg)
+    (47, 50),  -- Mixed Vegetables (kg)
+    (48, 50),  -- Lemon (piece)
+    (49, 30),  -- Butter (kg)
+    (50, 50),  -- Penne Pasta (kg)
+    (51, 50),  -- Mixed Vegetables (kg)
+    (52, 30),  -- Marinara Sauce (liter)
+    (53, 50),  -- Chicken Breast (kg)
+    (54, 30),  -- Marinara Sauce (liter)
+    (55, 30),  -- Mozzarella Cheese (kg)
+
+    -- Desserts Stocks
+    (56, 30),  -- Cream Cheese (kg)
+    (57, 200), -- Eggs (piece)
+    (58, 50),  -- Berries (kg)
+    (59, 30),  -- Chocolate (kg)
+    (60, 50),  -- Flour (kg)
+    (61, 200), -- Eggs (piece)
+    (62, 50),  -- Vanilla Ice Cream (liter)
+    (63, 50),  -- Apples (kg)
+    (64, 50),  -- Flour (kg)
+    (65, 50),  -- Vanilla Ice Cream (liter)
+
+    -- Extras Stocks
+    (66, 50),  -- Bacon (kg)
+    (67, 30),  -- Gluten-Free Bread (loaf)
+    (68, 50);  -- Mixed Salad Greens (kg)

@@ -40,6 +40,14 @@ class ApiResponse:
             'message': message,
             'time_stamp': datetime.now(),
         })
+    
+    @staticmethod
+    def found(data, entity, parameter, value):
+        return Response({
+            'data': data,
+            'message': f'{entity} with {parameter} [{value}] successfully fetched',
+            'time_stamp': datetime.now(),
+        })
 
     @staticmethod
     def created(message):

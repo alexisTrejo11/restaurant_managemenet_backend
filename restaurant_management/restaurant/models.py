@@ -1,172 +1,203 @@
 from django.db import models
-from datetime import datetime
-from decimal import Decimal
+from django.utils import timezone
 
-
-class Table(models.Model):
-    id = models.AutoField(primary_key=True)
-    number = models.PositiveIntegerField(unique=True)
-    seats = models.PositiveIntegerField()
-    is_available = models.BooleanField(default=True)
-
-    def set_as_available(self):
-        self.is_available = True
-
-    def set_as_unavailable(self):
-        self.is_available = False
-
-    def __str__(self):
-        return f"Table {self.number} (Seats: {self.seats})"
-    
-
-class Menu(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    is_available = models.BooleanField(default=True)
-
+class MenuItem(models.Model):
     CATEGORY_CHOICES = [
-        ('undefined', 'Undefined'),
-        ('drinks', 'Drinks'),
-        ('alcohol_drinks', 'Alcohol Drinks'),
-        ('starters', 'Starters'),
-        ('breakfasts', 'Breakfasts'),
-        ('meals', 'Meals'),
-        ('desserts', 'Desserts'),
-        ('extras', 'Extras'),
+        ('DRINKS', 'Drinks'),
+        ('ALCOHOL_DRINKS', 'Alcohol Drinks'),
+        ('BREAKFASTS', 'Breakfasts'),
+        ('STARTERS', 'Starters'),
+        ('MEALS', 'Meals'),
+        ('DESSERTS', 'Desserts'),
+        ('EXTRAS', 'Extras'),
     ]
 
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='undefined', null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class Order(models.Model):
-    id = models.AutoField(primary_key=True)
-    table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    status_choices = [
-        ('in_progress', 'In progress'),  
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    status = models.CharField(max_length=15, choices=status_choices, default='pending')
-
-    def __str__(self):
-        return f"Order #{self.id} for Table {self.table.number}"
-    
-    @classmethod
-    def validate_status(cls, status):
-        return status in dict(cls.status_choices)
-
-
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
-    menu_item = models.ForeignKey(Menu, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    notes = models.CharField(max_length=200, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.quantity} x {self.menu_item.name} for Order #{self.order.id}"
-
-    def get_menu_item(self):
-        return self.menu_item
-
-
-class Reservation(models.Model):
-    customer_name = models.CharField(max_length=100)
-    customer_email = models.EmailField(null=True)
-    customers_numbers = models.IntegerField(default=1)
-    reservation_time = models.DateTimeField()
-    table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Reservation for {self.customer_name} at {self.reservation_time}"
-
-
-class Payment(models.Model):
-    payment_method_choices = [
-        ('cash', 'Cash'),
-        ('credit_card', 'Credit Card'),
-        ('digital_payment', 'Digital Payment'),
-    ]
-    
-    status_choices = [
-        ('pending_payment', 'Pending Payment'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-
-    MEX_VAT = Decimal('0.16')
-
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=20, choices=payment_method_choices, default='cash')
-    tip = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
-    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    VAT = models.DecimalField(max_digits=4, decimal_places=2, default=0.16)  
-    taxes = models.DecimalField(max_digits=10, decimal_places=2, default=0)  
-    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  
-    paid_at = models.DateTimeField(null=True, blank=True)
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=15, choices=status_choices, default='pending_payment')
 
-    @classmethod
-    def validate_status(cls, status):
-        return status in dict(cls.status_choices)
+    class Meta:
+        db_table = 'menu_items'
+        verbose_name = 'Menu Item'
+        verbose_name_plural = 'Menu Items'
 
-    def __str__(self):
-        return f"Payment of ${self.sub_total} for Order #{self.order.id}"
-
-    def add_tip(self, tip):
-        self.tip = tip
-        self.total += tip
-
-    def set_as_complete(self):
-        self.status = 'completed'
-        self.paid_at = datetime.now()
-
-
-
-class Ingredient(models.Model):
-    name = models.CharField(max_length=100)
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    unit = models.CharField(max_length=20)  # kg, liters, etc.
-    
     def __str__(self):
         return self.name
 
+class MenuExtra(models.Model):
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'menu_extras'
+        verbose_name = 'Menu Extra'
+        verbose_name_plural = 'Menu Extras'
+
+    def __str__(self):
+        return self.name
+
+class Table(models.Model):
+    number = models.IntegerField()
+    seats = models.IntegerField()
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'tables'
+        verbose_name = 'Table'
+        verbose_name_plural = 'Tables'
+        unique_together = ('number',)
+
+    def __str__(self):
+        return f'Table {self.number} ({self.seats} seats)'
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    table = models.ForeignKey(Table, on_delete=models.PROTECT, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    end_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'orders'
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+
+    def __str__(self):
+        return f'Order {self.id} - Table {self.table.number}'
+
+class OrderItem(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.PROTECT, related_name='order_items')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    added_at = models.DateTimeField(auto_now_add=True)
+    is_delivered = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'order_items'
+        verbose_name = 'Order Item'
+        verbose_name_plural = 'Order Items'
+
+    def __str__(self):
+        return f'{self.menu_item.name} - Order {self.order.id}'
+
+class Ingredient(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.SET_NULL, null=True, related_name='ingredients')
+    name = models.CharField(max_length=255)
+    unit = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'ingredients'
+        verbose_name = 'Ingredient'
+        verbose_name_plural = 'Ingredients'
+
+    def __str__(self):
+        return self.name
 
 class Stock(models.Model):
-    ingredient = models.OneToOneField(Ingredient, on_delete=models.CASCADE, related_name='stock')
-    current_quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    optimal_quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT, related_name='stocks')
+    total_stock = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'stocks'
+        verbose_name = 'Stock'
+        verbose_name_plural = 'Stocks'
+
     def __str__(self):
-        return f"Stock of {self.ingredient.name}"
-    
-    def is_below_optimal(self):
-        return self.current_quantity < self.optimal_quantity  
-    
-    def increase_current_quantity(self, quantity):
-        self.current_quantity += quantity
-
-    def decrease_current_quantity(self, quantity):
-        if self.current_quantity - quantity < 0:
-            raise ValueError("Cannot decrease stock below zero")
-        self.current_quantity -= quantity
-
+        return f'{self.ingredient.name} - {self.total_stock} {self.ingredient.unit}'
 
 class StockTransaction(models.Model):
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name="transactions")
-    date = models.DateTimeField(auto_now_add=True)
-    stock_update_choices = [
-        ('IN', 'in'),
-        ('OUT', 'out'),
-        ('ADJUSTED', 'adjusted'),
+    TRANSACTION_TYPES = [
+        ('IN', 'Stock In'),
+        ('OUT', 'Stock Out'),
     ]
-    stock_update = models.CharField(choices=stock_update_choices, max_length=20)
+
+    ingredient_quantity = models.IntegerField()
+    stock = models.ForeignKey(Stock, on_delete=models.PROTECT, related_name='transactions')
+    transaction_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
+    date = models.DateTimeField(default=timezone.now)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'stock_transactions'
+        verbose_name = 'Stock Transaction'
+        verbose_name_plural = 'Stock Transactions'
+
+    def __str__(self):
+        return f'{self.transaction_type} - {self.ingredient_quantity} {self.ingredient.unit} of {self.ingredient.name}'
+
+class Reservation(models.Model):
+    STATUS_CHOICES = [
+        ('BOOKED', 'Booked'),
+        ('ATTENDED', 'Attended'),
+        ('NOT_ATTENDED', 'Not Attended'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    table = models.ForeignKey(Table, on_delete=models.PROTECT, related_name='reservations')
+    reservation_date = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'reservations'
+        verbose_name = 'Reservation'
+        verbose_name_plural = 'Reservations'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} - {self.reservation_date}'
+
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('CASH', 'Cash'),
+        ('CARD', 'Card'),
+        ('TRANSACTION', 'Transaction'),
+    ]
+
+    PAYMENT_STATUS = [
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    CURRENCY_TYPES = [
+        ('MXN', 'Mexican Peso'),
+        ('USD', 'US Dollar'),
+        ('EUR', 'Euro'),
+    ]
+
+    order = models.OneToOneField(Order, on_delete=models.PROTECT, null=True, related_name='payment')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=10, decimal_places=2)
+    vat_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    vat = models.DecimalField(max_digits=10, decimal_places=2)
+    currency_type = models.CharField(max_length=3, choices=CURRENCY_TYPES)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'payments'
+        verbose_name = 'Payment'
+        verbose_name_plural = 'Payments'
+
+    def __str__(self):
+        return f'Payment for Order {self.order_id} - {self.total} {self.currency_type}'

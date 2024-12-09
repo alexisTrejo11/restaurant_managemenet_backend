@@ -17,8 +17,7 @@ def get_ingredient_by_id(request, ingredient_id):
     
     ingredient_data = IngredientSerializer(ingredient_result.get_data()).data
 
-    return ApiResponse.ok(ingredient_data, f'Ingredient with ID {ingredient_id} successfully fetched',)
-
+    return ApiResponse.found(ingredient_data, 'Ingredient', 'ID', ingredient_id)
 
 @api_view(['GET'])
 def get_all_ingredients(request):

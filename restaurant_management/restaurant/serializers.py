@@ -1,4 +1,4 @@
-from restaurant.models import Table, Ingredient, Menu, Reservation, Stock, Order, OrderItem, Payment
+from restaurant.models import Table, Ingredient, MenuItem, Reservation, Stock, Order, OrderItem, Payment
 from rest_framework import serializers
 
 class TableSerializer(serializers.ModelSerializer):
@@ -96,7 +96,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Menu
+        model = MenuItem
         fields = ['name', 'price', 'category', 'description']  
         read_only_fields = ['id']  
 
