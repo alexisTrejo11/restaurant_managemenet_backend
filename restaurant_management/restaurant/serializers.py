@@ -1,10 +1,17 @@
 from restaurant.models import Table, Ingredient, MenuItem, Reservation, Stock, Order, OrderItem, Payment
 from rest_framework import serializers
 
+class TableInsertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Table
+        fields = ['number', 'seats']  
+        read_only_fields = ['id']  
+
+
 class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
-        fields = ['number', 'is_available', 'seats']  
+        fields = ['number', 'seats', 'is_available'] 
         read_only_fields = ['id']  
 
 

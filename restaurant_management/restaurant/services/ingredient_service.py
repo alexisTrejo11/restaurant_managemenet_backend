@@ -20,7 +20,6 @@ class IngredientService:
             return None
 
 
-
     @staticmethod
     def get_all_ingredients():
         return Ingredient.objects.all().order_by('id')
