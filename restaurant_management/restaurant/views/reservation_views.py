@@ -1,3 +1,4 @@
+"""
 from rest_framework.response import Response
 from restaurant.serializers import ReservationInsertSerializer, ReservationSerializer
 from restaurant.services.reservation_service import ReservationService
@@ -77,3 +78,4 @@ def delete_reservation_by_id(request, reservation_id):
         return ApiResponse.not_found(delete_result.get_error_msg())
 
     return ApiResponse.ok(None, f'reservation with Id {reservation_id} succesfully deleted')
+"""

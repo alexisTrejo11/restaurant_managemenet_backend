@@ -1,58 +1,50 @@
-from django.shortcuts import render
-from rest_framework import status
-
 from restaurant.utils.response import ApiResponse
-from rest_framework.decorators import api_view
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from restaurant.models import Table
-from rest_framework.exceptions import ValidationError
-from restaurant.container import Container
 from restaurant.serializers import TableSerializer, TableInsertSerializer
+from rest_framework.views import APIView
+from restaurant.services.table_service import TableService
 
-container = Container()
+table_service = TableService()
 
-@api_view(['GET'])
-def get_table_by_number(request, table_number):
-    table_service = container.table_service()
+class GetTableByNumber(APIView):
+    def get(self, request, table_number):
+        table = table_service.get_table_by_number(table_number)
+        if table is None:
+            return ApiResponse.not_found(f'Table with number {table_number} not found')
+        
+        table_data = TableSerializer(table).data
 
-    table = table_service.get_table_by_number(table_number)
-    if table is None:
-        return ApiResponse.not_found(f'Table with number {table_number} not found')
-    
-    table_data = TableSerializer(table).data
-
-    return ApiResponse.created(f'Table with number succesfully created' ,table_data)
-
-    
-@api_view(['GET'])
-def get_all_tables(request):
-    table_service = container.table_service()
-
-    tables = table_service.get_all()
-    table_data = TableSerializer(tables, many=True).data
-    return ApiResponse.ok(table_data, 'All tables succesfully fetched')
+        return ApiResponse.created(table_data, f'Table with number {table_number} succesfully fetched')
 
 
-@api_view(['POST'])
-def create_table(self, request):
-    table_service = container.table_service()
+class GetAllTables(APIView):    
+    def get(self, request):
+        tables = table_service.get_all()
+        table_data = TableSerializer(tables, many=True).data
+        return ApiResponse.ok(table_data, 'All tables succesfully fetched')
 
-    serializer = TableInsertSerializer(data=request.data)
-    if not serializer.is_valid():
-        return ApiResponse.bad_request(serializer.errors)
 
-    table = table_service.create_table(serializer.validated_data)
-    return ApiResponse.created("Table successfully created",
-    data={"id": table.id, "number": table.number},
-    )
+class CreateTable(APIView):    
+    def post(self, request):
+        serializer = TableInsertSerializer(data=request.data)
+        if not serializer.is_valid():
+            return ApiResponse.bad_request(serializer.errors)
 
-@api_view(['DELETE'])
-def delete_table_by_number(request, table_number):
-    table_service = container.table_service()
+        is_number_unique = table_service.validate_unique_table_number(serializer.validated_data)
+        if not is_number_unique:
+            return ApiResponse.bad_request(f'Table already exsits')
 
-    is_table_deleted = table_service.delete_table_by_number(table_number)
-    if not is_table_deleted:
-        return ApiResponse.not_found(f'Table with number {table_number} not found.')
-    
-    return ApiResponse.ok(None, f'Table with number {table_number} successfully deleted.')
+
+        table = table_service.create_table(serializer.validated_data)
+        table_data = TableSerializer(table).data
+
+        return ApiResponse.created(table_data, "Table successfully created")
+
+
+
+class DeleteTable(APIView): 
+    def delete(self, request, table_number):
+        is_table_deleted = table_service.delete_table(table_number)
+        if not is_table_deleted:
+            return ApiResponse.not_found(f'table', 'table number', table_number)
+        
+        return ApiResponse.deleted('Table')

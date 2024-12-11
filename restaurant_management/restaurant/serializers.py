@@ -1,19 +1,36 @@
-from restaurant.models import Table, Ingredient, MenuItem, Reservation, Stock, Order, OrderItem, Payment
+from restaurant.models import Table, Ingredient
 from rest_framework import serializers
 
-class TableInsertSerializer(serializers.ModelSerializer):
+class TableInsertSerializer(serializers.Serializer):
+    number = serializers.IntegerField()
+    seats = serializers.IntegerField()
+
+
+class TableSerializer(serializers.Serializer):
+    number = serializers.IntegerField()
+    seats = serializers.IntegerField()
+    is_available = serializers.BooleanField()
+
+
+class IngredientInsertSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Table
-        fields = ['number', 'seats']  
+        model = Ingredient
+        fields = ['name', 'quantity', 'unit']  
         read_only_fields = ['id']  
 
 
-class TableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Table
-        fields = ['number', 'seats', 'is_available'] 
-        read_only_fields = ['id']  
+class IngredientSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    unit = serializers.CharField()
 
+class IngredientInsertSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    unit = serializers.CharField()
+
+
+
+"""
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,11 +53,6 @@ class CompletePaymentSerializer(serializers.ModelSerializer):
         return value
 
 
-class IngredientInsertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = ['name', 'quantity', 'unit']  
-        read_only_fields = ['id']  
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -94,12 +106,6 @@ class OrderInsertSerializer(serializers.Serializer):
             raise serializers.ValidationError("Order items cannot be empty.")
         return value
 
-        
-class IngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = '__all__'
-
 
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,17 +140,14 @@ class StockUpdateSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
     def validate_quantity(self, value):
-        """
         Validate that the quantity is a positive number.
-        """
+    
         if value <= 0:
             raise serializers.ValidationError("Quantity must be a positive number.")
         return value
 
     def validate_update_status(self, value):
-        """
         Validate that the update status is 'IN' or 'OUT'.
-        """
         if value not in ['IN', 'OUT']:
             raise serializers.ValidationError("Update status must be 'IN' or 'OUT'.")
         return value
@@ -155,3 +158,4 @@ class StockSerializer(serializers.ModelSerializer):
         model = Stock
         fields = '__all__'
 
+"""

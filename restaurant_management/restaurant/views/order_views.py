@@ -1,3 +1,4 @@
+"""
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from restaurant.services.order_service import OrderService
@@ -105,3 +106,4 @@ def cancel_order(request, order_id):
      OrderService.update_order_status(order, 'cancelled')
 
      return ApiResponse.ok('Order succesfully cancelled')
+"""

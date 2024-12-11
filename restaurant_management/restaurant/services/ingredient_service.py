@@ -1,49 +1,30 @@
 from restaurant.models import Ingredient
 from rest_framework.exceptions import ValidationError
-from restaurant.utils.result import Result
+from restaurant.repository.ingredient_repository import IngredientRepository
 
 class IngredientService:
-    @staticmethod
-    def get_ingredient_by_id(ingredient_id):
-        try:
-            ingredient = Ingredient.objects.get(id=ingredient_id)
-            return Result.success(ingredient)
-        except Ingredient.DoesNotExist:
-            return Result.error(f'Ingredient with ID {ingredient_id} not found')
-    
-    @staticmethod
-    def get_ingredient_entity_by_id(ingredient_id):
-        try:
-            return Ingredient.objects.get(id=ingredient_id)
-        
-        except Ingredient.DoesNotExist:
-            return None
+    def __init__(self):
+        self.ingredient_repository = IngredientRepository()
 
 
-    @staticmethod
-    def get_all_ingredients():
-        return Ingredient.objects.all().order_by('id')
-        
+    def get_ingredient_by_id(self, ingredient_id) -> Ingredient:
+        return self.ingredient_repository.get_by_id(ingredient_id)
 
-    @staticmethod
-    def create_ingredient(data):
+
+    def get_all_ingredients(self) -> list:
+        return self.ingredient_repository.get_all()
+
+    def create_ingredient(self, data) -> Ingredient:
         ingredient = Ingredient(
             name=data.get('name'),
-            quantity=data.get('quantity'),
             unit=data.get('unit')
             )
 
-        ingredient.save()
+        self.ingredient_repository.create(ingredient)
 
         return ingredient
 
 
-    @staticmethod
-    def delete_ingredient(ingredient_id):
-        try:
-            ingredient = Ingredient.objects.get(id=ingredient_id)
-            ingredient.delete()
+    def delete_ingredient(self, ingredient_id):
+        return self.ingredient_repository.delete(ingredient_id)
             
-            return Result.success(None)
-        except Ingredient.DoesNotExist:
-            return Result.error(f'Ingredient with ID {ingredient_id} successfully deleted')

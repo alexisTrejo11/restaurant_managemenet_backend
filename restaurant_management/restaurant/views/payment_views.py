@@ -1,3 +1,4 @@
+"""
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from restaurant.services.payment_service import PaymentService
@@ -95,3 +96,4 @@ def cancel_payment(request, payment_id):
      PaymentService.update_payment_status(payment, 'cancelled')
 
      return ApiResponse.ok(None, 'Payments succesfully cancelled')
+"""

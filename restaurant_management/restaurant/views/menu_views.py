@@ -1,3 +1,4 @@
+"""
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
@@ -56,3 +57,4 @@ def delete_menu_by_id(request, menu_id):
     return Response({
         'message': f'menu with id {menu_id} successfully deleted.'
     }, status=status.HTTP_200_OK)
+"""

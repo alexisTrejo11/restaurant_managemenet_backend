@@ -14,6 +14,14 @@ class ApiResponse:
             'message': message,
             'time_stamp': datetime.now(),
         }, status=status.HTTP_404_NOT_FOUND)
+
+    @staticmethod
+    def not_found(entity, parameter, value):
+        return Response({
+            'data': None,
+            'message': f'{entity} with {parameter} [{value}] not found',
+            'time_stamp': datetime.now(),
+        }, status=status.HTTP_404_NOT_FOUND)
     
     @staticmethod
     def bad_request(message):
@@ -63,4 +71,14 @@ class ApiResponse:
             'data': data,
             'message': message,
             'time_stamp': datetime.now(),
-        },status=status.HTTP_201_CREATED)
+        },
+        status=status.HTTP_201_CREATED)
+
+    @staticmethod
+    def deleted(entity):
+        return Response({
+            'data': None,
+            'message': f'{entity} succesfully deleted',
+            'time_stamp': datetime.now(),
+        },
+        status=status.HTTP_201_CREATED)

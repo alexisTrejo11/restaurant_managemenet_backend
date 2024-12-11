@@ -1,11 +1,17 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from restaurant.views import table_views
+from restaurant.views.ingredient_views import GetAllIngredients, GetIngredientById, CreateIngredient, DeleteIngredient
+from restaurant.views.table_views import GetAllTables, GetTableByNumber, CreateTable, DeleteTable
 
 urlpatterns = [
-    path('v1/api/tables/<int:table_number>', table_views.get_table_by_number, name='get_table_by_number'),
-    path('v1/api/tables/all', table_views.get_all_tables, name='get_all_tables'),   
-    path('v1/api/tables', table_views.create_table, name='create_tables'),   
-    path('v1/api/tables/<int:table_number>/delete', table_views.delete_table_by_number, name='delete_tables_by_number'),   
+    path('v1/api/tables/<int:table_number>', GetTableByNumber.as_view(), name='get_table_by_number'),
+    path('v1/api/tables/all', GetAllTables.as_view(), name='get_all_tables'),   
+    path('v1/api/tables', CreateTable.as_view(), name='create_tables'),   
+    path('v1/api/tables/<int:table_number>/delete', DeleteTable.as_view(), name='delete_tables_by_number'),   
+
+    path('v1/api/ingredients/<int:ingredient_id>', GetIngredientById.as_view(), name='get_ingredient_by_id'),   
+    path('v1/api/ingredients/all', GetAllIngredients.as_view(), name='get_all_ingredients'),   
+    path('v1/api/ingredients', CreateIngredient.as_view(), name='delete_ingredient_by_id'),   
+    path('v1/api/ingredients/<int:ingredient_id>/remove', DeleteIngredient.as_view(), name='delete_ingredient_by_id'),   
 
 ]

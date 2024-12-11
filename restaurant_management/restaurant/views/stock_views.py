@@ -1,3 +1,4 @@
+"""
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
@@ -89,3 +90,4 @@ def delete_stock_by_ingredient_id(request, ingredient_id):
         return ApiResponse.not_found(f'Stock with ingredient Id {ingredient_id} not found')
 
     return ApiResponse.ok(f'Stock with ingredient Id {ingredient_id} successfully deleted')
+"""
