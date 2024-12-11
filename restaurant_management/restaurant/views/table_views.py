@@ -18,7 +18,7 @@ class GetTableByNumber(APIView):
 
 class GetAllTables(APIView):    
     def get(self, request):
-        tables = table_service.get_all()
+        tables = table_service.get_all_tables()
         table_data = TableSerializer(tables, many=True).data
         return ApiResponse.ok(table_data, 'All tables succesfully fetched')
 

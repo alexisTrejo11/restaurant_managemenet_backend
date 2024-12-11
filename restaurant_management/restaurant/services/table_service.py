@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from restaurant.models import Table
+from restaurant.services.domain.table import Table
 from restaurant.repository.table_respository import TableRepository
 
 class TableService:

@@ -74,6 +74,7 @@ class ApiResponse:
         },
         status=status.HTTP_201_CREATED)
 
+
     @staticmethod
     def deleted(entity):
         return Response({

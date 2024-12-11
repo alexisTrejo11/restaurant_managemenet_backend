@@ -36,7 +36,7 @@ CREATE TABLE orders (
 
 CREATE TABLE order_items (
      id SERIAL PRIMARY KEY,
-     menu_items_id INT NOT NULL,
+     menu_item_id INT NOT NULL,
      order_id INT NOT NULL,
      added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      is_delivered BOOLEAN DEFAULT FALSE

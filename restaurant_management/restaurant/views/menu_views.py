@@ -1,60 +1,68 @@
-"""
-from django.shortcuts import render
-from rest_framework import status
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
 from restaurant.services.menu_service import MenuService
-from rest_framework.exceptions import ValidationError
+from restaurant.serializers import MenuItemSerializer, MenuInsertItemSerializer
+from restaurant.utils.response import ApiResponse
 
-@api_view(['GET'])
-def get_menu_by_id(request, menu_id):
-    menu = MenuService.get_menu_by_id(menu_id)
-    if menu is None:
-        return Response({
-            'message': f'menu with id {menu_id} not found.'
-        }, status=status.HTTP_404_NOT_FOUND)
+menu_service = MenuService()
+
+class MenuViewSet(ViewSet):
+    def retrieve(self, request, pk=None):
+        """
+        GET /menus/<id> - Retrieve a single menu by ID.
+        """
+        menu = menu_service.get_menu_by_id(pk)
+        if not menu:
+            return ApiResponse.not_found('Menu', 'ID', pk)
+
+        menu_data = MenuItemSerializer(menu).data
+        return ApiResponse.found(menu_data, 'Menu', 'ID', pk)
+
+
+    def list(self, request):
+        """
+        GET /menus/ - Retrieve all menus.
+        """
+        menus = menu_service.get_all_menus()
+        menu_data = MenuItemSerializer(menus, many=True).data
+        return ApiResponse.ok(menu_data, 'Menus successfully fetched')
+
+
+    def create(self, request):
+        """
+        POST /menus/ - Create a new menu.
+        """
+        serializer = MenuInsertItemSerializer(data=request.data)
+        if not serializer.is_valid():
+            return ApiResponse.bad_request(serializer.errors)
+
+        menu_item = menu_service.create_menu(serializer.validated_data)
+        menu_item_data = MenuItemSerializer(menu_item).data
         
-    return Response({
-        'message': f'menu with id:{menu_id} successfully fetched',
-        'data': menu
-    })
+        return ApiResponse.created(menu_item_data, 'Menu Item successfully created')
 
 
-@api_view(['GET'])
-def get_menus_by_category(request, category):
-    menus = MenuService.get_menus_by_category(category)
-    if menus is None:
-        return Response({
-            'message': f'Category with name {category} not found.'
-        }, status=status.HTTP_404_NOT_FOUND)
+    def destroy(self, request, pk=None):
+        """
+        DELETE /menus/<id> - Delete a menu by ID.
+        """
+        is_deleted = menu_service.delete_menu_by_id(pk)
+        if not is_deleted:
+            return ApiResponse.not_found('Menu', 'ID', pk)
 
-    return Response({
-        'message': f'Menus with category {category} successfully fetched',
-        'data': menus
-    })
+        return ApiResponse.deleted('Menu Item')
 
+    """
+    @action(detail=False, methods=['get'], url_path='category/(?P<category>[^/.]+)')
+    def get_by_category(self, request, category=None):
+    \"\"\"
+        GET /menus/category/<category> - Retrieve menus by category.
+        \"\"\"
+        menus = menu_service.get_menus_by_category(category)
+        if not menus:
+            return ApiResponse.not_found('Category', 'name', category)
 
-@api_view(['POST'])
-def create_menu(request):
-    try:
-        MenuService.create_menu(request.data)  
-        
-        return Response({
-            'message': 'menu successfully created',
-        }, status=status.HTTP_201_CREATED)
-    except ValidationError as e:        
-        return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST) 
-
-
-@api_view(['DELETE'])
-def delete_menu_by_id(request, menu_id):
-    is_menu_deleted = MenuService.delete_menu_by_id(menu_id)
-    if not is_menu_deleted:
-        return Response({
-            'message': f'menu with id {menu_id} not found.'
-        }, status=status.HTTP_404_NOT_FOUND)
-
-    return Response({
-        'message': f'menu with id {menu_id} successfully deleted.'
-    }, status=status.HTTP_200_OK)
-"""
+        menu_data = MenuItemSerializer(menus, many=True).data
+        return ApiResponse.found(menu_data, 'Menu Items', 'category', category)
+    """

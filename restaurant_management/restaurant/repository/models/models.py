@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-class MenuItem(models.Model):
+class MenuItemModel(models.Model):
     CATEGORY_CHOICES = [
         ('DRINKS', 'Drinks'),
         ('ALCOHOL_DRINKS', 'Alcohol Drinks'),
@@ -26,6 +26,7 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.name
+        
 
 class MenuExtra(models.Model):
     name = models.CharField(max_length=255)
@@ -56,7 +57,8 @@ class TableModel(models.Model):
     def __str__(self):
         return f'Table {self.number} ({self.seats} seats)'
 
-class Order(models.Model):
+
+class OrderModel(models.Model):
     STATUS_CHOICES = [
         ('IN_PROGRESS', 'In Progress'),
         ('COMPLETED', 'Completed'),
@@ -77,8 +79,8 @@ class Order(models.Model):
         return f'Order {self.id} - Table {self.table.number}'
 
 class OrderItem(models.Model):
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.PROTECT, related_name='order_items')
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    menu_item = models.ForeignKey(MenuItemModel, on_delete=models.PROTECT, related_name='order_items')
+    order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items')
     added_at = models.DateTimeField(auto_now_add=True)
     is_delivered = models.BooleanField(default=False)
 
@@ -91,7 +93,7 @@ class OrderItem(models.Model):
         return f'{self.menu_item.name} - Order {self.order.id}'
 
 class IngredientModel(models.Model):
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.SET_NULL, null=True, related_name='ingredients')
+    menu_item = models.ForeignKey(MenuItemModel, on_delete=models.SET_NULL, null=True, related_name='ingredients')
     name = models.CharField(max_length=255)
     unit = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -105,7 +107,7 @@ class IngredientModel(models.Model):
     def __str__(self):
         return self.name
 
-class Stock(models.Model):
+class StockModel(models.Model):
     ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT, related_name='stocks')
     total_stock = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -119,14 +121,14 @@ class Stock(models.Model):
     def __str__(self):
         return f'{self.ingredient.name} - {self.total_stock} {self.ingredient.unit}'
 
-class StockTransaction(models.Model):
+class StockTransactionModel(models.Model):
     TRANSACTION_TYPES = [
         ('IN', 'Stock In'),
         ('OUT', 'Stock Out'),
     ]
 
     ingredient_quantity = models.IntegerField()
-    stock = models.ForeignKey(Stock, on_delete=models.PROTECT, related_name='transactions')
+    stock = models.ForeignKey(StockModel, on_delete=models.PROTECT, related_name='transactions')
     transaction_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
     date = models.DateTimeField(default=timezone.now)
     ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT)
@@ -182,7 +184,7 @@ class Payment(models.Model):
         ('EUR', 'Euro'),
     ]
 
-    order = models.OneToOneField(Order, on_delete=models.PROTECT, null=True, related_name='payment')
+    order = models.OneToOneField(OrderModel, on_delete=models.PROTECT, null=True, related_name='payment')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)

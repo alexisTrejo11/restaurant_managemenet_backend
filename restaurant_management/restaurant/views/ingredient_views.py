@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view
 from restaurant.utils.response import ApiResponse
 from restaurant.serializers import IngredientSerializer, IngredientInsertSerializer
 from restaurant.services.ingredient_service import IngredientService
-from django.views.decorators.http import require_http_methods
 from rest_framework.views import APIView
 
 ingredient_service = IngredientService()

@@ -1,42 +1,21 @@
-from restaurant.models import MenuItem
-from restaurant.serializers import MenuSerializer
-from rest_framework.exceptions import ValidationError
-
+from restaurant.repository.menu_item_repository import MenuItemRepository
+from restaurant.mappers.menu_item_mappers import MenuItemMapper
+from restaurant.services.domain.menu_item import MenuItem
 
 class MenuService:
-    @staticmethod
-    def get_menu_by_id(menu_id):
-        try:
-            menu = MenuItem.objects.get(id=menu_id)
-            return MenuSerializer(menu).data
-        except Menu.DoesNotExist:
-            return None
+    def __init__(self):
+        self.menu_repository = MenuItemRepository()
 
+    def get_menu_by_id(self, menu_id) -> MenuItem:
+        return self.menu_repository.get_by_id(menu_id)
 
-    @staticmethod
-    def get_menus_by_category(category):
-        try:
-            Menus = MenuItem.objects.filter(category=category)
-            serialier = MenuSerializer(Menus, many=True)
-            serialier.data
-        except Menu.DoesNotExist:
-            return None
+    def get_all_menus(self) -> list:
+        return self.menu_repository.get_all()
 
-    @staticmethod
-    def create_menu(data):
-        serializer = MenuSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            raise ValidationError(serializer.errors)
+    def create_menu(self, serializer_data) -> MenuItem:
+        menu_item = MenuItemMapper.map_serializer_to_domain(serializer_data)        
+        return self.menu_repository.create(menu_item)
 
-
-    @staticmethod
-    def delete_menu_by_id(menu_id):
-        try:
-            menu = MenuItem.objects.get(id=menu_id)
-            menu.delete()
-            return True
-        except Menu.DoesNotExist:
-            return False
+    def delete_menu_by_id(self, menu_id):
+        return self.menu_repository.delete(menu_id)
 

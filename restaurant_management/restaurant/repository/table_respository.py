@@ -1,5 +1,5 @@
 from restaurant.repository.models.models import TableModel 
-from restaurant.models import Table 
+from restaurant.services.domain.table import Table 
 from restaurant.repository.common_repository import CommonRepository
 
 class TableRepository(CommonRepository[Table]):

@@ -1,4 +1,4 @@
-from restaurant.models import Ingredient
+from restaurant.services.domain.ingredient import Ingredient
 from rest_framework.exceptions import ValidationError
 from restaurant.repository.ingredient_repository import IngredientRepository
 
