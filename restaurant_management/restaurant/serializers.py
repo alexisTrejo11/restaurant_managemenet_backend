@@ -2,7 +2,6 @@ from restaurant.services.domain.table import Table
 from restaurant.services.domain.ingredient import Ingredient
 from restaurant.services.domain.menu_item import MenuItem
 
-
 from rest_framework import serializers
 
 class TableInsertSerializer(serializers.Serializer):
@@ -64,8 +63,37 @@ class MenuItemSerializer(serializers.Serializer):
     description = serializers.CharField()
 
 
-"""
+class StockInsertSerializer(serializers.Serializer):
+    ingredient_id = serializers.IntegerField()
+    optimal_stock_quantity = serializers.IntegerField()
 
+
+class StockTransactionSerializer(serializers.Serializer):
+    transaction_type = serializers.CharField()
+    ingredient_quantity = serializers.IntegerField()
+    date = serializers.DateTimeField()
+    employee_name = serializers.CharField()
+    expires_at = serializers.DateTimeField(required=False, allow_null=True)
+
+
+class StockSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    total_stock = serializers.IntegerField()
+    optimal_stock_quantity = serializers.IntegerField()
+    stock_transactions = StockTransactionSerializer(many=True) 
+    ingredient = IngredientSerializer()
+
+
+
+class StockTransactionInsertSerializer(serializers.Serializer):
+    stock_id = serializers.IntegerField()
+    transaction_type = serializers.CharField()
+    ingredient_quantity = serializers.IntegerField()
+    date = serializers.DateTimeField()
+    employee_name = serializers.CharField()
+    expires_at = serializers.DateTimeField(required=False, allow_null=True)
+
+"""
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
@@ -85,8 +113,6 @@ class CompletePaymentSerializer(serializers.ModelSerializer):
         if value not in valid_payment_methods:
             raise serializers.ValidationError("El método de pago proporcionado no es válido.")
         return value
-
-
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -178,11 +204,5 @@ class StockUpdateSerializer(serializers.Serializer):
         if value not in ['IN', 'OUT']:
             raise serializers.ValidationError("Update status must be 'IN' or 'OUT'.")
         return value
-
-
-class StockSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stock
-        fields = '__all__'
 
 """

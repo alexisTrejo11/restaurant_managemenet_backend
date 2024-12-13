@@ -15,6 +15,7 @@ class MenuItemRepository(CommonRepository[MenuItem]):
             MenuItemMapper.map_model_to_domain(model)
             for model in menu_items
         ]
+        
         return menu
 
 

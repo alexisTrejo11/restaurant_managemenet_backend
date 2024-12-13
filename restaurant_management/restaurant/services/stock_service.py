@@ -1,102 +1,71 @@
-from restaurant.models import Stock, Ingredient, StockTransaction
-from restaurant.serializers import StockInsertSerializer, StockSerializer
+from restaurant.repository.stock_repository import StockRepository
+from restaurant.services.domain.stock import Stock, StockTransaction
 from restaurant.utils.result import Result
-from django.db import transaction
-
+from typing import List, Optional
+from restaurant.utils.exceptions import StockNotFoundError
 
 class StockService:
-    @staticmethod
-    def get_stock_by_ingredient_id(ingredient_id):
-        stock_result = StockService._get_stock_by_ingredient_id(ingredient_id)
-            
-        # The validation of an existing ingredient is not handled here, if stock not 
-        # founded with ingredient id is cause is not created yet
-        if stock_result.is_failure():
-            return Result.error(f'Stock with ingredient Id {ingredient_id} not initialized yet')
-        else:
-            return Result.success(stock_result.get_data())
+    def __init__(self):
+        self.stock_repository = StockRepository()
 
-    @staticmethod
-    def get_stock_by_id(stock_id):
-        try:
-            stock = Stock.objects.get(pk=stock_id)
-            return Result.success(stock)
-        except Stock.DoesNotExist:
-            return Result.error(f'Stock with Id {stock_id} not found')
 
-    @staticmethod
-    def init_stock(ingredient, optimal_quantity):
-        stock = Stock(
-            ingredient=ingredient,
-            current_quantity=0,
-            optimal_quantity=optimal_quantity,
+    def validate_unique_stock_per_product(self, ingredient):
+        stock = self.stock_repository.get_by_ingredient(ingredient)
+        return stock == None
+
+
+    def init_stock(self, ingredient, serializer) -> Stock:
+        new_stock = Stock(
+            id=None,
+            ingredient=ingredient, 
+            optimal_stock_quantity=serializer.get('optimal_stock_quantity')
         )
-        stock.save()
+        
+        new_stock = self.stock_repository.create(new_stock)
+
+        return new_stock
+
+
+    def get_stock_by_id(self, stock_id) -> Optional[Stock]:
+        return self.stock_repository.get_by_id(stock_id)
+
+
+    def get_stock_by_ingredient(self, ingredient) -> Optional[Stock]:
+        return self.stock_repository.get_by_ingredient(ingredient)
+
+
+    def get_all_stocks_sort_by_last_transaction(self) -> list:
+        return self.stock_repository.get_all()
+
+
+    def clear_stock(self, id) -> Stock:
+        stock = self.stock_repository.get_by_id(id)
+        if not stock:
+            raise StockNotFoundError(f"Stock with ID {stock_id} not found")
+
+        stock.clear()
+        self.stock_repository.update(stock)
+
         return stock
 
-    @staticmethod
-    def update_stock(data):
-        ingredient_id = data.get('ingredient_id')
-        update_status =  data.get('update_status')
-        quantity =  data.get('quantity')
-
-        stock_result = StockService._get_stock_by_ingredient_id(ingredient_id)
-        if stock_result.is_failure():
-            return Result.error(stock_result.get_error_msg())
-
-        stock = stock_result.get_data()
-
-        if update_status == 'IN':
-            return StockService._increase_stock(stock, quantity)
-        elif update_status == 'OUT':
-            return StockService._decrease_stock(stock, quantity)
-        else:
-            return Result.error('Invalid update status')
-
-        
-    @staticmethod
-    def delete_stock_by_ingredient_id(ingredient_id):
-        stock_result = StockService._get_stock_by_ingredient_id(ingredient_id)
-        if stock_result.is_failure():
-            return Result.error(stock_result.get_error_msg())
-
-        stock = stock_result.get_data()
-        stock.delete()
+    def validate_transaction(self, stock: Stock, transaction: StockTransaction) -> Result:
+        validation_map = stock.validate_transaction(transaction)
+        if not validation_map["is_valid"]:
+            return Result.error(validation_map["message"])
 
         return Result.success(None)
 
-    @staticmethod
-    def validate_stock_creation(ingredient_id):
-        try:
-            stock = Stock.objects.select_related('ingredient').get(ingredient__id=ingredient_id)
-            return Result.error('Ingredient already has a stock')
-        except Stock.DoesNotExist:
-            return Result.success(None)
+    def add_transaction(self, stock: Stock, transaction: StockTransaction) -> Stock:
+            stock.add_transaction(transaction)
+            self.stock_repository.save_transaction(transaction)
+            
+            return self.stock_repository.update(stock)
 
-    @staticmethod
-    def _get_stock_by_ingredient_id(ingredient_id):
-        try:
-            stock = Stock.objects.select_related('ingredient').get(ingredient__id=ingredient_id)
-            return Result.success(stock)
-        except Stock.DoesNotExist:
-            return Result.error(f'Stock for ingredient ID {ingredient_id} not found')
 
-    @staticmethod
-    def _increase_stock(stock, quantity):
-        stock.increase_current_quantity(quantity)
-        return StockService._save_stock(stock, 'IN')
+    def delete_stock_by_id(self, id) -> bool:
+        return self.stock_repository.delete(id)
 
-    @staticmethod
-    def _decrease_stock(stock, quantity):
-        try:
-            stock.decrease_current_quantity(quantity)
-            return StockService._save_stock(stock, 'OUT')
-        except Exception as e:
-            return Result.error(str(e))
 
-    @staticmethod
-    def _save_stock(stock, stock_update):
-        with transaction.atomic():
-            stock.save()
-            StockTransaction.objects.create(stock=stock, stock_update=stock_update)
-        return Result.success(None)
+
+
+

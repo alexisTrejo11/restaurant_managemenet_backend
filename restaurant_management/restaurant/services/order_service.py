@@ -2,7 +2,7 @@ from restaurant.utils.result import Result
 from restaurant.dtos.order_item_dtos import OrderItemInsertDTO
 from restaurant.models import Order, OrderItem, Table
 from django.db import transaction
-from restaurant.models import MenuItem as Menu
+from restaurant.models import Menu
 from typing import List
 
 class OrderService:
@@ -51,20 +51,20 @@ class OrderService:
      def add_items_to_order(order: Order, order_items_dtos: List[OrderItemInsertDTO]):
         existing_items = OrderService.get_order_items(order)
         # Create dict using ids as key and items as values
-        existing_items_dict = {item.MenuItem_item.id: item for item in existing_items}
+        existing_items_dict = {item.menu_item.id: item for item in existing_items}
         
         items_to_add = []
         
         for dto in order_items_dtos:
-            if dto.MenuItem_id in existing_items_dict:
+            if dto.menu_id in existing_items_dict:
                 # if items exists increase quantity
-                existing_item = existing_items_dict[dto.MenuItem_id]
+                existing_item = existing_items_dict[dto.menu_id]
                 existing_item.quantity += dto.quantity
                 items_to_add.append(existing_item) 
             else:
                 # If not create new item
-                MenuItem_item = MenuItem.objects.get(pk=dto.MenuItem_id)  # Cant produce exceptions
-                new_item = OrderItem(order=order, MenuItem_item=MenuItem_item, quantity=dto.quantity)
+                menu_item = Menu.objects.get(pk=dto.menu_id)  # Cant produce exceptions
+                new_item = OrderItem(order=order, menu_item=menu_item, quantity=dto.quantity)
                 items_to_add.append(new_item)  
         
         # Save new and exisitng items
@@ -98,10 +98,10 @@ class OrderService:
      def _create_order_items(order: Order, order_items_dtos: list[OrderItemInsertDTO]):
           order_items = []  
           for item_dto in order_items_dtos:
-               MenuItem_item = MenuItem.objects.get(pk=item_dto.MenuItem_id)
+               menu_item = Menu.objects.get(pk=item_dto.menu_id)
                order_item = OrderItem(
                     order=order,
-                    MenuItem_item=MenuItem_item,
+                    menu_item=menu_item,
                     quantity=item_dto.quantity
                )
                order_items.append(order_item)

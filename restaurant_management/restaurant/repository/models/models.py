@@ -78,6 +78,7 @@ class OrderModel(models.Model):
     def __str__(self):
         return f'Order {self.id} - Table {self.table.number}'
 
+
 class OrderItem(models.Model):
     menu_item = models.ForeignKey(MenuItemModel, on_delete=models.PROTECT, related_name='order_items')
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items')
@@ -91,6 +92,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.menu_item.name} - Order {self.order.id}'
+
 
 class IngredientModel(models.Model):
     menu_item = models.ForeignKey(MenuItemModel, on_delete=models.SET_NULL, null=True, related_name='ingredients')
@@ -110,8 +112,12 @@ class IngredientModel(models.Model):
 class StockModel(models.Model):
     ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT, related_name='stocks')
     total_stock = models.IntegerField()
+    optimal_stock_quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_transactions(self):
+        return self.transactions.all()
 
     class Meta:
         db_table = 'stocks'
@@ -121,6 +127,7 @@ class StockModel(models.Model):
     def __str__(self):
         return f'{self.ingredient.name} - {self.total_stock} {self.ingredient.unit}'
 
+
 class StockTransactionModel(models.Model):
     TRANSACTION_TYPES = [
         ('IN', 'Stock In'),
@@ -128,10 +135,11 @@ class StockTransactionModel(models.Model):
     ]
 
     ingredient_quantity = models.IntegerField()
-    stock = models.ForeignKey(StockModel, on_delete=models.PROTECT, related_name='transactions')
+    stock = models.ForeignKey(StockModel, on_delete=models.CASCADE, related_name='transactions')
     transaction_type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
     date = models.DateTimeField(default=timezone.now)
-    ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT)
+    expires_at = models.DateTimeField(null=True)
+    employee_name = models.CharField(max_length=255, blank=True, null=True) 
 
     class Meta:
         db_table = 'stock_transactions'
@@ -139,7 +147,8 @@ class StockTransactionModel(models.Model):
         verbose_name_plural = 'Stock Transactions'
 
     def __str__(self):
-        return f'{self.transaction_type} - {self.ingredient_quantity} {self.ingredient.unit} of {self.ingredient.name}'
+        return f'{self.transaction_type} - {self.ingredient_quantity}'
+
 
 class Reservation(models.Model):
     STATUS_CHOICES = [
@@ -164,6 +173,7 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} - {self.reservation_date}'
+
 
 class Payment(models.Model):
     PAYMENT_METHODS = [

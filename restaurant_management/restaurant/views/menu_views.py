@@ -53,16 +53,15 @@ class MenuViewSet(ViewSet):
 
         return ApiResponse.deleted('Menu Item')
 
-    """
+
     @action(detail=False, methods=['get'], url_path='category/(?P<category>[^/.]+)')
     def get_by_category(self, request, category=None):
-    \"\"\"
+        """
         GET /menus/category/<category> - Retrieve menus by category.
-        \"\"\"
+        """
         menus = menu_service.get_menus_by_category(category)
         if not menus:
             return ApiResponse.not_found('Category', 'name', category)
 
         menu_data = MenuItemSerializer(menus, many=True).data
         return ApiResponse.found(menu_data, 'Menu Items', 'category', category)
-    """

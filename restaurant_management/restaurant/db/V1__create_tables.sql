@@ -55,6 +55,7 @@ CREATE TABLE stocks(
      id SERIAL PRIMARY KEY,
      ingredient_id INT NOT NULL REFERENCES ingredients(id),
      total_stock INT NOT NULL,
+     optimal_stock_quantity INT NOT NULL,
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );

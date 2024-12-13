@@ -5,14 +5,14 @@ from typing import Optional
 class Ingredient:
     def __init__(
         self,
+        id: str,
         name: str,
-        quantity: Decimal,
         unit: str,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
     ):
+        self.id = id
         self.name = name
-        self.quantity = quantity
         self.unit = unit
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
