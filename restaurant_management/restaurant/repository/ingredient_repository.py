@@ -24,7 +24,7 @@ class IngredientRepository(CommonRepository[Ingredient]):
         if ingredient_model:
             return IngredientMappers.modelToDomain(ingredient_model)
         return None
-
+	
 
     def create(self, ingredient: Ingredient) -> Ingredient:
         new_ingredient = self.ingredient_model(

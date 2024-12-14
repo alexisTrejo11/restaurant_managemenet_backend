@@ -93,6 +93,24 @@ class StockTransactionInsertSerializer(serializers.Serializer):
     employee_name = serializers.CharField()
     expires_at = serializers.DateTimeField(required=False, allow_null=True)
 
+
+class ReservationInsertSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    email = serializers.CharField(required=False, allow_null=True)
+    phone_number = serializers.CharField(required=False, allow_null=True)
+    requested_reservation_time = serializers.CharField()
+    customer_number = serializers.IntegerField()
+
+
+class ReservationSerializer(serializers.Serializer):
+	first_name = serializers.CharField()
+	last_name = serializers.CharField()
+	table_number = serializers.IntegerField()
+	reservation_date = serializers.DateTimeField()
+	status = serializers.CharField()
+	created_at = serializers.DateTimeField()
+
+
 """
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -165,20 +183,6 @@ class OrderInsertSerializer(serializers.Serializer):
         if not value:
             raise serializers.ValidationError("Order items cannot be empty.")
         return value
-
-
-class ReservationInsertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reservation
-        fields = ['customer_name', 'customer_email', 'customers_numbers', 'reservation_time']  
-        read_only_fields = ['id']
-
-
-class ReservationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reservation
-        fields = '__all__'
-
 
 class StockInsertSerializer(serializers.ModelSerializer):
     class Meta:

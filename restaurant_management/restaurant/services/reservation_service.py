@@ -1,109 +1,85 @@
 from restaurant.serializers import ReservationSerializer
-from restaurant.models import Table, Reservation
-from datetime import timedelta, datetime
-from django.db.models import Q
 from restaurant.utils.result import Result
+from restaurant.repository.reservation_repository import ReservationRepository
+from restaurant.repository.table_respository import TableRepository
+from restaurant.services.domain.reservation import Reservation
+from datetime import datetime, timedelta
+from restaurant.utils.exceptions import DomainException
 
 class ReservationService:
-    @staticmethod
-    def create_reservation(data):
-        reservation_time = data.get('reservation_time')
-        customers_numbers = data.get('customers_numbers')
-
-        if isinstance(reservation_time, str):
-            reservation_time = datetime.fromisoformat(reservation_time)
-        
-        table_available = ReservationService._assign_table(reservation_time, customers_numbers)
-        if table_available is None:
-            return Result.error("No tables available for the requested time and number of customers.")
-        
-        reservation = Reservation(
-            table= table_available,
-            customer_name=data.get('customer_name'),
-            customer_email=data.get('customer_email'),
-            reservation_time=reservation_time,
-            customers_numbers=customers_numbers,
-        )
-
-        reservation.save()
-
-        return Result.success(reservation)
+    def __init__(self):
+        self.reservation_repository = ReservationRepository()
+        self.table_repository = TableRepository()
 
 
-    @staticmethod
-    def get_reservations_by_email(email):
-        reservations = Reservation.objects.filter(customer_email=email)
-        
-        if len(reservations) == 0:
-            return Result.error(f'Reservations with email:{email} not founded')
-
-        return Result.success(reservations)
+    def get_all(self):
+        return self.reservation_repository.get_all()
 
 
-    @staticmethod
-    def get_today_reservations():
-        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
-
-        return ReservationService._get_reservations_by_date_range(start_date, end_date)
+    def get_by_id(self, id):
+        self.reservation_repository.get_by_id(id)
 
 
-    @staticmethod
-    def get_today_not_expired_reservations():
-        # Reduce the time 30 minutes cause is the max tolerance delay to apply the reservations
-        start_date = datetime.now() - timedelta(minutes=30)
-        end_date = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
-
-        return ReservationService._get_reservations_by_date_range(start_date, end_date)
-
-
-    @staticmethod
-    def get_reservation_by_id(reservation_id):
-        try:
-            reservation = Reservation.objects.get(pk=reservation_id) 
-
-            return Result.success(reservation)
-        except Reservation.DoesNotExist:
-            return Result.error(f'reservation with Id {reservation_id} not found')
+    def get_by_filter(self, filter, value):
+        if filter == "email":
+        	return self.reservation_repository.get_by_email(value)
+        elif filter == "phone_number":
+            return self.reservation_repository.get_by_phone_number(value)
+        elif filter == "name":
+            return self.reservation_repository.get_by_name(value)
+        elif filter == "table":
+            return self.reservation_repository.get_by_table(value)
+        else:
+            raise ValueError("Invalid Filter")
 
 
-    @staticmethod
-    def delete_reservation_by_id(reservation_id):
-        try:
-            reservation = Reservation.objects.get(id=reservation_id) 
-            reservation.delete()
-            
-            return Result.success(None)
-        except Reservation.DoesNotExist:
-            return Result.error(f'reservation with Id {reservation_id} not found')
+    def get_by_time_range(self, start : datetime, end : datetime):
+        return self.reservation_repository.get_reservations_by_date_range(start, end)
 
 
-    @staticmethod
-    def _get_reservations_by_date_range(start_date, end_date):
-        if isinstance(start_date, str):
-            start_date = datetime.fromisoformat(start_date)
-        elif isinstance(end_date, str):
-            end_date = datetime.fromisoformat(end_date)
-        
-        return Reservation.objects.filter(reservation_time__range=(start_date, end_date))
+    def validate_creation(self, reservation : Reservation) -> Result:
+        date_result = reservation.validate_date()
+        if date_result.is_failure():
+            return date_result
+
+        customer_result = reservation.validate_customer_limit()
+        if customer_result.is_failure():
+            return customer_result
+    
+
+    def create(self, reservation : Reservation) -> Reservation:
+        suitable_tables = self._find_suitable_tables(reservation.customer_number)
+        if not suitable_tables:
+            raise DomainException("No suitable tables available for the requested number of customers.")
 
 
-    @staticmethod
-    def _assign_table(reservation_time, customers_numbers):
-        # Define the time range (2.5 hours before and after the requested time)
-        start_time = reservation_time - timedelta(hours=2, minutes=30)
-        end_time = reservation_time + timedelta(hours=2, minutes=30)
-
-        # Filter tables with enough seats, ordered by seat count (ascending)
-        possible_tables = Table.objects.filter(seats__gte=customers_numbers).order_by('seats')
-
-        for table in possible_tables:
-            # Check if this table is free within the time range
-            conflicting_reservations = Reservation.objects.filter(
-                Q(table=table) & Q(reservation_time__range=(start_time, end_time))
+        for table in suitable_tables:
+            reservation_conflict = self.reservation_repository.get_by_table_and_reservation_time(
+                table,
+                reservation.reservation_date
             )
+            if not reservation_conflict: 
+                reservation.assign_table(table) 
+                self.reservation_repository.create(reservation)
+                return reservation  
 
-            if not conflicting_reservations.exists():
-                return table
+        raise DomainException("No tables available for the requested date and customer capacity.")
 
-        return None
+
+    def delete_by_id(self, id):
+        return self.reservation_repository.delete(id)
+
+
+    def _find_suitable_tables(self, party_size):
+        all_tables = self.table_repository.get_all()
+
+        suitables_tables = []
+        for table in alltables:
+            if table.capacity >= party_size:
+                suitables_tables.append(table)
+
+        return sorted(
+            suitable_tables, 
+            key=lambda table: table.capacity
+        )
+        

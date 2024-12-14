@@ -1,13 +1,15 @@
 from restaurant.repository.models.models import TableModel 
 from restaurant.services.domain.table import Table 
 from restaurant.repository.common_repository import CommonRepository
+from typing import TypeVar, Generic, List, Optional
+
 
 class TableRepository(CommonRepository[Table]):
      def __init__(self):
           self.table = TableModel
 
 
-     def get_all(self):
+     def get_all(self) -> List[Table]:
           return self.table.objects.all().order_by('number')
 
 

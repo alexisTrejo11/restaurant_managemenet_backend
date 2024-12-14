@@ -72,8 +72,10 @@ CREATE TABLE stock_transactions (
 -- Clients
 CREATE TABLE reservations (
      id SERIAL PRIMARY KEY,
-     first_name VARCHAR(255) NOT NULL,
-     last_name VARCHAR(255) NOT NULL,
+     name VARCHAR(255) NOT NULL,
+     email VARCHAR(255),
+     phone_number VARCHAR(255),
+     customer_number INT NOT NULL,
      table_id INT NOT NULL,
      reservation_date TIMESTAMP NOT NULL,
      status VARCHAR(255) NOT NULL CHECK (status IN ('BOOKED', 'ATTENDED', 'NOT_ATTENDED', 'CANCELLED')),

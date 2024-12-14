@@ -109,6 +109,7 @@ class IngredientModel(models.Model):
     def __str__(self):
         return self.name
 
+
 class StockModel(models.Model):
     ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT, related_name='stocks')
     total_stock = models.IntegerField()
@@ -150,7 +151,7 @@ class StockTransactionModel(models.Model):
         return f'{self.transaction_type} - {self.ingredient_quantity}'
 
 
-class Reservation(models.Model):
+class ReservationModel(models.Model):
     STATUS_CHOICES = [
         ('BOOKED', 'Booked'),
         ('ATTENDED', 'Attended'),
@@ -158,8 +159,10 @@ class Reservation(models.Model):
         ('CANCELLED', 'Cancelled'),
     ]
 
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=255)
+    customer_number = models.IntegerField()
+    email = models.CharField(max_length=255)
     table = models.ForeignKey(TableModel, on_delete=models.PROTECT, related_name='reservations')
     reservation_date = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
