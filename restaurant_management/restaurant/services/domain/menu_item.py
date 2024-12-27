@@ -12,8 +12,7 @@ class CategoryEnum(Enum):
     MEALS = "MEALS"
     DESSERTS = "DESSERTS"
     EXTRAS = "EXTRAS"
-
-
+    
 
 class MenuItem:
     def __init__(

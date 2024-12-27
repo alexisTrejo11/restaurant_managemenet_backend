@@ -6,8 +6,8 @@ class TableService:
     def __init__(self):
         self.table_repository = TableRepository()
 
-    def get_table_by_id(self, number : int) -> Table:
-        return self.table_repository.get_by_number(number)
+    def get_table_by_number(self, number : int) -> Table:
+        return self.table_repository.get_by_id(number)
 
 
     def get_all_tables(self) -> list:

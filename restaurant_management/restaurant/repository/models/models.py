@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.timezone import now
+
 
 class MenuItemModel(models.Model):
     CATEGORY_CHOICES = [
@@ -178,7 +180,7 @@ class ReservationModel(models.Model):
         return f'{self.first_name} {self.last_name} - {self.reservation_date}'
 
 
-class Payment(models.Model):
+class PaymentModel(models.Model):
     PAYMENT_METHODS = [
         ('CASH', 'Cash'),
         ('CARD', 'Card'),

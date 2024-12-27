@@ -9,7 +9,7 @@ class GetTableByNumber(APIView):
     def get(self, request, table_number):
         table = table_service.get_table_by_number(table_number)
         if table is None:
-            return ApiResponse.not_found(f'Table with number {table_number} not found')
+            return ApiResponse.not_found('Table', 'number', table_number)
         
         table_data = TableSerializer(table).data
 
