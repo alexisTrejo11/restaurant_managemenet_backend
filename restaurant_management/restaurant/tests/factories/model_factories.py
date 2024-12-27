@@ -97,6 +97,7 @@ class OrderModelFactory(DjangoModelFactory):
     created_at = factory.LazyFunction(fake.date_this_century)
     end_at = factory.LazyAttribute(lambda o: fake.date_this_century() if o.status == 'COMPLETED' else None)
 
+
 class OrderItemFactory(DjangoModelFactory):
     class Meta:
         model = OrderItem

@@ -98,7 +98,7 @@ class ReservationInsertSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.CharField(required=False, allow_null=True)
     phone_number = serializers.CharField(required=False, allow_null=True)
-    requested_reservation_time = serializers.CharField()
+    requested_reservation_time = serializers.DateTimeField()
     customer_number = serializers.IntegerField()
 
 
