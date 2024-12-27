@@ -392,3 +392,4 @@ class PaymentModelTest(TestCase):
         payment.delete()
 
         self.assertFalse(PaymentModel.objects.filter(id=payment.id).exists())
+
