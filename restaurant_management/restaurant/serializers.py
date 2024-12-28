@@ -1,17 +1,21 @@
+import email
 from restaurant.services.domain.table import Table
 from restaurant.services.domain.ingredient import Ingredient
 from restaurant.services.domain.menu_item import MenuItem
+from datetime import datetime
+from restaurant.services.domain import table
 
 from rest_framework import serializers
 
+
 class TableInsertSerializer(serializers.Serializer):
     number = serializers.IntegerField()
-    seats = serializers.IntegerField()
+    capacity = serializers.IntegerField()
 
 
 class TableSerializer(serializers.Serializer):
     number = serializers.IntegerField()
-    seats = serializers.IntegerField()
+    capacity = serializers.IntegerField()
     is_available = serializers.BooleanField()
 
 
@@ -84,7 +88,6 @@ class StockSerializer(serializers.Serializer):
     ingredient = IngredientSerializer()
 
 
-
 class StockTransactionInsertSerializer(serializers.Serializer):
     stock_id = serializers.IntegerField()
     transaction_type = serializers.CharField()
@@ -98,17 +101,20 @@ class ReservationInsertSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.CharField(required=False, allow_null=True)
     phone_number = serializers.CharField(required=False, allow_null=True)
-    requested_reservation_time = serializers.DateTimeField()
+    reservation_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     customer_number = serializers.IntegerField()
 
 
 class ReservationSerializer(serializers.Serializer):
-	first_name = serializers.CharField()
-	last_name = serializers.CharField()
-	table_number = serializers.IntegerField()
-	reservation_date = serializers.DateTimeField()
-	status = serializers.CharField()
-	created_at = serializers.DateTimeField()
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    email = serializers.CharField()
+    phone_number = serializers.CharField()
+    table = serializers.IntegerField(source='table.number')
+    reservation_date = serializers.DateTimeField()  
+    status = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
 
 
 """

@@ -1,5 +1,5 @@
 -- Inserting Tables
-INSERT INTO tables (number, seats, is_available) VALUES
+INSERT INTO tables (number, capacity, is_available) VALUES
     (1, 2, true),
     (2, 2, true),
     (3, 2, true),

@@ -45,7 +45,7 @@ class MenuExtra(models.Model):
 
 class TableModel(models.Model):
     number = models.IntegerField()
-    seats = models.IntegerField()
+    capacity = models.IntegerField()
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -57,7 +57,7 @@ class TableModel(models.Model):
         unique_together = ('number',)
 
     def __str__(self):
-        return f'Table {self.number} ({self.seats} seats)'
+        return f'Table {self.number} ({self.capacity} capacity)'
 
 
 class OrderModel(models.Model):

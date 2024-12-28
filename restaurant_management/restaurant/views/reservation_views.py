@@ -1,8 +1,10 @@
+from tkinter.tix import Tree
 from restaurant.serializers import ReservationInsertSerializer, ReservationSerializer
 from restaurant.services.reservation_service import ReservationService
 from restaurant.utils.response import ApiResponse
 from rest_framework.viewsets import ViewSet
 from datetime import datetime, timedelta, date
+from restaurant.mappers.reservation_mappers import ReservationMapper
 
 
 class ReservationViews(ViewSet):
@@ -14,25 +16,24 @@ class ReservationViews(ViewSet):
         if reservation is None:
             return ApiResponse.not_found("Reservation", 'ID', pk)
 
-        reservations_data = ReservationSerializer(reservation_result.get_data()).data
+        reservations_data = ReservationSerializer(reservation).data
         
-        return ApiResponse.ok(reservations_data, f'reservation with reservation Id {reservation_id} succesfully fetched')
+        return ApiResponse.ok(reservations_data, f'reservation with reservation Id {pk} succesfully fetched')
 
 
-    def getReservationsByFilter(self, request, filter, value):
+    def getReservationsByFilter(self, request):
         filter_param = request.GET.get('filter')  
         value = request.GET.get('value')
 
         if not filter_param or not value:
             return ApiResponse.bad_request("Invalid URL param format")
 
-
-        reservation = self.reservation_service.get_by_filter(email)
+        reservation = self.reservation_service.get_by_filter(filter_param, value)
         if reservation is None:
-            return ApiResponse.not_found("Reservation", filter, value)
+            return ApiResponse.not_found("Reservation", filter_param, value)
 
-        reservations_serialized = ReservationSerializer(reservation).data
-        return ApiResponse.found(reservations_data, "reservation", filter, value)
+        reservations_data = ReservationSerializer(reservation, many=True).data
+        return ApiResponse.found(reservations_data, "reservation", filter_param, value)
 
 
     def getTodayReservation(self, request):
@@ -50,6 +51,8 @@ class ReservationViews(ViewSet):
     def getReservationByDateRange(self, request):
         start = request.GET.get('start')
         end = request.GET.get('end')
+        today = datetime.now()
+
 
         if not start or not end:
             start = today.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -61,7 +64,7 @@ class ReservationViews(ViewSet):
         except ValueError as e:
             raise ValueError(f"Invalid date format: {e}")
 
-        reservations = self.reservation_service.get_by_time_range(start,end)
+        reservations = self.reservation_service.get_by_time_range(start_date,end_date)
         reservations_serialized = ReservationSerializer(reservations, many=True).data
 
         return ApiResponse.ok(reservations_serialized, f"Reservation successfully fetched. Date Range: {start}-{end_date}")
@@ -72,25 +75,24 @@ class ReservationViews(ViewSet):
             if serializer.is_valid() is False:
                 return ApiResponse.bad_request(f'Validation failed:{serializer.errors}')  
 
+            new_reservation = ReservationMapper.serializer_to_domain(serializer.data)
 
-            validation_result = self.reservation_service.validate_creation(reservation)
+            validation_result = self.reservation_service.validate_creation(new_reservation)
             if validation_result.is_failure():
                 return ApiResponse.bad_request(validation_result.get_error_msg())  
 
-            reservation = self.reservation_service.assing_table(reservation)
-
-            reservation = self.reservation_service.create(reservation)        
-            reservation_serialized = ReservationSerializer(reservation).data
+            reservation_created = self.reservation_service.create(new_reservation)        
+            reservation_serialized = ReservationSerializer(reservation_created).data
 
             return ApiResponse.created(reservation_serialized, 'Reservation succesfully created')
 
 
-    def deleteReservationById(self, request, pk):
+    def deleteById(self, request, pk):
         is_delete = self.reservation_service.delete_by_id(pk)
         if not is_delete:
             return ApiResponse.not_found("Reservation", 'ID', pk)
 
-        return ApiResponse.ok(reservations_data, f'reservation with reservation ID [{pk}] succesfully fetched')
+        return ApiResponse.deleted('Reservation')
 
 """
 

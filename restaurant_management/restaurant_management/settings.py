@@ -55,6 +55,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'restaurant_management.urls'
 
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'restaurant.utils.exceptions.custom_exception_handler',
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

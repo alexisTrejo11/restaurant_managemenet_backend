@@ -22,7 +22,7 @@ class ReservationService:
 
     def get_by_filter(self, filter, value):
         if filter == "email":
-        	return self.reservation_repository.get_by_email(value)
+            return self.reservation_repository.get_by_email(value)
         elif filter == "phone_number":
             return self.reservation_repository.get_by_phone_number(value)
         elif filter == "name":
@@ -40,11 +40,18 @@ class ReservationService:
     def validate_creation(self, reservation : Reservation) -> Result:
         date_result = reservation.validate_date()
         if date_result.is_failure():
-            return date_result
+            return Result.error(date_result.get_error_msg())
+        
+        hour_result = reservation.validate_hour()
+        if hour_result.is_failure():
+            return hour_result
 
         customer_result = reservation.validate_customer_limit()
         if customer_result.is_failure():
-            return customer_result
+            return Result.error(customer_result.get_error_msg())
+        
+        return Result.success(None)
+
     
 
     def create(self, reservation : Reservation) -> Reservation:
@@ -52,16 +59,15 @@ class ReservationService:
         if not suitable_tables:
             raise DomainException("No suitable tables available for the requested number of customers.")
 
-
         for table in suitable_tables:
             reservation_conflict = self.reservation_repository.get_by_table_and_reservation_time(
                 table,
                 reservation.reservation_date
             )
+
             if not reservation_conflict: 
-                reservation.assign_table(table) 
-                self.reservation_repository.create(reservation)
-                return reservation  
+                reservation.assing_table(table) 
+                return self.reservation_repository.create(reservation)
 
         raise DomainException("No tables available for the requested date and customer capacity.")
 
@@ -74,12 +80,12 @@ class ReservationService:
         all_tables = self.table_repository.get_all()
 
         suitables_tables = []
-        for table in alltables:
+        for table in all_tables:
             if table.capacity >= party_size:
                 suitables_tables.append(table)
 
         return sorted(
-            suitable_tables, 
+            suitables_tables, 
             key=lambda table: table.capacity
         )
         

@@ -3,6 +3,7 @@ from restaurant.repository.models.models import ReservationModel
 from restaurant.mappers.reservation_mappers import ReservationMapper
 from restaurant.repository.common_repository import CommonRepository
 from typing import List, Optional
+from datetime import timedelta
 
 
 class ReservationRepository(CommonRepository):

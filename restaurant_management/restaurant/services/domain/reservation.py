@@ -30,7 +30,9 @@ class Reservation:
         table: Table = None,
         created_at: Optional[datetime] = None,
         cancelled_at: Optional[datetime] = None,
+        id: Optional[int] = None,
     ):
+        self.id = id
         self.name = name
         self.email = email
         self.customer_number = customer_number
@@ -65,32 +67,45 @@ class Reservation:
         self.status = self.Status.NOT_ATTENDED
 
 
-    def assing_table(table : Table):
+    def assing_table(self, table : Table):
         self.table = table
 
 
     def validate_date(self) -> Result:
         reservation_date = self.reservation_date
+        reservation_hour = reservation_date.hour
+        OPENING_HOUR = 12  # 12:00 PM
+        CLOSING_HOUR = 22  # 10:00 PM
+
         now = datetime.now()
-        max_date_allowed = now.date() + relativedelta(months=1)  
-        
-        # Assert Future
+        max_date_allowed = now + relativedelta(months=1)
+
         if reservation_date < now:
             return Result.error("Reservations must be made for a future date.")
         
-        # Assert Not Booked At same Day
         if reservation_date.date() == now.date():
-            return Result.error("Same-day reservations are not allowed.")
+            return Result.error("Same day reservations are not allowed.")
 
-        # Assert 1 Month Range
         if reservation_date > max_date_allowed:
             return Result.error("Reservations can only be made up to one month in advance.")
         
-        return Result.success()
+
+        return Result.success(None)
+    
+    def validate_hour(self):
+        reservation_hour = self.reservation_date.hour
+        OPENING_HOUR = 12  # 12:00 PM
+        CLOSING_HOUR = 22  # 10:00 PM
+
+        if not (OPENING_HOUR <= reservation_hour < CLOSING_HOUR):
+            return Result.error("Reservations can only be scheduled between 12:00 PM and 9:00 PM.")
+
+        return Result.success(None)
+
 
 
     def validate_customer_limit(self) -> Result:
-        if self.customer_number > 15:
-            return Result.error("Reservation can't be above 15 customers")
+        if self.customer_number > 8:
+            return Result.error("Reservation can't be above 8 customers")
 
-        return Result.success()
+        return Result.success(None)
