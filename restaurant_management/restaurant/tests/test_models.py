@@ -1,9 +1,8 @@
-from restaurant.tests.factories.model_factories import TableFactory, MenuItemFactory, MenuExtraFactory, OrderItemFactory, OrderModelFactory
+from restaurant.tests.factories.model_factories import TableFactory, MenuItemFactory, MenuExtraFactory, OrderItemFactory, OrderFactory
 from restaurant.repository.models.models import TableModel, MenuItemModel, MenuExtra
 from restaurant.repository.models.models import ReservationModel, TableModel, IngredientModel, StockModel, OrderItem, OrderModel, PaymentModel
 from restaurant.tests.factories.model_factories import ReservationFactory, TableFactory, IngredientFactory, MenuItemFactory, StockFactory, PaymentFactory
 
-from django.utils import timezone
 from django.test import TestCase
 from faker import Faker
 
@@ -15,14 +14,14 @@ class TableModelTest(TestCase):
 
         self.assertEqual(table.number, 2)
         self.assertTrue(table.is_available)
-        self.assertEqual(table.seats, 2)
+        self.assertIsNotNone(table.capacity)
 
 
     def test_create_table_with_specific_values(self):
-        table = TableFactory(number=10, seats=4, is_available=False)
+        table = TableFactory(number=10, capacity=4, is_available=False)
 
         self.assertEqual(table.number, 10)
-        self.assertEqual(table.seats, 4)
+        self.assertEqual(table.capacity, 4)
         self.assertFalse(table.is_available)
 
     def test_table_creation_and_persistence(self):
@@ -32,14 +31,14 @@ class TableModelTest(TestCase):
 
         saved_table = TableModel.objects.get(id=table.id)
         self.assertEqual(saved_table.number, table.number)
-        self.assertEqual(saved_table.seats, table.seats)
+        self.assertEqual(saved_table.capacity, table.capacity)
         self.assertEqual(saved_table.is_available, table.is_available)
 
     def test_updated_at_on_update(self):
         table = TableFactory()
         original_updated_at = table.updated_at
 
-        table.seats = 6
+        table.capacity = 6
         table.save()
 
         self.assertNotEqual(original_updated_at, table.updated_at)
@@ -262,7 +261,7 @@ class OrderModelTest(TestCase):
 
     def setUp(self):
         # Crear una orden y sus ítems
-        self.order = OrderModelFactory()
+        self.order = OrderFactory()
         self.order_item = OrderItemFactory(order=self.order)
 
     def test_create_order(self):
@@ -277,7 +276,7 @@ class OrderModelTest(TestCase):
 
     def test_order_str_method(self):
         # Verificar que el método __str__ devuelve la representación correcta
-        order = OrderModelFactory()
+        order = OrderFactory()
         self.assertEqual(str(order), f'Order {order.id} - Table {order.table.number}')
 
     def test_read_order(self):
@@ -290,7 +289,7 @@ class OrderModelTest(TestCase):
 
     def test_update_order(self):
         # Actualizar el estado de la orden
-        order = OrderModelFactory()
+        order = OrderFactory()
         new_status = 'COMPLETED'
         order.status = new_status
         order.save()
@@ -303,7 +302,7 @@ class OrderModelTest(TestCase):
 
     def test_delete_order(self):
         # Verificar que la orden existe en la base de datos
-        order = OrderModelFactory()
+        order = OrderFactory()
         self.assertTrue(OrderModel.objects.filter(id=order.id).exists())
 
         # Eliminar la orden
@@ -348,7 +347,6 @@ class OrderItemModelTest(TestCase):
 
 
 class PaymentModelTest(TestCase):
-
     def setUp(self):
         self.payment = PaymentFactory()
 

@@ -177,7 +177,7 @@ class ReservationModel(models.Model):
         verbose_name_plural = 'Reservations'
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name} - {self.reservation_date}'
+        return f'{self.name} - {self.reservation_date}'
 
 
 class PaymentModel(models.Model):

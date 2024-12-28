@@ -73,9 +73,6 @@ class Reservation:
 
     def validate_date(self) -> Result:
         reservation_date = self.reservation_date
-        reservation_hour = reservation_date.hour
-        OPENING_HOUR = 12  # 12:00 PM
-        CLOSING_HOUR = 22  # 10:00 PM
 
         now = datetime.now()
         max_date_allowed = now + relativedelta(months=1)
@@ -92,6 +89,7 @@ class Reservation:
 
         return Result.success(None)
     
+
     def validate_hour(self):
         reservation_hour = self.reservation_date.hour
         OPENING_HOUR = 12  # 12:00 PM
@@ -101,7 +99,6 @@ class Reservation:
             return Result.error("Reservations can only be scheduled between 12:00 PM and 9:00 PM.")
 
         return Result.success(None)
-
 
 
     def validate_customer_limit(self) -> Result:

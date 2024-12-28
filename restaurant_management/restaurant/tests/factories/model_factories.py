@@ -6,13 +6,12 @@ from restaurant.repository.models.models import MenuItemModel, MenuExtra, TableM
 
 fake = Faker()
 
-
 class TableFactory(DjangoModelFactory):
     class Meta:
         model = TableModel
 
-    number = 1
-    seats = factory.Iterator([2, 4, 6, 8]) 
+    number = factory.Sequence(lambda n: n + 1)
+    capacity = factory.Iterator([2, 4, 6, 8]) 
     is_available = True
     created_at = factory.LazyFunction(timezone.now)
     updated_at = factory.LazyFunction(timezone.now)
@@ -49,7 +48,7 @@ class ReservationFactory(DjangoModelFactory):
     email = factory.Faker('email')
     table = factory.SubFactory(TableFactory) 
     reservation_date = factory.LazyFunction(lambda: timezone.now() + timezone.timedelta(days=2))
-    status = factory.Iterator(['BOOKED', 'ATTENDED', 'NOT_ATTENDED', 'CANCELLED'])
+    status = factory.Iterator(['BOOKED'])
     cancelled_at = factory.LazyAttribute(lambda x: None if x.status != 'CANCELLED' else timezone.now())
     created_at = factory.LazyFunction(timezone.now)
 
@@ -61,8 +60,8 @@ class IngredientFactory(DjangoModelFactory):
     name = factory.Faker('word')
     unit = factory.Faker('word', ext_word_list=['kg', 'g', 'oz', 'ml', 'l'])
     menu_item = factory.SubFactory(MenuItemFactory)
-    created_at = factory.LazyFunction(factory.Faker('date_this_century'))
-    updated_at = factory.LazyFunction(factory.Faker('date_this_century'))
+    created_at = factory.LazyFunction(lambda: fake.date_this_century())
+    updated_at = factory.LazyFunction(lambda: fake.date_this_century())
 
 
 class StockFactory(DjangoModelFactory):
@@ -72,8 +71,8 @@ class StockFactory(DjangoModelFactory):
     ingredient = factory.SubFactory(IngredientFactory)
     total_stock = factory.Faker('random_int', min=1, max=100)  
     optimal_stock_quantity = factory.Faker('random_int', min=1, max=50)
-    created_at = factory.LazyFunction(fake.date_this_century)
-    updated_at = factory.LazyFunction(fake.date_this_century)
+    created_at = factory.LazyFunction(lambda: fake.date_this_century())
+    updated_at = factory.LazyFunction(lambda: fake.date_this_century())
 
 
 class StockTransactionFactory(DjangoModelFactory):
@@ -88,7 +87,7 @@ class StockTransactionFactory(DjangoModelFactory):
     employee_name = factory.Faker('name')
 
 
-class OrderModelFactory(DjangoModelFactory):
+class OrderFactory(DjangoModelFactory):
     class Meta:
         model = OrderModel
 
@@ -102,7 +101,8 @@ class OrderItemFactory(DjangoModelFactory):
     class Meta:
         model = OrderItem
 
-    menu_item = factory.SubFactory('restaurant.tests.factories.model_factories.MenuItemFactory')
+    order = factory.SubFactory(OrderFactory)
+    menu_item = factory.SubFactory(MenuItemFactory)
     added_at = factory.LazyFunction(fake.date_this_century)
     is_delivered = factory.Faker('boolean')
 
@@ -111,7 +111,7 @@ class PaymentFactory(DjangoModelFactory):
     class Meta:
         model = PaymentModel
 
-    order = factory.SubFactory('restaurant.tests.factories.model_factories.OrderFactory') 
+    order = factory.SubFactory(OrderFactory) 
     payment_method = factory.Faker('random_element', elements=['CASH', 'CARD', 'TRANSACTION'])
     payment_status = factory.Faker('random_element', elements=['PENDING', 'COMPLETED', 'CANCELLED'])
     sub_total = factory.Faker('pydecimal', left_digits=5, right_digits=2, positive=True)

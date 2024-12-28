@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from restaurant.services.domain.ingredient import Ingredient
 from restaurant.services.domain.table import Table
-
+from restaurant.services.domain.reservation import Reservation
+from restaurant.tests.factories.model_factories import TableFactory, ReservationFactory
+from restaurant.mappers.reservation_mappers import ReservationMapper
 
 class TestIngredient(unittest.TestCase):
     def setUp(self):
@@ -38,16 +40,15 @@ class TestIngredient(unittest.TestCase):
         self.assertEqual(str(self.ingredient), "Sugar")
 
 
-
 class TestTable(unittest.TestCase):
     def setUp(self):
         self.table = Table(
-            table_number=1,
+            number=1,
             capacity=4
         )
 
     def test_initialization(self):
-        self.assertEqual(self.table.table_number, 1)
+        self.assertEqual(self.table.number, 1)
         self.assertEqual(self.table.capacity, 4)
         self.assertTrue(self.table.is_available)
         self.assertIsInstance(self.table.created_at, datetime)
@@ -74,5 +75,75 @@ class TestTable(unittest.TestCase):
         self.assertEqual(str(self.table), "Table 1 (Capacity: 4)")
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestReservation(unittest.TestCase):
+    def setUp(self):
+        self.future_date = datetime.now() + timedelta(days=10)
+
+    def test_create_reservation_success(self):
+        reservation = Reservation(
+            name="John Doe",
+            email="john.doe@example.com",
+            phone_number="1234567890",
+            customer_number=4,
+            reservation_date=self.future_date,
+            table=Table(number=1, capacity=4)
+        )
+        self.assertEqual(reservation.name, "John Doe")
+        self.assertEqual(reservation.status, Reservation.Status.BOOKED)
+        self.assertIsNotNone(reservation.created_at)
+
+    def test_cancel_reservation(self):
+        reservation = ReservationFactory()
+        domain_reservation = ReservationMapper.to_domain(reservation)
+
+        domain_reservation.cancel()
+        self.assertEqual(domain_reservation.status, Reservation.Status.CANCELLED)
+        self.assertIsNotNone(domain_reservation.cancelled_at)
+
+        with self.assertRaises(ValueError):
+            domain_reservation.cancel()
+
+    def test_attend_reservation(self):
+        reservation = ReservationFactory()
+        domain_reservation = ReservationMapper.to_domain(reservation)
+
+        domain_reservation.attend()
+        self.assertEqual(domain_reservation.status, Reservation.Status.ATTENDED)
+
+    def test_validate_date_future_date(self):
+        reservation = Reservation(
+            name="Valid Date",
+            email="valid.date@example.com",
+            phone_number="7778889999",
+            customer_number=4,
+            reservation_date=self.future_date,
+            table=Table(number=2, capacity=4)
+        )
+        result = reservation.validate_date()
+        self.assertTrue(result.is_success())
+
+    def test_validate_hour_within_limits(self):
+        valid_time = datetime.now().replace(hour=15, minute=0, second=0, microsecond=0)
+        reservation = Reservation(
+            name="Valid Hour",
+            email="valid.hour@example.com",
+            phone_number="1231231234",
+            customer_number=4,
+            reservation_date=valid_time,
+            table=Table(number=self.table.number, capacity=self.table.capacity)
+        )
+        result = reservation.validate_hour()
+        self.assertTrue(result.is_success())
+
+    def test_validate_customer_limit_exceeds_limit(self):
+        reservation = Reservation(
+            name="Exceeds Limit",
+            email="exceeds.limit@example.com",
+            phone_number="3434343434",
+            customer_number=10,
+            reservation_date=self.future_date,
+            table=Table(number=self.table.number, capacity=self.table.capacity)
+        )
+        result = reservation.validate_customer_limit()
+        self.assertTrue(result.is_failure())
+        self.assertEqual(result.get_error_msg(), "Reservation can't be above 8 customers")

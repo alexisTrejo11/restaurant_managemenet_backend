@@ -1,5 +1,4 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework.response import Response
 from rest_framework.decorators import action
 from restaurant.services.menu_service import MenuService
 from restaurant.serializers import MenuItemSerializer, MenuInsertItemSerializer

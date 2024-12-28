@@ -1,25 +1,20 @@
-"""
-from django.shortcuts import render
-from rest_framework.decorators import api_view
-from restaurant.services.order_service import OrderService
-from restaurant.services.table_service import TableService
-from restaurant.services.payment_service import PaymentService
-from restaurant.utils.result import Result
+
+from rest_framework.viewsets import ViewSet
 from restaurant.utils.response import ApiResponse
-from restaurant.serializers import OrderSerializer, OrderInsertSerializer, AddItemsSerilizer, PaymentSerializer
-from restaurant.mappers.order_mappers import OrderMappers
-
-@api_view(['GET'])
-def get_order_by_id(request, order_id):
-     order_result = OrderService.get_order_by_id(order_id)
-
-     if order_result.is_failure():
-          return ApiResponse.not_found(order_result.get_error_msg())
-     
-     order_data = OrderSerializer(order_result.get_data()).data
-     return ApiResponse.ok(order_data, f'Order with ID {order_id} not found')
+from restaurant.serializers import OrderSerializer
 
 
+class OrderView:
+    def get_order_by_id(request, order_id):
+        order_result = OrderService.get_order_by_id(order_id)
+
+        if order_result.is_failure():
+            return ApiResponse.not_found(order_result.get_error_msg())
+        
+        order_data = OrderSerializer(order_result.get_data()).data
+        return ApiResponse.ok(order_data, f'Order with ID {order_id} not found')
+
+"""
 @api_view(['GET'])
 def get_orders_by_status(request, order_status):
      order_result = OrderService.get_orders_by_status(order_status)
