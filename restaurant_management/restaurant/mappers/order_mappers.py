@@ -1,15 +1,63 @@
-from restaurant.dtos.order_item_dtos import OrderItemInsertDTO
+from restaurant.repository.models.models import OrderModel, OrderItemModel, TableModel, MenuItemModel
+from restaurant.services.domain.order import Order, OrderItem
+from restaurant.serializers import OrderSerializer
+from restaurant.mappers.table_mappers import TableMappers
+from restaurant.mappers.menu_item_mappers import MenuItemMapper
 
 class OrderMappers:
-    @staticmethod  
-    def map_request_to_order_item_dtos(data):
-        order_items = data.get('order_items', [])
-        
-        return [
-            OrderItemInsertDTO(
-                menu_id=item.get('menu_id'),
-                quantity=item.get('quantity'),
-                notes=item.get('notes')
-            )
-            for item in order_items
-        ]
+    @staticmethod
+    def to_model(order: Order) -> OrderModel:
+        order_model = OrderModel(
+            id=order.id,
+            table=TableMappers.to_model(order.table), 
+            status=order.status,
+            created_at=order.created_at,
+            end_at=order.end_at,
+        )
+        return order_model
+
+    @staticmethod
+    def to_domain(order_model: OrderModel):
+        items = [OrderItemMappers.to_domain(item) for item in order_model.order_items.all()]
+        return Order(
+            id=order_model.id,
+            table=TableMappers.to_domain(order_model.table),
+            status=order_model.status,
+            created_at=order_model.created_at,
+            end_at=order_model.end_at,
+            items=items, 
+        )
+
+
+    @staticmethod
+    def serializer_to_domain(order_serializer: OrderSerializer):
+        return Order(
+            status=order_serializer.validated_data['status'],
+            created_at=order_serializer.validated_data['created_at'],
+            end_at=order_serializer.validated_data.get('end_at'),
+        )
+
+class OrderItemMappers:
+    @staticmethod
+    def to_model(order_item: OrderItem):
+        order_item_model = OrderItemModel(
+            id=order_item.id,
+            menu_item=MenuItemMapper.to_model(order_item.menu_item),  
+            is_delivered=order_item.is_delivered,
+            notes=order_item.notes,
+            quantity=order_item.quantity,
+            added_at=order_item.added_at,
+        )
+        return order_item_model
+
+
+    @staticmethod
+    def to_domain(order_item_model: OrderItemModel) -> OrderItem:
+        return OrderItem(
+            id=order_item_model.id,
+            menu_item=MenuItemMapper.to_domain(order_item_model.menu_item),
+            quantity=order_item_model.quantity,
+            notes=order_item_model.notes,
+            is_delivered=order_item_model.is_delivered,
+            added_at=order_item_model.added_at
+        )

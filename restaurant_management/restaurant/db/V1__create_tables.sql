@@ -19,7 +19,7 @@ CREATE TABLE menu_extras (
 CREATE TABLE tables (
      id SERIAL PRIMARY KEY,
      number INT NOT NULL,
-     seats INT NOT NULL,
+     capacity INT NOT NULL,
      is_available BOOLEAN DEFAULT TRUE,
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -37,7 +37,10 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
      id SERIAL PRIMARY KEY,
      menu_item_id INT NOT NULL,
+     menu_extra_id INT,
+     quantity INT NOT NULL,
      order_id INT NOT NULL,
+     notes VARCHAR(255),
      added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      is_delivered BOOLEAN DEFAULT FALSE
 );

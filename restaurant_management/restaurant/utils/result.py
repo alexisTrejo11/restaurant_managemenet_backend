@@ -28,5 +28,5 @@ class Result:
         return Result(data=None, error_message=error_message) 
 
     @staticmethod
-    def success(data):
+    def success(data=None):
         return Result(data=data, error_message=None)

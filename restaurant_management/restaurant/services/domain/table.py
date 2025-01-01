@@ -8,9 +8,11 @@ class Table:
         number: int,
         capacity: int,
         is_available: bool = True,
+        id: int = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
     ):
+        self.id = id
         self.number = number
         self.capacity = capacity
         self.is_available = is_available

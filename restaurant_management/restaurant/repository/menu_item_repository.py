@@ -12,7 +12,7 @@ class MenuItemRepository(CommonRepository[MenuItem]):
      def get_all(self) -> List[MenuItem]:
         menu_items = self.menu_item.objects.all().order_by('id')
         menu = [
-            MenuItemMapper.map_model_to_domain(model)
+            MenuItemMapper.to_domain    (model)
             for model in menu_items
         ]
         
@@ -22,16 +22,15 @@ class MenuItemRepository(CommonRepository[MenuItem]):
      def get_by_id(self, item_id: int) -> Optional[MenuItem]:
         model = self.menu_item.objects.filter(id=item_id).first()
         if model:
-           return MenuItemMapper.map_model_to_domain(model)
-        return None
+           return MenuItemMapper.to_domain(model)
 
 
      def create(self, menu_item: MenuItem) -> MenuItem:
-         new_item_model = MenuItemMapper.map_domain_to_model(menu_item)
+         new_item_model = MenuItemMapper.to_model(menu_item)
          
          new_item_model.save()
 
-         return MenuItemMapper.map_model_to_domain(new_item_model)
+         return MenuItemMapper.to_domain(new_item_model)
 
 
      def update(self,  menu_item: MenuItem) -> Optional[MenuItem]:

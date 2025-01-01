@@ -81,10 +81,13 @@ class OrderModel(models.Model):
         return f'Order {self.id} - Table {self.table.number}'
 
 
-class OrderItem(models.Model):
+class OrderItemModel(models.Model):
     menu_item = models.ForeignKey(MenuItemModel, on_delete=models.PROTECT, related_name='order_items')
-    order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items')
+    order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items', default="")
     added_at = models.DateTimeField(auto_now_add=True)
+    menu_extra = models.ForeignKey(MenuExtra, on_delete=models.PROTECT, related_name='order_items', null=True)
+    quantity = models.IntegerField()
+    notes = models.CharField(null=True)
     is_delivered = models.BooleanField(default=False)
 
     class Meta:
@@ -203,7 +206,7 @@ class PaymentModel(models.Model):
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
-    discount = models.DecimalField(max_digits=10, decimal_places=2)
+    disccount = models.DecimalField(max_digits=10, decimal_places=2)
     vat_rate = models.DecimalField(max_digits=5, decimal_places=2)
     vat = models.DecimalField(max_digits=10, decimal_places=2)
     currency_type = models.CharField(max_length=3, choices=CURRENCY_TYPES)

@@ -42,12 +42,13 @@ class ApiResponse:
 
 
     @staticmethod
-    def ok(data, message):
+    def ok(message, data=None):
         return Response({
             'data': data,
             'message': message,
             'time_stamp': datetime.now(),
         })
+    
     
     @staticmethod
     def found(data, entity, parameter, value):
@@ -58,15 +59,7 @@ class ApiResponse:
         })
 
     @staticmethod
-    def created(message):
-        return Response({
-            'data': None,
-            'message': message,
-            'time_stamp': datetime.now(),
-        },status=status.HTTP_201_CREATED)
-    
-    @staticmethod
-    def created(data, message):
+    def created(data, message=None):
         return Response({
             'data': data,
             'message': message,

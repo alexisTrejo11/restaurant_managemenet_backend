@@ -6,7 +6,7 @@ from restaurant.repository.models.models import MenuItemModel
 
 class MenuItemMapper:
      @staticmethod
-     def map_model_to_domain(model: MenuItemModel) -> MenuItem:
+     def to_domain(model: MenuItemModel) -> MenuItem:
           return MenuItem(
                id=model.id,
                name=model.name,
@@ -18,18 +18,19 @@ class MenuItemMapper:
           )
 
      @staticmethod
-     def map_domain_to_model(domain: MenuItem, model: Optional[MenuItemModel] = None) -> MenuItemModel:
-          if model is None:
-               model = MenuItemModel()
+     def to_model(domain: MenuItem, model: Optional[MenuItemModel] = None) -> MenuItemModel:
+        if model is None:
+            model = MenuItemModel()
+    
+            model.id = domain.id
+            model.name = domain.name
+            model.price = domain.price
+            model.description = domain.description
+            model.category = domain.category
+            model.created_at = domain.created_at
+            model.updated_at = domain.updated_at
 
-          model.name = domain.name
-          model.price = domain.price
-          model.description = domain.description
-          model.category = domain.category.value
-          model.created_at = domain.created_at
-          model.updated_at = domain.updated_at
-
-          return model
+        return model
 
      @staticmethod
      def map_serializer_to_domain(serializer) -> MenuItem:

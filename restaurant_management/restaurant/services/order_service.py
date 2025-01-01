@@ -1,129 +1,97 @@
-from restaurant.utils.result import Result
-from restaurant.dtos.order_item_dtos import OrderItemInsertDTO
-from restaurant.models import Order, OrderItem, Table
-from django.db import transaction
-from restaurant.models import Menu
 from typing import List
+from restaurant.repository.order_repository import OrderRepository
+from restaurant.services.domain.order import Order, OrderStatus, OrderItem
+from restaurant.services.domain.table import Table
+from restaurant.repository.table_respository import TableRepository
+from restaurant.repository.menu_item_repository import MenuItemRepository
 
 class OrderService:
-     @staticmethod
-     def get_order_by_id(order_id):
-          try:
-               order = Order.objects.get(pk=order_id)
-               return Result.success(order)
-          except Order.DoesNotExist:
-               return Result.error(f'order with ID {order_id} not found')
+    def __init__(self):
+        self.order_repository = OrderRepository()
+        self.table_repository = TableRepository()
+        self.menu_item_repository = MenuItemRepository()
+    
+
+    def get_order_by_id(self, order_id):
+        return self.order_repository.get_by_id(order_id)
 
 
-     @staticmethod
-     def get_orders_by_status(order_status):
-          if not Order.validate_status(order_status):
-               return Result.error('Invalid order status')
-          
-          orders = Order.objects.filter(status=order_status).prefetch_related('items')
-          return Result.success(orders)
+    def get_orders_by_status(self, status) -> List[Order]:
+        return self.order_repository.get_by_status(status)
+    
 
+    def init_order(self, table: Table) -> Order:
+        new_order = Order(
+            status=OrderStatus.IN_PROGRESS, 
+            table=table
+        )
 
-     @staticmethod
-     def delete_order_by_id(order_id):
-          try:
-               order = Order.objects.get(pk=order_id)
-               order.delete()
-               return Result.success(None)
-          except Order.DoesNotExist:
-               return Result.error(f'order with ID {order_id} not found')   
-
-
-     @staticmethod
-     def init_order(table: Table, order_items_dtos: list[OrderItemInsertDTO]):
-          with transaction.atomic():
-               OrderService.set_table_as_unavailable(table)
-
-               order = Order(table=table, status='in_progress')
-               order.save()
-               
-               order_items = OrderService._create_order_items(order, order_items_dtos)
-               OrderService._save_order_items(order, order_items)
-               return order
-     
-     
-     @staticmethod
-     def add_items_to_order(order: Order, order_items_dtos: List[OrderItemInsertDTO]):
-        existing_items = OrderService.get_order_items(order)
-        # Create dict using ids as key and items as values
-        existing_items_dict = {item.menu_item.id: item for item in existing_items}
+        self.table_repository.set_as_unavailable(new_order.table.number)
         
-        items_to_add = []
-        
-        for dto in order_items_dtos:
-            if dto.menu_id in existing_items_dict:
-                # if items exists increase quantity
-                existing_item = existing_items_dict[dto.menu_id]
-                existing_item.quantity += dto.quantity
-                items_to_add.append(existing_item) 
-            else:
-                # If not create new item
-                menu_item = Menu.objects.get(pk=dto.menu_id)  # Cant produce exceptions
-                new_item = OrderItem(order=order, menu_item=menu_item, quantity=dto.quantity)
-                items_to_add.append(new_item)  
-        
-        # Save new and exisitng items
-        if items_to_add:
-            OrderItem.objects.bulk_create([item for item in items_to_add if isinstance(item, OrderItem) and item.pk is None])
-            OrderItem.objects.bulk_update([item for item in items_to_add if isinstance(item, OrderItem) and item.pk is not None], ['quantity'])
+        return self.order_repository.create(new_order)
+    
 
-        order.refresh_from_db() 
+    def proccess_items(self, items_data):
+        created_items = []
+        
+        for item_data in items_data: 
+            menu_item_id = item_data.get('menu_item_id')  
+            quantity = item_data.get('quantity') 
+            notes = item_data.get('notes') 
+
+            menu_item = self.menu_item_repository.get_by_id(menu_item_id)
+            if not menu_item:
+                raise ValueError(f'Menu Item with [{menu_item_id}] not found')
+
+            order_item = OrderItem(
+
+                menu_item=menu_item,
+                quantity=quantity,
+                notes=notes
+            )
+            created_items.append(order_item)
+
+        return created_items
+
+
+    def add_items_to_order(self, order: Order, order_items: List[OrderItem]) -> Order:
+        order.add_items(order_items)
+
+        return self.order_repository.update_items(order)
+    
+
+    def delete_items_to_order(self, order: Order, item_ids: List[int]) -> Order:
+        order.remove_items(item_ids)
+
+        self.order_repository.update_items(order)
+
         return order
 
 
-     @staticmethod
-     def update_order_status(order: Order, order_status: str):       
-          if not order.validate_status(order_status): 
-               return   
-          order.status = order_status
-          order.save()
-     
-
-     @staticmethod
-     def verify_order_cancel(order: Order):       
-          if order.status is 'cancelled':
-               return Result.error('Order already cancelled')
-          elif order.status is 'pending_payment' or 'in_progress':
-               return Result.error('Invalid order. Cannot be cancelled')
-          else:
-               return Result.success(None)
+    def delete_order_by_id(self, order_id):
+        return self.order_repository.delete(order_id)
 
 
-     @staticmethod
-     def _create_order_items(order: Order, order_items_dtos: list[OrderItemInsertDTO]):
-          order_items = []  
-          for item_dto in order_items_dtos:
-               menu_item = Menu.objects.get(pk=item_dto.menu_id)
-               order_item = OrderItem(
-                    order=order,
-                    menu_item=menu_item,
-                    quantity=item_dto.quantity
-               )
-               order_items.append(order_item)
-          return order_items
+    def cancel_order(self, order: Order):
+        order.set_as_cancel()
 
-     @staticmethod
-     def _save_order_items(order: Order, order_items: list[OrderItem]):
-          OrderItem.objects.bulk_create(order_items) 
-          order.refresh_from_db()
+        self.order_repository.update(order)
+        self.table_repository.set_as_unavailable(order.table.number)
 
 
-     @staticmethod
-     def get_order_items(order):
-        return OrderItem.objects.filter(order=order)
+    def end_order(self, order: Order):
+        order.set_as_complete()
 
-     
-     @staticmethod
-     def set_table_as_unavailable(table: Table):
-          table.set_as_unavailable()
-          table.save()
-     
-     @staticmethod
-     def set_table_as_available(table: Table):
-          table.set_as_available()
-          table.save()
+        self.table_repository.set_as_unavailable(order.table.number)
+        return self.order_repository.update(order)
+
+
+    def set_item_as_delivered(self, order_id, item_id):
+        order = self.order_repository.get_by_id(order_id)
+        order.set_item_as_delivered(item_id)
+        
+        self.order_repository.update_items(order)
+
+
+    def get_not_delivered_items(self):
+        return self.order_repository.get_not_delivered_items()

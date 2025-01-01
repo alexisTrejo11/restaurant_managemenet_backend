@@ -11,14 +11,14 @@ class ReservationViews(ViewSet):
     def __init__(self):
         self.reservation_service = ReservationService()
 
-    def getReservationById(self, request, pk):
-        reservation = self.reservation_service.get_by_id(pk)
+    def getReservationById(self, request, id):
+        reservation = self.reservation_service.get_by_id(id)
         if reservation is None:
-            return ApiResponse.not_found("Reservation", 'ID', pk)
+            return ApiResponse.not_found("Reservation", 'ID', id)
 
         reservations_data = ReservationSerializer(reservation).data
         
-        return ApiResponse.ok(reservations_data, f'reservation with reservation Id {pk} succesfully fetched')
+        return ApiResponse.ok(reservations_data, f'reservation with reservation Id {id} succesfully fetched')
 
 
     def getReservationsByFilter(self, request):
