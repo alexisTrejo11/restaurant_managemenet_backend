@@ -6,7 +6,7 @@ from restaurant.views.menu_views import MenuViewSet
 from restaurant.views.stock_views import StockViewSet
 from restaurant.views.reservation_views import ReservationViews
 from restaurant.views.order_views import OrderViews
-
+from restaurant.views.payment_views import PaymentViews
 
 menu_view_router = DefaultRouter()
 menu_view_router.register(r'menus', MenuViewSet, basename='menu')
@@ -16,6 +16,9 @@ reservation_view_router.register(r'reservations', ReservationViews, basename='re
 
 order_view_router = DefaultRouter()
 order_view_router.register(r'orders', OrderViews, basename='orders')
+
+payment_view_router = DefaultRouter()
+payment_view_router.register(r'payments', PaymentViews, basename='payments')
 
 urlpatterns = [
     # Tables
@@ -52,12 +55,20 @@ urlpatterns = [
     path('v1/api/orders/by-status/<str:status>/', OrderViews.as_view({'get': 'get_orders_by_status'}), name='orders-by-status'),
     path('v1/api/orders/<int:table_number>', OrderViews.as_view({'post': 'start_order'}), name='start-order'),
     path('v1/api/orders/<int:id>/cancel', OrderViews.as_view({'put': 'cancel_order'}), name='cancel-order'),
-    path('v1/api/orders/<int:id>/complete', OrderViews.as_view({'put': 'end_order'}), name='complete-order'),
+    path('v1/api/orders/<int:id>/end', OrderViews.as_view({'put': 'end_order'}), name='complete-order'),
 
 
     path('v1/api/orders/<int:order_id>/<int:item_id>/deliver', OrderViews.as_view({'put': 'mark_item_as_delivered'}), name='mark_item_as_delivered'),
     path('v1/api/orders/items/add', OrderViews.as_view({'put': 'add_items_to_order'}), name='start-order'),
     path('v1/api/orders/items/remove', OrderViews.as_view({'delete': 'delete_items_to_order'}), name='start-order'),
     path('v1/api/orders/items/not-delivered', OrderViews.as_view({'get': 'get_not_delivered_items'}), name='get_not_delivered_items'),
+
+    # Payment
+    path('v1/api/payments/<int:id>', PaymentViews.as_view({'get': 'get_payment_by_id'}), name='get_payment_by_id'),
+    path('v1/api/payments/by-status/<str:status>', PaymentViews.as_view({'get': 'get_payments_by_status'}), name='get_payment_by_id'),
+    path('v1/api/payments/by-date/start/<str:start_date>/end/<str:end_date>', PaymentViews.as_view({'get': 'get_payments_by_data_range'}), name='get_payments_by_data_range'),
+    path('v1/api/payments/by-date/today', PaymentViews.as_view({'get': 'get_today_payments'}), name='get_payments_by_data_range'),
+    path('v1/api/payments/<int:id>/complete/<str:payment_method>', PaymentViews.as_view({'put': 'complete_payment'}), name='complete_payment'),
+    path('v1/api/payments/<int:id>/cancel', PaymentViews.as_view({'put': 'cancel_payment'}), name='cancel_payment'),
 ] 
  

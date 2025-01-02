@@ -1,13 +1,9 @@
-from rest_framework.decorators import api_view
 from rest_framework.viewsets import ViewSet
-
 from restaurant.services.stock_service import StockService
 from restaurant.services.ingredient_service import IngredientService
-
-from restaurant.utils.result import Result
 from restaurant.utils.response import ApiResponse
 from restaurant.mappers.stock_mappers import StockTransactionMappers
-from restaurant.serializers import IngredientSerializer, StockInsertSerializer, StockSerializer, StockTransactionInsertSerializer
+from restaurant.serializers import StockInsertSerializer, StockSerializer, StockTransactionInsertSerializer
 
 stock_service = StockService()
 ingredient_service = IngredientService()

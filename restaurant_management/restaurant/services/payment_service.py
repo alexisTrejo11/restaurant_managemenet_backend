@@ -1,116 +1,142 @@
-from restaurant.models import Payment, Order
-from restaurant.services.order_service import OrderService
 from datetime import datetime
-from restaurant.utils.result import Result
 from decimal import Decimal
+from typing import List, Optional
+from restaurant.repository.payment_repository import PaymentRepository 
+from restaurant.services.domain.payment import Payment, PaymentItem
+from restaurant.services.domain.order import OrderItem
+from restaurant.services.domain.payment import Payment
+from restaurant.services.domain.order import Order
+from restaurant.utils.result import Result
+
 
 class PaymentService:
-    @staticmethod
-    def get_payment_by_id(payment_id):
-        try:
-            payment = Payment.objects.get(pk=payment_id)
-            return Result.success(payment)
-        except Payment.DoesNotExist:
-            return Result.error(f'Payment with ID {payment_id} not found')
+    def __init__(self):
+        self.payment_repository = PaymentRepository()
 
-    @staticmethod
-    def get_payments_by_date_range(start_date, end_date):
+    def get_payment_by_id(self, payment_id) -> Optional[Payment]:
+            return self.payment_repository.get_by_id(payment_id)
+
+    def valdiate_payment_status(self, status):
+        valid_statuses = ['pending_payment', 'completed', 'cancelled']
+        return status in valid_statuses       
+
+
+    def get_payments_by_date_range(self, start_date, end_date):
         if isinstance(start_date, str):
             start_date = datetime.fromisoformat(start_date)
         if isinstance(end_date, str):
             end_date = datetime.fromisoformat(end_date)
 
         if start_date > end_date:
-            return Result.error('start_date cannot be after end_date')
+           raise ValueError('start_date cannot be after end_date')
 
-        payments = Payment.objects.filter(created_at__range=(start_date, end_date))
-        return Result.success(payments)
+        return self.payment_repository.get_by_date_range(start_date, end_date)
 
-    @staticmethod
-    def get_payments_by_status(payment_status):
-        return Payment.objects.filter(status=payment_status)
 
-    @staticmethod
-    def get_complete_payments_by_date_range(start_date, end_date):
+    def get_payments_by_status(self, payment_status):
+        return self.payment_repository.get_by_status(payment_status)
+
+
+    def get_complete_payments_by_date_range(self, start_date, end_date):
         if start_date > end_date:
-            return Result.error('start_date cannot be after end_date')
+            raise ValueError('start_date cannot be after end_date')
 
-        payments = Payment.objects.filter(paid_at__range=(start_date, end_date))
-        return Result.success(payments)
+        return self.payment_repository.get_complete_payments_by_date_range(start_date, end_date)
 
-    @staticmethod
-    def init_payment(order: Order):
-        sub_total = PaymentService._calculate_payment_sub_total(order)
-        discount = PaymentService._calculate_payment_discount(order)
-        taxes = PaymentService._calculate_taxes(sub_total, discount)
-        total = PaymentService._calculate_payment_total(sub_total, discount, taxes)
 
-        payment = Payment(
-            order=order, 
-            sub_total=sub_total, 
-            total=total, 
-            status='pending_payment', 
-            VAT=Payment.MEX_VAT, 
-            tip=Decimal('0.00'),
-            discount=discount,
-            taxes=taxes
-        )
-        payment.save()
+    def create_payment(self, order: Order):
+        payment = self._initialize_payment(order)
+        self._validate_payment(payment, order)
+
+        payment_items = self._generate_payment_items(order.items)
+        payment = self._calculate_payment(payment, payment_items)
+
+        payment_created = self._save_payment_and_items(payment, payment_items)
+
+        return payment_created
+
+    def _initialize_payment(self, order: Order):
+        return Payment.init_payment(order)
+
+    def _validate_payment(self, payment: Payment, order: Order):
+        payment.validate_payment_creation(order)
+
+    def _generate_payment_items(self, order_items):
+        return self.generate_payment_items(order_items)
+
+    def _calculate_payment(self, payment: Payment, payment_items):
+        payment.items = payment_items
+        payment.calculate_numbers()
         return payment
 
-    @staticmethod
-    def validate_payment_creation(order: Order):
-        if order.status != 'completed':
-            return Result.error('Order status must be completed')
+    def _save_payment_and_items(self, payment: Payment, payment_items):
+        payment_created = self.payment_repository.create(payment)
+        payment_items_created = self.payment_repository.save_payment_items(payment_created, payment_items)
+        payment_created.items = payment_items_created
+        return payment_created
 
-        if Payment.objects.filter(order=order).exists():
-            return Result.error("A payment already exists for this order")
 
-        return Result.success(None)
+    def complete_payment(self, payment: Payment, payment_method : str) -> Result:
+        method_validation = payment.validate_payment_method(payment_method)
+        if method_validation.is_failure():
+            return method_validation
 
-    @staticmethod
-    def validate_pending_payment_status(status):
-        if status in ['cancelled', 'completed']:
-            return Result.error('Payment already processed')
-        return Result.success(None)
 
-    @staticmethod
-    def validate_payment_status(payment_status):
-        return Payment.validate_status(status=payment_status)
+        payment.complete_payment(payment_method)
+        Payment = self.payment_repository.update(payment)
+        return Result.success(Payment)
 
-    @staticmethod
-    def complete_payment(payment: Payment, data):
-        tip = Decimal(data.get('tip', 0))
-        if tip < 0:
-            return ValueError('Tip cannot be negative')
 
-        payment.add_tip(tip)
-        payment.set_as_complete()
-        payment.save()
-        return payment
+    def update_payment_status(self, payment: Payment, status: str):
+        payment.validate_payment_status(status)
+        payment.payment_status = status
+        self.payment_repository.update(payment)
 
-    @staticmethod
-    def update_payment_status(payment: Payment, payment_status: str):
-        payment.status = payment_status  
-        payment.save()
 
-    @staticmethod
-    def _calculate_payment_sub_total(order: Order):
-        items = OrderService.get_order_items(order)
-        sub_total = sum(item.menu_item.price for item in items)
-        return sub_total
+    def validate_payment_complete(self, payment: Payment) -> Result:
+        return payment.validate_payment_complete()
+    
 
-    @staticmethod
-    def _calculate_payment_discount(order: Order):
-        return Decimal('0.00')
+    def validate_payment_cancel(self, payment: Payment) -> Result:
+        return payment.validate_payment_cancel()
+    
+    def generate_payment_items(self, order_items: List[OrderItem]) -> List[PaymentItem]:
+        payment_items = {}
 
-    @staticmethod
-    def _calculate_payment_total(sub_total, discount, taxes):
-        total = (Decimal(sub_total) - Decimal(discount)) + taxes
-        return total
+        for order_item in order_items:
+            key = (
+                order_item.menu_item.id, 
+                order_item.menu_extra.id if order_item.menu_extra else None
+            )
 
-    @staticmethod
-    def _calculate_taxes(sub_total, discount):
-        amount_pre_tax = Decimal(sub_total) - Decimal(discount)
-        taxes = amount_pre_tax * Payment.MEX_VAT
-        return taxes
+            if key in payment_items:
+                payment_items[key].increase_item_quantity(order_item.quantity)
+                payment_items[key].calculate_total()
+            else:
+                payment_items[key] = self.__create_payment_item(order_item)
+
+        return list(payment_items.values())
+        
+        
+    def __create_payment_item(self, order_item : OrderItem):
+        payment_item = PaymentItem(
+                menu_item=order_item.menu_item,
+                menu_extra_item=order_item.menu_extra,
+                order_item=order_item,
+                quantity=order_item.quantity,
+                price=order_item.menu_item.price
+            )
+
+        payment_item.calculate_total()
+
+        if payment_item.menu_extra_item:
+            payment_item.menu_extra_item = order_item.menu_extra.price
+            payment_item.increase_extra_item_price()
+        
+        return payment_item
+
+    def _save_payment_and_items(self, payment: Payment, payment_items):
+        payment_created = self.payment_repository.create(payment)
+        payment_items_created = self.payment_repository.save_payment_items(payment_created, payment_items)
+        payment_created.items = payment_items_created
+        return payment_created

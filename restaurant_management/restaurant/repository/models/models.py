@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.timezone import now
-
+from decimal import Decimal
 
 class MenuItemModel(models.Model):
     CATEGORY_CHOICES = [
@@ -18,8 +18,8 @@ class MenuItemModel(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(default=now)
 
     class Meta:
         db_table = 'menu_items'
@@ -32,8 +32,8 @@ class MenuItemModel(models.Model):
 
 class MenuExtra(models.Model):
     name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(default=now)
 
     class Meta:
         db_table = 'menu_extras'
@@ -43,12 +43,13 @@ class MenuExtra(models.Model):
     def __str__(self):
         return self.name
 
+
 class TableModel(models.Model):
     number = models.IntegerField()
     capacity = models.IntegerField()
     is_available = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(default=now)
 
     class Meta:
         db_table = 'tables'
@@ -69,7 +70,7 @@ class OrderModel(models.Model):
 
     table = models.ForeignKey(TableModel, on_delete=models.PROTECT, related_name='orders')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=now)
     end_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -84,9 +85,9 @@ class OrderModel(models.Model):
 class OrderItemModel(models.Model):
     menu_item = models.ForeignKey(MenuItemModel, on_delete=models.PROTECT, related_name='order_items')
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE, related_name='order_items', default="")
-    added_at = models.DateTimeField(auto_now_add=True)
+    added_at = models.DateTimeField(default=now)
     menu_extra = models.ForeignKey(MenuExtra, on_delete=models.PROTECT, related_name='order_items', null=True)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=1)
     notes = models.CharField(null=True)
     is_delivered = models.BooleanField(default=False)
 
@@ -96,15 +97,15 @@ class OrderItemModel(models.Model):
         verbose_name_plural = 'Order Items'
 
     def __str__(self):
-        return f'{self.menu_item.name} - Order {self.order.id}'
+        return f'{self.menu_item.name} - Order {self.order.id if self.order else "Unknown"}'
 
 
 class IngredientModel(models.Model):
     menu_item = models.ForeignKey(MenuItemModel, on_delete=models.SET_NULL, null=True, related_name='ingredients')
     name = models.CharField(max_length=255)
     unit = models.CharField(max_length=10)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(default=now)
 
     class Meta:
         db_table = 'ingredients'
@@ -119,8 +120,8 @@ class StockModel(models.Model):
     ingredient = models.ForeignKey(IngredientModel, on_delete=models.PROTECT, related_name='stocks')
     total_stock = models.IntegerField()
     optimal_stock_quantity = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(default=now)
 
     def get_transactions(self):
         return self.transactions.all()
@@ -171,7 +172,7 @@ class ReservationModel(models.Model):
     table = models.ForeignKey(TableModel, on_delete=models.PROTECT, related_name='reservations')
     reservation_date = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=now)
     cancelled_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -203,7 +204,7 @@ class PaymentModel(models.Model):
     ]
 
     order = models.OneToOneField(OrderModel, on_delete=models.PROTECT, null=True, related_name='payment')
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, null=True)
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     disccount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -211,7 +212,7 @@ class PaymentModel(models.Model):
     vat = models.DecimalField(max_digits=10, decimal_places=2)
     currency_type = models.CharField(max_length=3, choices=CURRENCY_TYPES)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=now)
     paid_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -221,3 +222,43 @@ class PaymentModel(models.Model):
 
     def __str__(self):
         return f'Payment for Order {self.order_id} - {self.total} {self.currency_type}'
+    
+
+class PaymentItemModel(models.Model):
+    payment = models.ForeignKey(
+        'PaymentModel', 
+        on_delete=models.CASCADE, 
+        related_name='payment_items'
+    )
+    order_item = models.OneToOneField(
+        'OrderItemModel', 
+        on_delete=models.PROTECT, 
+        related_name='payment_item'
+    )
+    menu_item = models.ForeignKey(
+        'MenuItemModel', 
+        on_delete=models.PROTECT, 
+        related_name='payment_items'
+    )
+    menu_item_extra = models.ForeignKey(
+        'MenuExtra', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='payment_items'
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField()
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'payment_items'
+        verbose_name = 'Payment Item'
+        verbose_name_plural = 'Payment Items'
+
+    def __str__(self):
+        return f'{self.quantity}x {self.menu_item.name} - {self.total}'
+
+    def calculate_total(self):
+        """Calculate the total price for the item."""
+        return Decimal(self.price) * Decimal(self.quantity)

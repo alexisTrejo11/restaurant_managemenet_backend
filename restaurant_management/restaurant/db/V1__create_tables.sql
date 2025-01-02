@@ -89,8 +89,8 @@ CREATE TABLE reservations (
 CREATE TABLE payments (
      id SERIAL PRIMARY KEY,
      order_id int,
-     payment_method VARCHAR(255) CHECK (payment_method IN ('CASH, CARD, TRANSACTION')),
-     payment_status VARCHAR(255) CHECK (payment_method IN ('PENDING, COMPLETED, CANCELLED')),
+     payment_method VARCHAR(255) CHECK (payment_method IN ('CASH', 'CARD', 'TRANSACTION')),
+     payment_status VARCHAR(255) CHECK (payment_method IN ('PENDING', 'COMPLETED', 'CANCELLED')),
      sub_total DECIMAL(10, 2) NOT NULL,
      disccount DECIMAL(10, 2) NOT NULL,
      vat_rate DECIMAL(10, 2) NOT NULL, --0.16
@@ -100,6 +100,19 @@ CREATE TABLE payments (
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      paid_at TIMESTAMP
 );
+
+CREATE TABLE payment_items (
+    id SERIAL PRIMARY KEY,                          
+    payment_id INT NOT NULL,                      
+    menu_item_id INT NOT NULL,                    
+    order_item_id INT NOT NULL,                   
+    menu_item_extra_id INT,                       
+    price NUMERIC(10, 2) NOT NULL,                
+    quantity INT NOT NULL CHECK (quantity > 0),   
+    total NUMERIC(10, 2) NOT NULL,                
+    CONSTRAINT fk_payment FOREIGN KEY (payment_id) REFERENCES public.payments (id) ON DELETE CASCADE
+);
+
 
 ALTER TABLE orders 
     ADD CONSTRAINT order_table_fk

@@ -1,13 +1,15 @@
 from rest_framework.viewsets import ViewSet
 from restaurant.utils.response import ApiResponse
-from restaurant.serializers import OrderSerializer, OrderItemSerializer ,OrderItemsInsertSerilizer, OrderItemsDeleteSerilizer
+from restaurant.serializers import OrderSerializer, OrderItemSerializer ,OrderItemsInsertSerilizer, OrderItemsDeleteSerilizer, PaymentSerializer
 from restaurant.services.order_service import OrderService
 from restaurant.services.table_service import TableService
+from restaurant.services.payment_service import PaymentService
 
 class OrderViews(ViewSet):
     def __init__(self):
             self.order_service = OrderService()
             self.table_service = TableService()
+            self.payment_service = PaymentService()
     
     def get_order_by_id(self, request, id):
         order = self.order_service.get_order_by_id(id)
@@ -82,8 +84,10 @@ class OrderViews(ViewSet):
             return ApiResponse.not_found('Order', 'ID', id)
 
         self.order_service.end_order(order)
+        payment = self.payment_service.create_payment(order)
 
-        return ApiResponse.ok('Order Successfully Ended')
+        payment_data = PaymentSerializer(payment).data
+        return ApiResponse.ok(payment_data, 'Order Successfully Ended. Payment is pending to be paid')
     
 
     def cancel_order(self, request, id):
