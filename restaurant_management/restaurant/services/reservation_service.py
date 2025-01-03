@@ -3,39 +3,63 @@ from restaurant.utils.result import Result
 from restaurant.repository.reservation_repository import ReservationRepository
 from restaurant.repository.table_respository import TableRepository
 from restaurant.services.domain.reservation import Reservation
-from datetime import datetime, timedelta
+from datetime import datetime
 from restaurant.utils.exceptions import DomainException
+from django.core.cache import cache
+
 
 class ReservationService:
     def __init__(self):
         self.reservation_repository = ReservationRepository()
         self.table_repository = TableRepository()
 
-
     def get_all(self):
-        return self.reservation_repository.get_all()
+        reservations = cache.get('all_reservations')
 
+        if reservations is None:
+            reservations = self.reservation_repository.get_all()
+            cache.set('all_reservations', reservations, timeout=3600)  
+        
+        return reservations
 
     def get_by_id(self, id):
-        self.reservation_repository.get_by_id(id)
-
+        reservation = cache.get(f'reservation_{id}')
+        
+        if reservation is None:
+            reservation = self.reservation_repository.get_by_id(id)
+            cache.set(f'reservation_{id}', reservation, timeout=3600)
+        
+        return reservation
 
     def get_by_filter(self, filter, value):
-        if filter == "email":
-            return self.reservation_repository.get_by_email(value)
-        elif filter == "phone_number":
-            return self.reservation_repository.get_by_phone_number(value)
-        elif filter == "name":
-            return self.reservation_repository.get_by_name(value)
-        elif filter == "table":
-            return self.reservation_repository.get_by_table(value)
-        else:
-            raise ValueError("Invalid Filter")
+        cache_key = f'reservations_{filter}_{value}'
+        reservations = cache.get(cache_key)
+        
+        if reservations is None:
+            if filter == "email":
+                reservations = self.reservation_repository.get_by_email(value)
+            elif filter == "phone_number":
+                reservations = self.reservation_repository.get_by_phone_number(value)
+            elif filter == "name":
+                reservations = self.reservation_repository.get_by_name(value)
+            elif filter == "table":
+                reservations = self.reservation_repository.get_by_table(value)
+            else:
+                raise ValueError("Invalid Filter")
 
+            cache.set(cache_key, reservations, timeout=3600)
+        return reservations
 
-    def get_by_time_range(self, start : datetime, end : datetime):
-        return self.reservation_repository.get_reservations_by_date_range(start, end)
+    def get_by_time_range(self, start: datetime, end: datetime):
+        cache_key = f'reservations_time_range_{start.timestamp()}_{end.timestamp()}'
+        reservations = cache.get(cache_key)
 
+        if reservations is None:
+            reservations = self.reservation_repository.get_reservations_by_date_range(start, end)
+            cache.set(cache_key, reservations, timeout=3600)
+        
+        return reservations
+    
 
     def validate_creation(self, reservation : Reservation) -> Result:
         date_result = reservation.validate_date()
