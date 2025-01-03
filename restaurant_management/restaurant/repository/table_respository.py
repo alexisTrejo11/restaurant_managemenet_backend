@@ -1,10 +1,8 @@
-from xml.parsers.expat import model
 from restaurant.repository.models.models import TableModel 
 from restaurant.services.domain.table import Table 
 from restaurant.repository.common_repository import CommonRepository
-from typing import TypeVar, Generic, List, Optional
+from typing import List
 from restaurant.mappers.table_mappers import TableMappers
-
 
 class TableRepository(CommonRepository[TableModel]):
     def __init__(self):

@@ -1,9 +1,8 @@
 from restaurant.repository.models.models import IngredientModel
 from restaurant.services.domain.ingredient import Ingredient
 from restaurant.repository.common_repository import CommonRepository
-from typing import List, Optional
 from restaurant.mappers.ingredient_mappers import IngredientMappers
-
+from typing import List, Optional
 
 class IngredientRepository(CommonRepository[Ingredient]):
     def __init__(self):

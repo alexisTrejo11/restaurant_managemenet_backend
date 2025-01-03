@@ -3,10 +3,12 @@ from restaurant.services.domain.stock import Stock, StockTransaction
 from restaurant.utils.result import Result
 from typing import List, Optional
 from restaurant.utils.exceptions import StockNotFoundError
+from injector import inject
 
 class StockService:
-    def __init__(self):
-        self.stock_repository = StockRepository()
+    @inject
+    def __init__(self, stock_repository : StockRepository):
+        self.stock_repository = stock_repository
 
 
     def validate_unique_stock_per_product(self, ingredient):

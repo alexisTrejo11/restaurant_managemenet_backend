@@ -1,37 +1,50 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework.decorators import action
-from restaurant.services.menu_service import MenuService
+from restaurant.services.menu_service import MenuItemService
 from restaurant.serializers import MenuItemSerializer, MenuInsertItemSerializer
 from restaurant.utils.response import ApiResponse
+from restaurant.injector.app_module import AppModule
+from injector import Injector
 
-menu_service = MenuService()
+container = Injector([AppModule()])
 
-class MenuViewSet(ViewSet):
-    def retrieve(self, request, pk=None):
-        """
-        GET /menus/<id> - Retrieve a single menu by ID.
-        """
-        menu = menu_service.get_menu_by_id(pk)
+class MenuViews(ViewSet):
+    def get_menu_service(self):
+        return container.get(MenuItemService)
+
+
+    def get_menu_item_by_id(self, request, menu_id=None):
+        menu_service = self.get_menu_service()
+
+        menu = menu_service.get_menu_by_id(menu_id)
         if not menu:
-            return ApiResponse.not_found('Menu', 'ID', pk)
+            return ApiResponse.not_found('Menu', 'ID', menu_id)
 
         menu_data = MenuItemSerializer(menu).data
-        return ApiResponse.found(menu_data, 'Menu', 'ID', pk)
+        return ApiResponse.found(menu_data, 'Menu', 'ID', menu_id)
 
 
-    def list(self, request):
-        """
-        GET /menus/ - Retrieve all menus.
-        """
+    def get_menus_items_by_category(self, request, category=None):
+        menu_service = self.get_menu_service()
+
+        menus = menu_service.get_menus_by_category(category)
+        if not menus:
+            return ApiResponse.not_found('Category', 'name', category)
+
+        menu_data = MenuItemSerializer(menus, many=True).data
+        return ApiResponse.found(menu_data, 'Menu Items', 'category', category)
+
+
+    def get_all_menu_items(self, request):
+        menu_service = self.get_menu_service()
+
         menus = menu_service.get_all_menus()
         menu_data = MenuItemSerializer(menus, many=True).data
         return ApiResponse.ok(menu_data, 'Menus successfully fetched')
 
 
-    def create(self, request):
-        """
-        POST /menus/ - Create a new menu.
-        """
+    def create_menu_item(self, request):
+        menu_service = self.get_menu_service()
+
         serializer = MenuInsertItemSerializer(data=request.data)
         if not serializer.is_valid():
             return ApiResponse.bad_request(serializer.errors)
@@ -42,25 +55,11 @@ class MenuViewSet(ViewSet):
         return ApiResponse.created(menu_item_data, 'Menu Item successfully created')
 
 
-    def destroy(self, request, pk=None):
-        """
-        DELETE /menus/<id> - Delete a menu by ID.
-        """
-        is_deleted = menu_service.delete_menu_by_id(pk)
+    def delete_menu_item_by_id(self, request, menu_id=None):
+        menu_service = self.get_menu_service()
+
+        is_deleted = menu_service.delete_menu_by_id(menu_id)
         if not is_deleted:
-            return ApiResponse.not_found('Menu', 'ID', pk)
+            return ApiResponse.not_found('Menu', 'ID', menu_id)
 
         return ApiResponse.deleted('Menu Item')
-
-
-    @action(detail=False, methods=['get'], url_path='category/(?P<category>[^/.]+)')
-    def get_by_category(self, request, category=None):
-        """
-        GET /menus/category/<category> - Retrieve menus by category.
-        """
-        menus = menu_service.get_menus_by_category(category)
-        if not menus:
-            return ApiResponse.not_found('Category', 'name', category)
-
-        menu_data = MenuItemSerializer(menus, many=True).data
-        return ApiResponse.found(menu_data, 'Menu Items', 'category', category)

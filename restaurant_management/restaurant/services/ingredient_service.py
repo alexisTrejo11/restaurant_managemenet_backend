@@ -1,10 +1,12 @@
 from restaurant.services.domain.ingredient import Ingredient
 from rest_framework.exceptions import ValidationError
 from restaurant.repository.ingredient_repository import IngredientRepository
+from injector import inject
 
 class IngredientService:
-    def __init__(self):
-        self.ingredient_repository = IngredientRepository()
+    @inject
+    def __init__(self, ingredient_repository: IngredientRepository):
+        self.ingredient_repository = ingredient_repository
 
 
     def get_ingredient_by_id(self, ingredient_id) -> Ingredient:
@@ -13,6 +15,7 @@ class IngredientService:
 
     def get_all_ingredients(self) -> list:
         return self.ingredient_repository.get_all()
+
 
     def create_ingredient(self, data) -> Ingredient:
         ingredient = Ingredient(

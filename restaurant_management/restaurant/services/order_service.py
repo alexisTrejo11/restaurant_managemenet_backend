@@ -4,12 +4,19 @@ from restaurant.services.domain.order import Order, OrderStatus, OrderItem
 from restaurant.services.domain.table import Table
 from restaurant.repository.table_respository import TableRepository
 from restaurant.repository.menu_item_repository import MenuItemRepository
+from injector import inject
 
 class OrderService:
-    def __init__(self):
-        self.order_repository = OrderRepository()
-        self.table_repository = TableRepository()
-        self.menu_item_repository = MenuItemRepository()
+    @inject
+    def __init__(
+        self, 
+        order_repository : OrderRepository, 
+        table_repository : TableRepository,
+        menu_item_repository : MenuItemRepository,
+        ):
+        self.order_repository = order_repository
+        self.table_repository = table_repository
+        self.menu_item_repository = menu_item_repository
     
 
     def get_order_by_id(self, order_id):

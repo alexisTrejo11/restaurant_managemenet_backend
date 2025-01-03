@@ -1,10 +1,12 @@
 from restaurant.repository.menu_item_repository import MenuItemRepository
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.services.domain.menu_item import MenuItem
+from injector import inject
 
-class MenuService:
-    def __init__(self):
-        self.menu_repository = MenuItemRepository()
+class MenuItemService:
+    @inject
+    def __init__(self, menu_repository: MenuItemRepository):
+        self.menu_repository = menu_repository
 
     def get_menu_by_id(self, menu_id) -> MenuItem:
         return self.menu_repository.get_by_id(menu_id)

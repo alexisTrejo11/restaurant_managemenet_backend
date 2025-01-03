@@ -4,7 +4,6 @@ from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.repository.common_repository import CommonRepository
 from typing import List, Optional
 
-
 class MenuItemRepository(CommonRepository[MenuItem]):
      def __init__(self):
         self.menu_item = MenuItemModel

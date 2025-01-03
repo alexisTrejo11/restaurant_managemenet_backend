@@ -1,30 +1,39 @@
 from restaurant.utils.response import ApiResponse
 from restaurant.serializers import TableSerializer, TableInsertSerializer
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from restaurant.services.table_service import TableService
+from restaurant.injector.app_module import AppModule
+from injector import Injector
 
-table_service = TableService()
+container = Injector([AppModule()])
 
-class GetTableByNumber(APIView):
-    def get(self, request, table_number):
-        table = table_service.get_table_by_number(table_number)
+class TableViews(ViewSet):
+    def get_table_service(self):
+        return container.get(TableService)
+
+    def get_table_by_number(self, request, number):
+        table_service = self.get_table_service()
+
+        table = table_service.get_table_by_number(number)
         if table is None:
-            return ApiResponse.not_found('Table', 'number', table_number)
+            return ApiResponse.not_found('Table', 'number', number)
         
         table_data = TableSerializer(table).data
 
-        return ApiResponse.created(table_data, f'Table with number {table_number} succesfully fetched')
+        return ApiResponse.created(table_data, f'Table with number {number} succesfully fetched')
 
 
-class GetAllTables(APIView):    
-    def get(self, request):
+    def get_all_tables(self, request):
+        table_service = self.get_table_service()
+
         tables = table_service.get_all_tables()
         table_data = TableSerializer(tables, many=True).data
         return ApiResponse.ok(table_data, 'All tables succesfully fetched')
 
 
-class CreateTable(APIView):    
-    def post(self, request):
+    def create_table(self, request):
+        table_service = self.get_table_service()
+
         serializer = TableInsertSerializer(data=request.data)
         if not serializer.is_valid():
             return ApiResponse.bad_request(serializer.errors)
@@ -40,9 +49,9 @@ class CreateTable(APIView):
         return ApiResponse.created(table_data, "Table successfully created")
 
 
+    def delete_table_by_number(self, request, table_number):
+        table_service = self.get_table_service()
 
-class DeleteTable(APIView): 
-    def delete(self, request, table_number):
         is_table_deleted = table_service.delete_table(table_number)
         if not is_table_deleted:
             return ApiResponse.not_found(f'table', 'table number', table_number)

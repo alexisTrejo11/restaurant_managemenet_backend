@@ -7,11 +7,12 @@ from restaurant.services.domain.order import OrderItem
 from restaurant.services.domain.payment import Payment
 from restaurant.services.domain.order import Order
 from restaurant.utils.result import Result
-
+from injector import inject
 
 class PaymentService:
-    def __init__(self):
-        self.payment_repository = PaymentRepository()
+    @inject
+    def __init__(self, payment_repository : PaymentRepository):
+        self.payment_repository = payment_repository
 
     def get_payment_by_id(self, payment_id) -> Optional[Payment]:
             return self.payment_repository.get_by_id(payment_id)

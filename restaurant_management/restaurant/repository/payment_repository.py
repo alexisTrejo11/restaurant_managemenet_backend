@@ -7,7 +7,6 @@ from restaurant.repository.common_repository import CommonRepository
 from django.db.models import ObjectDoesNotExist
 from django.utils.timezone import now
 
-
 class PaymentRepository(CommonRepository[Payment], ABC):
     def create(self, payment: Payment) -> Payment:
         payment_model = PaymentMapper.to_model(payment)
