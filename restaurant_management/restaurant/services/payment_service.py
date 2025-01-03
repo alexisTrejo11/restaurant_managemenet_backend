@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 from typing import List, Optional
 from restaurant.repository.payment_repository import PaymentRepository 
 from restaurant.services.domain.payment import Payment, PaymentItem
@@ -8,6 +7,9 @@ from restaurant.services.domain.payment import Payment
 from restaurant.services.domain.order import Order
 from restaurant.utils.result import Result
 from injector import inject
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PaymentService:
     @inject
@@ -53,45 +55,31 @@ class PaymentService:
         payment = self._calculate_payment(payment, payment_items)
 
         payment_created = self._save_payment_and_items(payment, payment_items)
+        logger.info(f"Payment created for order with ID {order.id}.")
 
         return payment_created
 
-    def _initialize_payment(self, order: Order):
-        return Payment.init_payment(order)
 
-    def _validate_payment(self, payment: Payment, order: Order):
-        payment.validate_payment_creation(order)
-
-    def _generate_payment_items(self, order_items):
-        return self.generate_payment_items(order_items)
-
-    def _calculate_payment(self, payment: Payment, payment_items):
-        payment.items = payment_items
-        payment.calculate_numbers()
-        return payment
-
-    def _save_payment_and_items(self, payment: Payment, payment_items):
-        payment_created = self.payment_repository.create(payment)
-        payment_items_created = self.payment_repository.save_payment_items(payment_created, payment_items)
-        payment_created.items = payment_items_created
-        return payment_created
-
-
-    def complete_payment(self, payment: Payment, payment_method : str) -> Result:
+    def complete_payment(self, payment: Payment, payment_method: str) -> Result:
         method_validation = payment.validate_payment_method(payment_method)
         if method_validation.is_failure():
+            logger.warning(f"Payment method validation failed for payment ID {payment.id} using method {payment_method}.")
             return method_validation
 
-
         payment.complete_payment(payment_method)
-        Payment = self.payment_repository.update(payment)
-        return Result.success(Payment)
+        
+        completed_payment = self.payment_repository.update(payment)
+        logger.info(f"Payment with ID {payment.id} completed using method {payment_method}.")
+
+        return Result.success(completed_payment)
 
 
     def update_payment_status(self, payment: Payment, status: str):
         payment.validate_payment_status(status)
         payment.payment_status = status
+        
         self.payment_repository.update(payment)
+        logger.info(f"Payment status for payment ID {payment.id} updated to {status}.")
 
 
     def validate_payment_complete(self, payment: Payment) -> Result:
@@ -100,6 +88,7 @@ class PaymentService:
 
     def validate_payment_cancel(self, payment: Payment) -> Result:
         return payment.validate_payment_cancel()
+    
     
     def generate_payment_items(self, order_items: List[OrderItem]) -> List[PaymentItem]:
         payment_items = {}
@@ -135,6 +124,27 @@ class PaymentService:
             payment_item.increase_extra_item_price()
         
         return payment_item
+
+
+    def _save_payment_and_items(self, payment: Payment, payment_items):
+        payment_created = self.payment_repository.create(payment)
+        payment_items_created = self.payment_repository.save_payment_items(payment_created, payment_items)
+        payment_created.items = payment_items_created
+        return payment_created
+
+    def _initialize_payment(self, order: Order):
+            return Payment.init_payment(order)
+
+    def _validate_payment(self, payment: Payment, order: Order):
+        payment.validate_payment_creation(order)
+
+    def _generate_payment_items(self, order_items):
+        return self.generate_payment_items(order_items)
+
+    def _calculate_payment(self, payment: Payment, payment_items):
+        payment.items = payment_items
+        payment.calculate_numbers()
+        return payment
 
     def _save_payment_and_items(self, payment: Payment, payment_items):
         payment_created = self.payment_repository.create(payment)

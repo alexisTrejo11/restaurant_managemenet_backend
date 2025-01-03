@@ -1,6 +1,10 @@
 from restaurant.services.domain.table import Table
 from restaurant.repository.table_respository import TableRepository
 from injector import inject
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class TableService:
     @inject
@@ -29,8 +33,18 @@ class TableService:
             is_available=True
         )
 
-        return self.table_repository.create(new_table)
+        created_table = self.table_repository.create(new_table)
+        
+        logger.info(f"Table with number {created_table.number} and {created_table.seats} seats created successfully.")
+        return created_table
 
 
     def delete_table(self, number) -> bool:
-        return self.table_repository.delete(number)
+        deleted = self.table_repository.delete(number)
+        
+        if deleted:
+            logger.info(f"Table with number {number} deleted successfully.")
+        else:
+            logger.warning(f"Failed to delete table with number {number}.")
+        
+        return deleted

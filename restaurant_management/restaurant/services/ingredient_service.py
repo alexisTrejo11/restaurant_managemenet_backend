@@ -2,7 +2,9 @@ from restaurant.services.domain.ingredient import Ingredient
 from restaurant.repository.ingredient_repository import IngredientRepository
 from injector import inject
 from django.core.cache import cache
+import logging
 
+logger = logging.getLogger(__name__)
 
 class IngredientService:
     @inject
@@ -36,13 +38,16 @@ class IngredientService:
         ingredient = Ingredient(
             name=data.get('name'),
             unit=data.get('unit')
-            )
-
-        self.ingredient_repository.create(ingredient)
-
-        return ingredient
-
+        )
+        
+        created_ingredient = self.ingredient_repository.create(ingredient)
+        
+        logger.info(f"Ingredient with ID {created_ingredient.id} created successfully.")
+        return created_ingredient
 
     def delete_ingredient(self, ingredient_id):
-        return self.ingredient_repository.delete(ingredient_id)
-            
+        is_delete = self.ingredient_repository.delete(ingredient_id)
+        
+        if is_delete:
+            logger.info(f"Ingredient with ID {ingredient_id} deleted successfully.")
+        return is_delete

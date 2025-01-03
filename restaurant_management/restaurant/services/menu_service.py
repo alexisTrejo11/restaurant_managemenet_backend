@@ -31,9 +31,17 @@ class MenuItemService:
         return menus
 
     def create_menu(self, serializer_data) -> MenuItem:
-        menu_item = MenuItemMapper.map_serializer_to_domain(serializer_data)        
-        return self.menu_repository.create(menu_item)
+        menu_item = MenuItemMapper.map_serializer_to_domain(serializer_data)
+        
+        created_menu = self.menu_repository.create(menu_item)
+        
+        logger.info(f"Menu with ID {created_menu.id} created successfully.")
+        return created_menu
 
     def delete_menu_by_id(self, menu_id):
-        return self.menu_repository.delete(menu_id)
+        is_delete = self.menu_repository.delete(menu_id)
+        
+        if is_delete:
+            logger.info(f"Menu with ID {menu_id} deleted successfully.")
+        return is_delete
 

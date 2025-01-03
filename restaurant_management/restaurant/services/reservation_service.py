@@ -6,7 +6,9 @@ from restaurant.services.domain.reservation import Reservation
 from datetime import datetime
 from restaurant.utils.exceptions import DomainException
 from django.core.cache import cache
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ReservationService:
     def __init__(self):
@@ -78,9 +80,10 @@ class ReservationService:
 
     
 
-    def create(self, reservation : Reservation) -> Reservation:
+    def create(self, reservation: Reservation) -> Reservation:
         suitable_tables = self._find_suitable_tables(reservation.customer_number)
         if not suitable_tables:
+            logger.warning(f"No suitable tables available for {reservation.customer_number} customers.")
             raise DomainException("No suitable tables available for the requested number of customers.")
 
         for table in suitable_tables:
@@ -90,14 +93,22 @@ class ReservationService:
             )
 
             if not reservation_conflict: 
-                reservation.assing_table(table) 
-                return self.reservation_repository.create(reservation)
+                reservation.assign_table(table) 
+                created_reservation = self.reservation_repository.create(reservation)
+                logger.info(f"Reservation created successfully with ID {created_reservation.id} for table {table.id}.")
+                return created_reservation
 
+        logger.warning(f"No tables available for the requested date {reservation.reservation_date} and customer capacity {reservation.customer_number}.")
         raise DomainException("No tables available for the requested date and customer capacity.")
 
-
     def delete_by_id(self, id):
-        return self.reservation_repository.delete(id)
+        deleted = self.reservation_repository.delete(id)
+        if deleted:
+            logger.info(f"Reservation with ID {id} deleted successfully.")
+        else:
+            logger.warning(f"Failed to delete reservation with ID {id}.")
+        return deleted
+
 
 
     def _find_suitable_tables(self, party_size):
