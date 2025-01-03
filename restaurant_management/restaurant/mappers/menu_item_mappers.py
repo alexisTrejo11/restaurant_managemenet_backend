@@ -38,7 +38,7 @@ class MenuItemMapper:
           id=None,
           name=serializer.get('name'),
           price=serializer.get('price'),
-          category=CategoryEnum(serializer.get('category')),
+          category=CategoryEnum(serializer.get('category')).value,
           description = serializer.get('description')
           )
           

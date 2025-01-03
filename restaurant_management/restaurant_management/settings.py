@@ -108,6 +108,7 @@ CACHES = {
     }
 }
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -126,6 +127,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+import logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

@@ -2,7 +2,10 @@ from restaurant.repository.menu_item_repository import MenuItemRepository
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.services.domain.menu_item import MenuItem
 from injector import inject
-from django.core.cache import cache
+from django.core.cache import cache # type: ignore
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MenuItemService:
     @inject
@@ -19,13 +22,13 @@ class MenuItemService:
         return menu
 
     def get_all_menus(self) -> list:
-            menus = cache.get('all_menus')
+        menus = cache.get('all_menus')
 
-            if menus is None:
-                menus = self.menu_repository.get_all()
-                cache.set('all_menus', menus, timeout=36000)
+        if menus is None:
+            menus = self.menu_repository.get_all()
+            cache.set('all_menus', menus, timeout=36000)
 
-            return menus
+        return menus
 
     def create_menu(self, serializer_data) -> MenuItem:
         menu_item = MenuItemMapper.map_serializer_to_domain(serializer_data)        
