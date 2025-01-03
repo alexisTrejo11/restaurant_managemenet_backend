@@ -1,7 +1,10 @@
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from rest_framework import status
-import json
+
+class PasswordValidationException(Exception):
+    """Custom exception for password validation errors"""
+    pass
 
 
 class StockNotFoundError(Exception):
@@ -13,6 +16,9 @@ class DomainException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+class RepositoryException(Exception):
+    pass
 
 def custom_exception_handler(exc, context):
     """

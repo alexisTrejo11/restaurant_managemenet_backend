@@ -1,5 +1,4 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from restaurant.views.table_views import TableViews
 from restaurant.views.menu_views import MenuViews
 from restaurant.views.reservation_views import ReservationViews
@@ -7,6 +6,8 @@ from restaurant.views.order_views import OrderViews
 from restaurant.views.stock_views import StockViews
 from restaurant.views.payment_views import PaymentViews
 from restaurant.views.ingredient_views import IngredientViews
+from restaurant.views.user_views import UserViews
+
 
 urlpatterns = [
     # Tables
@@ -59,6 +60,13 @@ urlpatterns = [
     path('v1/api/payments/by-date/today', PaymentViews.as_view({'get': 'get_today_payments'}), name='get_payments_by_data_range'),
     path('v1/api/payments/<int:id>/complete/<str:payment_method>', PaymentViews.as_view({'put': 'complete_payment'}), name='complete_payment'),
     path('v1/api/payments/<int:id>/cancel', PaymentViews.as_view({'put': 'cancel_payment'}), name='cancel_payment'),
+
+    # Users
+    path('v1/api/users/<int:user_id>', UserViews.as_view({'get': 'get_user_by_id', 'delete': 'delete_user_by_id'}), name='users-detail'),
+    path('v1/api/users/email/<str:email>', UserViews.as_view({'get': 'get_user_by_email'}), name='users-email'),
+    path('v1/api/users/all', UserViews.as_view({'get': 'get_all_users'}), name='get_all_users'),
+    path('v1/api/users', UserViews.as_view({'post': 'create_user'}), name='create_user'),
+
 ] 
  
 

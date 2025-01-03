@@ -262,3 +262,26 @@ class PaymentItemModel(models.Model):
     def calculate_total(self):
         """Calculate the total price for the item."""
         return Decimal(self.price) * Decimal(self.quantity)
+    
+
+class UserModel(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    gender = models.CharField(max_length=10)
+    email = models.EmailField(unique=True)
+    hashed_password = models.CharField(max_length=255)
+    birth_date = models.DateTimeField()
+    role = models.CharField(max_length=20)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    last_login = models.DateTimeField(auto_now=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        db_table = 'users'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['role']),
+        ]
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"

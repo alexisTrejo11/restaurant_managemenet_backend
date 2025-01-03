@@ -113,6 +113,62 @@ CREATE TABLE payment_items (
     CONSTRAINT fk_payment FOREIGN KEY (payment_id) REFERENCES public.payments (id) ON DELETE CASCADE
 );
 
+-- Create enum types for gender and role
+CREATE TYPE user_gender AS ENUM ('male', 'female', 'other');
+CREATE TYPE user_role AS ENUM ('admin', 'staff', 'customer');
+
+-- Create users table
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone_number VARCHAR(15),
+    hashed_password VARCHAR(255) NOT NULL,
+    gender user_gender NOT NULL,
+    birth_date DATE NOT NULL,
+    role user_role NOT NULL,
+    joined_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    is_verified BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_phone ON users(phone_number);
+CREATE INDEX idx_users_created_at ON users(created_at);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+
+ALTER TABLE users 
+    ADD CONSTRAINT users_birth_date_check 
+    CHECK (birth_date <= CURRENT_DATE - INTERVAL '18 years');
+
+ALTER TABLE users 
+    ADD CONSTRAINT users_email_check 
+    CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+
+ALTER TABLE users 
+    ADD CONSTRAINT users_phone_check 
+    CHECK (phone_number IS NULL OR phone_number ~ '^\+?1?\d{9,15}$');
+
 
 ALTER TABLE orders 
     ADD CONSTRAINT order_table_fk

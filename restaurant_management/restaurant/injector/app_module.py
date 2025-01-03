@@ -13,6 +13,10 @@ from restaurant.repository.order_repository import OrderRepository
 from restaurant.services.order_service import OrderService 
 from restaurant.repository.payment_repository import PaymentRepository
 from restaurant.services.payment_service import PaymentService 
+from restaurant.repository.user_repository import UserRepository
+from restaurant.services.user_service import UserService 
+from restaurant.services.auth_service import AuthService 
+
 
 class AppModule(Module):
     def configure(self, binder):
@@ -43,3 +47,10 @@ class AppModule(Module):
         # Payment
         binder.bind(PaymentRepository, to=PaymentRepository, scope=singleton)
         binder.bind(PaymentService, to=PaymentService, scope=singleton) 
+
+        # User
+        binder.bind(UserRepository, to=UserRepository, scope=singleton)
+        binder.bind(UserService, to=UserService, scope=singleton) 
+
+        #Auth
+        binder.bind(AuthService, to=AuthService, scope=singleton) 
