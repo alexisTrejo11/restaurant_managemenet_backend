@@ -16,7 +16,8 @@ class TableRepository(CommonRepository[TableModel]):
 
     def get_by_id(self, number):
         model = self.table.objects.filter(number=number).first()
-        return TableMappers.to_domain(model)
+        if model:
+            return TableMappers.to_domain(model)
 
 
     def set_as_available(self, number):
@@ -36,9 +37,10 @@ class TableRepository(CommonRepository[TableModel]):
     def create(self, table: Table) -> Table:
         model = self.table.objects.create(
             number=table.number,
-            seats=table.seats,
+            capacity=table.capacity,
             is_available=table.is_available
         )
+
         return TableMappers.to_domain(model)
    
 

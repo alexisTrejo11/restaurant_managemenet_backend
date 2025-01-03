@@ -29,13 +29,13 @@ class TableService:
     def create_table(self, validated_data) -> Table:
         new_table = Table(
             number=validated_data['number'],
-            seats=validated_data['seats'],
+            capacity=validated_data['capacity'],
             is_available=True
         )
 
         created_table = self.table_repository.create(new_table)
         
-        logger.info(f"Table with number {created_table.number} and {created_table.seats} seats created successfully.")
+        logger.info(f"Table with number {created_table.number} and {created_table.capacity} seats created successfully.")
         return created_table
 
 

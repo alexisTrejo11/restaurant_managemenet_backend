@@ -1,7 +1,6 @@
 from restaurant.services.domain.table import Table
 from restaurant.repository.models.models import TableModel
 
-
 class TableMappers:
     @staticmethod
     def to_model(table: Table):
