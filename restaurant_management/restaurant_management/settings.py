@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import sys
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,11 +86,11 @@ WSGI_APPLICATION = 'restaurant_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'restaurant_manager_db',
-        'USER': 'alexistrejo',
-        'PASSWORD': 'vladilena',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DJANGO_DB_NAME', 'mydb'),  # Valor por defecto
+        'USER': os.getenv('DJANGO_DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DJANGO_DB_HOST', 'db'),  # Nombre del servicio en Docker Compose
+        'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
     }
 }
 
@@ -101,7 +103,7 @@ if 'test' in sys.argv:
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211', 
+        'LOCATION': 'memcached:11211', 
         'TIMEOUT': 300,
     }
 }
