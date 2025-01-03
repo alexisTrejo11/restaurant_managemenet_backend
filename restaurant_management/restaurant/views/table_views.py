@@ -49,11 +49,11 @@ class TableViews(ViewSet):
         return ApiResponse.created(table_data, "Table successfully created")
 
 
-    def delete_table_by_number(self, request, table_number):
+    def delete_table_by_number(self, request, number):
         table_service = self.get_table_service()
 
-        is_table_deleted = table_service.delete_table(table_number)
+        is_table_deleted = table_service.delete_table(number)
         if not is_table_deleted:
-            return ApiResponse.not_found(f'table', 'table number', table_number)
+            return ApiResponse.not_found(f'table', 'number', number)
         
         return ApiResponse.deleted('Table')
