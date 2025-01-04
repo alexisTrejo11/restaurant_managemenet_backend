@@ -6,11 +6,11 @@ from rest_framework.viewsets import ViewSet
 from injector import Injector
 
 container = Injector([AppModule()])
-
+    
 class IngredientViews(ViewSet):
+
     def get_ingredient_service(self):
         return container.get(IngredientService)
-
 
     def get_ingredient_by_id(self, request, ingredient_id):
         ingredient_service = self.get_ingredient_service()
