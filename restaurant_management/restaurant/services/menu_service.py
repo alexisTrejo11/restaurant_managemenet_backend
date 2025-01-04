@@ -2,7 +2,7 @@ from restaurant.repository.menu_item_repository import MenuItemRepository
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.services.domain.menu_item import MenuItem
 from injector import inject
-from django.core.cache import cache # type: ignore
+from django.core.cache import cache 
 import logging
 
 logger = logging.getLogger(__name__)

@@ -1,10 +1,9 @@
-
 from restaurant.services.domain.user import User
 from restaurant.repository.user_repository import UserRepository
 from restaurant.mappers.user_mappers import UserMapper
 from injector import inject
 from restaurant.utils.result import Result
-
+from restaurant.utils.password.password_handler import PasswordService
 
 class UserService:
     @inject
@@ -18,6 +17,9 @@ class UserService:
 
     def get_user_by_email(self, email):
         return self.user_repository.get_by_email(email)
+
+    def get_by_phone_number(self, phone_number):
+        return self.user_repository.get_by_phone(phone_number)
 
 
     def get_all_users(self):
@@ -42,14 +44,16 @@ class UserService:
 
     def create_user(self, serializer: dict):
         user = UserMapper.serializer_to_domain(serializer)
-        user.hash_password(user.hashed_password)
+        
+        hashed_password = PasswordService.hash_password(user.hashed_password)
+        user.set_hashed_password(hashed_password)
         
         return self.user_repository.create(user)
 
 
-    def validate_unique_values(self, serialzier_data):
-        exists_by_email = self.user_repository.exists_by_email(serialzier_data.get('email'))
-        exists_by_phone = self.user_repository.exists_by_phone(serialzier_data.get('phone_number'))
+    def validate_unique_values(self, serializer_data):
+        exists_by_email = self.user_repository.exists_by_email(serializer_data.get('email'))
+        exists_by_phone = self.user_repository.exists_by_phone(serializer_data.get('phone_number'))
 
         if exists_by_email:
             return Result.error("Email already taken")

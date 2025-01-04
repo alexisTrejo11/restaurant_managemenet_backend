@@ -7,7 +7,7 @@ from restaurant.views.stock_views import StockViews
 from restaurant.views.payment_views import PaymentViews
 from restaurant.views.ingredient_views import IngredientViews
 from restaurant.views.user_views import UserViews
-
+from restaurant.views.auth_views import AuthViews
 
 urlpatterns = [
     # Tables
@@ -66,6 +66,10 @@ urlpatterns = [
     path('v1/api/users/email/<str:email>', UserViews.as_view({'get': 'get_user_by_email'}), name='users-email'),
     path('v1/api/users/all', UserViews.as_view({'get': 'get_all_users'}), name='get_all_users'),
     path('v1/api/users', UserViews.as_view({'post': 'create_user'}), name='create_user'),
+
+    # Auth
+    path('v1/api/auth/signup-staff', AuthViews.as_view({'post': 'signup_staff'}), name='signup-staff'),
+    path('v1/api/auth/login', AuthViews.as_view({'post': 'login'}), name='login'),
 
 ] 
  

@@ -30,7 +30,7 @@ class UserMapper:
             email=user_model.email,
             hashed_password=user_model.hashed_password,
             birth_date=user_model.birth_date,
-            role=user_model.role,
+            role=Role(user_model.role),
             joined_at=user_model.joined_at,
             last_login=user_model.last_login,
             phone_number=user_model.phone_number

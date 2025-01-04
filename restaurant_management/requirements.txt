@@ -7,3 +7,4 @@ pytest-django
 factory-boy
 injector
 pymemcache
+djangorestframework-simplejwt

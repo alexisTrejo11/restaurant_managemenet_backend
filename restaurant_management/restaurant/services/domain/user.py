@@ -3,10 +3,8 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
 import re
-from django.contrib.auth.hashers import make_password
 from restaurant.utils.result import Result
-from restaurant.utils.password_validator import PasswordValidator
-
+from restaurant.utils.password.password_validator import PasswordValidator
 
 class Gender(Enum):
     MALE = "male"
@@ -109,12 +107,9 @@ class User:
     @property
     def hashed_password(self) -> str:
         return self.__hashed_password
-
-
-    def hash_password(self, plain_password):
-        hashed_password = make_password(plain_password)
+    
+    def set_hashed_password(self, hashed_password) -> str:
         self.__hashed_password = hashed_password
-
 
     @staticmethod
     def validate_password(plain_password: str) -> Result:

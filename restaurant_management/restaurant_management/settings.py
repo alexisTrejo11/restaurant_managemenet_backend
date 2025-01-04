@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import sys
 import os
-
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_framework_simplejwt',
     'restaurant',
 ]
 
@@ -59,6 +60,15 @@ ROOT_URLCONF = 'restaurant_management.urls'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'restaurant.utils.exceptions.custom_exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'SIGNING_KEY': 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg==',
+    'ALGORITHM': 'HS256',
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=1),  
 }
 
 TEMPLATES = [
@@ -86,10 +96,10 @@ WSGI_APPLICATION = 'restaurant_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DJANGO_DB_NAME', 'mydb'),  # Valor por defecto
+        'NAME': os.getenv('DJANGO_DB_NAME', 'mydb'), 
         'USER': os.getenv('DJANGO_DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DJANGO_DB_HOST', 'db'),  # Nombre del servicio en Docker Compose
+        'HOST': os.getenv('DJANGO_DB_HOST', 'db'), 
         'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
     }
 }
@@ -107,7 +117,6 @@ CACHES = {
         'TIMEOUT': 300,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

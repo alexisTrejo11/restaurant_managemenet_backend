@@ -1,14 +1,11 @@
 from restaurant.services.auth_service import AuthService
 from restaurant.services.user_service import UserService
 from restaurant.serializers import StaffSignupSerializer, LoginSerializer
-
-
 from rest_framework.viewsets import ViewSet
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from restaurant.utils.response import ApiResponse
-
-from restaurant_management_backend.restaurant_management.restaurant import serializers
+from restaurant.services.domain.user import Role
 
 container = Injector([AppModule()])
 
@@ -23,35 +20,31 @@ class AuthViews(ViewSet):
         auth_service = self.get_auth_service()
         user_service = self.get_user_service()
 
-        serializer = StaffSignupSerializer(request.data)
-        if not serializer.is_valid:
-            return ApiResponse.bad_request(serializer.error_messages)
+        serializer = StaffSignupSerializer(data=request.data)
+        if not serializer.is_valid():
+            return ApiResponse.bad_request(serializer.errors)
 
         credentials_result = auth_service.validate_staff_singup_credentials(serializer.data)
         if credentials_result.is_failure():
             return ApiResponse.bad_request(credentials_result.get_error_msg())
         
-
         user = user_service.create_user(serializer.data)
 
-        JWT = auth_service.proccess_singup(user)
+        JWT = auth_service.proccess_signup(user)
 
         return ApiResponse.created(JWT, "Signup Succesfully Proccesed")
 
     def login(self, request):
         auth_service = self.get_auth_service()
-        user_service = self.get_user_service()
 
-        serializer = LoginSerializer(request.data)
-        if not serializer.is_valid:
-            return ApiResponse.bad_request(serializer.error_messages)
+        serializer = LoginSerializer(data=request.data)
+        if not serializer.is_valid():
+            return ApiResponse.bad_request(serializer.errors)
 
         credentials_result = auth_service.validate_login_credentials(serializer.data)
         if credentials_result.is_failure():
             return ApiResponse.bad_request(credentials_result.get_error_msg())
         
-        user = user_service.get_user_by_email(serializer.data.get('email'))
-
-        JWT = auth_service.proccess_login(user)
+        JWT = auth_service.proccess_login(credentials_result.get_data())
 
         return ApiResponse.created(JWT, "Signup Succesfully Proccesed")

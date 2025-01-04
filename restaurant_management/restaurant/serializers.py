@@ -1,11 +1,11 @@
 from django.forms import CharField
 from restaurant.services.domain.ingredient import Ingredient
 from rest_framework import serializers
-from rest_framework import serializers
 import re
 from datetime import  date
-from typing import Dict, Any
 from enum import Enum
+from restaurant.services.domain.user import Gender, Role
+
 
 
 class TableInsertSerializer(serializers.Serializer):
@@ -222,107 +222,18 @@ class SignupValidator:
         return 18 <= age <= 100
 
 
-class StaffSignupSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        error_messages={
-            'required': 'Email is required',
-            'invalid': 'Please enter a valid email address'
-        }
-    )
-    phone_number = serializers.CharField(
-        max_length=15,
-        required=False,
-        allow_null=True,
-        error_messages={
-            'max_length': 'Phone number must not exceed 15 characters'
-        }
-    )
-    first_name = serializers.CharField(
-        max_length=100,
-        error_messages={
-            'required': 'First name is required',
-            'max_length': 'First name must not exceed 100 characters'
-        }
-    )
-    last_name = serializers.CharField(
-        max_length=100,
-        error_messages={
-            'required': 'Last name is required',
-            'max_length': 'Last name must not exceed 100 characters'
-        }
-    )
-    birth_date = serializers.DateField(
-        error_messages={
-            'required': 'Birth date is required',
-            'invalid': 'Invalid date format. Use YYYY-MM-DD'
-        }
-    )
-    gender = serializers.ChoiceField(
-        choices=['male', 'female', 'other'],
-        error_messages={
-            'required': 'Gender is required',
-            'invalid_choice': 'Invalid gender. Choose from: male, female, other'
-        }
-    )
-    password = serializers.CharField(
-        min_length=8,
-        write_only=True,
-        error_messages={
-            'required': 'Password is required',
-            'min_length': 'Password must be at least 8 characters long'
-        }
-    )
-
-    def validate_email(self, value: str) -> str:
-        if not SignupValidator.validate_email(value):
-            raise serializers.ValidationError("Invalid email format")
-        return value.lower()
-
-    def validate_phone_number(self, value: str) -> str:
-        if value and not SignupValidator.validate_phone(value):
-            raise serializers.ValidationError("Invalid phone number format")
-        return value
-
-    def validate_birth_date(self, value: date) -> date:
-        if not SignupValidator.validate_birth_date(value):
-            raise serializers.ValidationError("Must be over 18 and under 100 years old")
-        return value
-
-    def validate_password(self, value: str) -> str:
-        if not any(c.isupper() for c in value):
-            raise serializers.ValidationError("Password must contain at least one uppercase letter")
-        if not any(c.islower() for c in value):
-            raise serializers.ValidationError("Password must contain at least one lowercase letter")
-        if not any(c.isdigit() for c in value):
-            raise serializers.ValidationError("Password must contain at least one number")
-        if not any(c in "!@#$%^&*(),.?\":{}|<>" for c in value):
-            raise serializers.ValidationError("Password must contain at least one special character")
-        return value
-
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        if data.get('first_name').lower() in data.get('password').lower():
-            raise serializers.ValidationError({
-                "password": "Password cannot contain your name"
-            })
-        return data
-
-
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(
+    identifier_field = serializers.CharField(
         error_messages={
-            'required': 'Email is required',
-            'invalid': 'Please enter a valid email address'
+            'required': 'identifeier_field is required',
+            'invalid': 'Please enter a valid email address or phone number'
         }
     )
     password = serializers.CharField(
-        write_only=True,
         error_messages={
             'required': 'Password is required'
         }
     )
-
-    def validate_email(self, value: str) -> str:
-        return value.lower()
 
 
 class EnumField(serializers.ChoiceField):
@@ -340,8 +251,6 @@ class EnumField(serializers.ChoiceField):
             return self.enum_type(data)
         except ValueError:
             self.fail("invalid_choice", input=data)
-
-from restaurant.services.domain.user import Gender, Role
 
 class UserSerializer(serializers.Serializer):
     id = serializers.CharField(source='id.value', required=False, allow_null=True)
@@ -387,3 +296,17 @@ class PasswordResetSerializer(serializers.Serializer):
 
     def validate_email(self, value: str) -> str:
         return value.lower()
+    
+
+class StaffSignupSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255)
+    gender = EnumField(enum_type=Gender)
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    birth_date = serializers.DateField()
+    phone_number = serializers.CharField(max_length=15, allow_null=True, required=False)
+    role = serializers.ChoiceField(choices=[(Role.STAFF, Role.STAFF.name)], default=Role.STAFF, read_only=True)
+
+
+
