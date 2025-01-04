@@ -9,3 +9,5 @@ injector
 pymemcache
 djangorestframework-simplejwt
 django-ratelimit
+drf-yasg
+

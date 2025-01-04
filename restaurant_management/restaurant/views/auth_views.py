@@ -7,6 +7,7 @@ from injector import Injector
 from restaurant.utils.response import ApiResponse
 from restaurant.services.domain.user import Role
 from rest_framework.throttling import UserRateThrottle
+from drf_yasg.utils import swagger_auto_schema
 
 container = Injector([AppModule()])
 
@@ -14,11 +15,18 @@ class AuthViews(ViewSet):
     throttle_classes = [UserRateThrottle]
     
     def get_auth_service(self):
-            return container.get(AuthService)
+        return container.get(AuthService)
 
     def get_user_service(self):
-            return container.get(UserService)
+        return container.get(UserService)
 
+    @swagger_auto_schema(
+        operation_description="Signup staff user",
+        responses={
+            201: "JWT token with successful signup",
+            400: "Bad Request (Validation error)"
+        }
+    )
     def signup_staff(self, request):
         auth_service = self.get_auth_service()
         user_service = self.get_user_service()
@@ -35,9 +43,16 @@ class AuthViews(ViewSet):
 
         JWT = auth_service.proccess_signup(user)
 
-        return ApiResponse.created(JWT, "Signup Succesfully Proccesed")
+        return ApiResponse.created(JWT, "Signup Successfully Processed")
 
 
+    @swagger_auto_schema(
+        operation_description="Login user and get JWT",
+        responses={
+            201: "JWT token with successful login",
+            400: "Bad Request (Validation error)"
+        }
+    )
     def login(self, request):
         auth_service = self.get_auth_service()
 
@@ -51,5 +66,4 @@ class AuthViews(ViewSet):
         
         JWT = auth_service.proccess_login(credentials_result.get_data())
 
-        return ApiResponse.created(JWT, "Login Succesfully Proccesed")
-    
+        return ApiResponse.created(JWT, "Login Successfully Processed")

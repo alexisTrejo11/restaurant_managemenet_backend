@@ -8,8 +8,30 @@ from restaurant.views.payment_views import PaymentViews
 from restaurant.views.ingredient_views import IngredientViews
 from restaurant.views.user_views import UserViews
 from restaurant.views.auth_views import AuthViews
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from django.urls import path, include
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Restaurant Management API",
+      default_version='v1',
+      description="Documentation for the API of a Restaurant Management System",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="aTrejoCoder@gmail.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
+
 
 urlpatterns = [
+    # Swagger 
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
+
     # Tables
     path('v1/api/tables/<int:number>', TableViews.as_view({'get': 'get_table_by_number', 'delete': 'delete_table_by_number'}), name='table-detail'),
     path('v1/api/tables/all', TableViews.as_view({'get': 'get_all_tables'}), name='get_all_tables'),

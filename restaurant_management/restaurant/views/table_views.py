@@ -4,6 +4,8 @@ from rest_framework.viewsets import ViewSet
 from restaurant.services.table_service import TableService
 from restaurant.injector.app_module import AppModule
 from injector import Injector
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 container = Injector([AppModule()])
 
@@ -11,6 +13,13 @@ class TableViews(ViewSet):
     def get_table_service(self):
         return container.get(TableService)
 
+    @swagger_auto_schema(
+        operation_description="Fetch a table by its number",
+        responses={
+            200: TableSerializer,
+            404: openapi.Response('Table not found', TableSerializer),
+        }
+    )
     def get_table_by_number(self, request, number):
         table_service = self.get_table_service()
 
@@ -20,17 +29,29 @@ class TableViews(ViewSet):
         
         table_data = TableSerializer(table).data
 
-        return ApiResponse.created(table_data, f'Table with number {number} succesfully fetched')
+        return ApiResponse.created(table_data, f'Table with number {number} successfully fetched')
 
-
+    @swagger_auto_schema(
+        operation_description="Fetch all tables",
+        responses={
+            200: TableSerializer(many=True),
+        }
+    )
     def get_all_tables(self, request):
         table_service = self.get_table_service()
 
         tables = table_service.get_all_tables()
         table_data = TableSerializer(tables, many=True).data
-        return ApiResponse.ok(table_data, 'All tables succesfully fetched')
+        return ApiResponse.ok(table_data, 'All tables successfully fetched')
 
-
+    @swagger_auto_schema(
+        operation_description="Create a new table",
+        request_body=TableInsertSerializer,
+        responses={
+            201: TableSerializer,
+            400: openapi.Response('Invalid request or table already exists')
+        }
+    )
     def create_table(self, request):
         table_service = self.get_table_service()
 
@@ -40,15 +61,20 @@ class TableViews(ViewSet):
 
         is_number_unique = table_service.validate_unique_table_number(serializer.validated_data)
         if not is_number_unique:
-            return ApiResponse.bad_request(f'Table already exsits')
-
+            return ApiResponse.bad_request(f'Table already exists')
 
         table = table_service.create_table(serializer.validated_data)
         table_data = TableSerializer(table).data
 
         return ApiResponse.created(table_data, "Table successfully created")
 
-
+    @swagger_auto_schema(
+        operation_description="Delete a table by its number",
+        responses={
+            204: 'Table successfully deleted',
+            404: openapi.Response('Table not found')
+        }
+    )
     def delete_table_by_number(self, request, number):
         table_service = self.get_table_service()
 

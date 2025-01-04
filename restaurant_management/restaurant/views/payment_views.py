@@ -5,6 +5,7 @@ from restaurant.serializers import PaymentSerializer
 from datetime import datetime
 from restaurant.injector.app_module import AppModule
 from injector import Injector
+from drf_yasg.utils import swagger_auto_schema
 
 container = Injector([AppModule()])
 
@@ -12,6 +13,13 @@ class PaymentViews(ViewSet):
     def get_payment_service(self):
         return container.get(PaymentService)
 
+    @swagger_auto_schema(
+        operation_description="Get payment by ID",
+        responses={
+            200: PaymentSerializer,
+            404: "Payment not found"
+        }
+    )
     def get_payment_by_id(self, request, id):
         payment_service = self.get_payment_service()
 
@@ -23,6 +31,13 @@ class PaymentViews(ViewSet):
         return ApiResponse.found(payment_data, 'Payment', 'ID', id)
 
 
+    @swagger_auto_schema(
+        operation_description="Get payments by status",
+        responses={
+            200: PaymentSerializer(many=True),
+            400: "Invalid payment status"
+        }
+    )
     def get_payments_by_status(self, request, status):
         payment_service = self.get_payment_service()
 
@@ -33,9 +48,16 @@ class PaymentViews(ViewSet):
         payments = payment_service.get_payments_by_status(status)
         
         payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, f'Payments with status [{status}] succesfully fetched')
+        return ApiResponse.ok(payment_data, f'Payments with status [{status}] successfully fetched')
 
 
+    @swagger_auto_schema(
+        operation_description="Get payments by date range",
+        responses={
+            200: PaymentSerializer(many=True),
+            400: "Invalid date format"
+        }
+    )
     def get_payments_by_data_range(self, request, start_date, end_date):
         payment_service = self.get_payment_service()
         
@@ -47,9 +69,15 @@ class PaymentViews(ViewSet):
         payments = payment_service.get_complete_payments_by_date_range(start_date, end_date)
     
         payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, f'Paymments with data between {start_date} and {end_date} succesfully fetched')
+        return ApiResponse.ok(payment_data, f'Payments between {start_date} and {end_date} successfully fetched')
 
 
+    @swagger_auto_schema(
+        operation_description="Get today's payments",
+        responses={
+            200: PaymentSerializer(many=True),
+        }
+    )
     def get_today_payments(self, request):
         payment_service = self.get_payment_service()
 
@@ -59,9 +87,17 @@ class PaymentViews(ViewSet):
         payments = payment_service.get_complete_payments_by_date_range(start_date, end_date)
         
         payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, 'Today Payments succesfully fetched')
+        return ApiResponse.ok(payment_data, 'Today payments successfully fetched')
 
 
+    @swagger_auto_schema(
+        operation_description="Complete a payment",
+        responses={
+            200: PaymentSerializer,
+            404: "Payment not found",
+            409: "Conflict (payment validation failure)"
+        }
+    )
     def complete_payment(self, request, id, payment_method):
         payment_service = self.get_payment_service()
 
@@ -78,9 +114,17 @@ class PaymentViews(ViewSet):
             return ApiResponse.conflict(validate_result.get_error_msg())
 
         payment_data = PaymentSerializer(payment_complete.get_data()).data 
-        return ApiResponse.ok(payment_data, 'Payments succesfully completed') 
+        return ApiResponse.ok(payment_data, 'Payment successfully completed') 
 
 
+    @swagger_auto_schema(
+        operation_description="Cancel a payment",
+        responses={
+            200: "Payment successfully cancelled",
+            404: "Payment not found",
+            409: "Conflict (payment validation failure)"
+        }
+    )
     def cancel_payment(self, request, id):
         payment_service = self.get_payment_service()
 
@@ -94,4 +138,4 @@ class PaymentViews(ViewSet):
 
         payment_service.update_payment_status(payment, 'CANCELLED')
 
-        return ApiResponse.ok(None, 'Payments succesfully cancelled')
+        return ApiResponse.ok(None, 'Payment successfully cancelled')
