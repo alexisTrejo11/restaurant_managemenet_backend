@@ -6,6 +6,8 @@ from injector import inject
 from rest_framework_simplejwt.tokens import RefreshToken
 from restaurant.services.domain.user import User
 from restaurant.utils.password.password_handler import PasswordService
+from django.core.cache import cache
+import hashlib
 
 
 class AuthService:
@@ -26,21 +28,32 @@ class AuthService:
             return Result.success()
 
 
-    def validate_login_credentials(self, serializer_data)-> Result:
-        identifier_field = serializer_data.get('identifier_field') # Email or Phone number
-        
-        user_founded = self.user_service.get_user_by_email(identifier_field)
-        if user_founded is None:       
-            user_founded = self.user_service.get_by_phone_number(identifier_field)
+    def validate_login_credentials(self, serializer_data) -> Result:
+        identifier_field = serializer_data.get('identifier_field')
+        password = serializer_data.get('password')
 
-        if user_founded is None:
-            return Result.error('User not found with given credentials')
+        # Check Cache
+        cache_key = self._generate_login_cache_key(identifier_field, password)
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return cached_result
 
-        is_password_correct = PasswordService.verify_password(serializer_data.get('password'), user_founded.hashed_password)  
-        if is_password_correct:
-            return Result.success(user_founded)
+        # Find User
+        user = self._get_user_from_cache_or_service(identifier_field)
+        if user is None:
+            result = Result.error('User not found with given credentials')
+            cache.set(cache_key, result, timeout=600)
+            return result
+
+        # Validate password
+        if self._validate_password(password, user.hashed_password):
+            result = Result.success(user)
         else:
-            return Result.error('Incorrect Password')
+            result = Result.error('Incorrect Password')
+
+        # Save Cache
+        cache.set(cache_key, result, timeout=600) 
+        return result
 
 
     def proccess_login(self, user: User) -> dict:
@@ -66,3 +79,26 @@ class AuthService:
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         }
+    
+
+    def _generate_login_cache_key(self, identifier, password):
+        hashed_password_key = hashlib.md5(password.encode('utf-8')).hexdigest()
+        return f'user_credentials_{identifier}_{hashed_password_key}'
+
+
+    def _get_user_from_cache_or_service(self, identifier):
+            cache_key_user = f'user_{identifier}'
+            user = cache.get(cache_key_user)
+
+            if user is None:
+                user = self.user_service.get_user_by_email(identifier) or \
+                    self.user_service.get_by_phone_number(identifier)
+
+                if user:
+                    cache.set(cache_key_user, user, timeout=3600)  # 1 hora de caché
+
+            return user
+    
+
+    def _validate_password(self, input_password, hashed_password):
+        return PasswordService.verify_password(input_password, hashed_password)
