@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_ratelimit.middleware.RatelimitMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,16 +59,26 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'restaurant_management.urls'
 
 REST_FRAMEWORK = {
+    # JWT
     'EXCEPTION_HANDLER': 'restaurant.utils.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # Rate limitng
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '40/minute', 
+        'user': '40/minute',  
+    },
 }
 
 SIMPLE_JWT = {
     'SIGNING_KEY': 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg==',
     'ALGORITHM': 'HS256',
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=1),  
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=8),  
 }
 
 TEMPLATES = [

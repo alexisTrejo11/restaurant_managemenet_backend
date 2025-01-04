@@ -8,3 +8,4 @@ factory-boy
 injector
 pymemcache
 djangorestframework-simplejwt
+django-ratelimit

@@ -6,10 +6,13 @@ from restaurant.injector.app_module import AppModule
 from injector import Injector
 from restaurant.utils.response import ApiResponse
 from restaurant.services.domain.user import Role
+from rest_framework.throttling import UserRateThrottle
 
 container = Injector([AppModule()])
 
 class AuthViews(ViewSet):
+    throttle_classes = [UserRateThrottle]
+    
     def get_auth_service(self):
             return container.get(AuthService)
 
@@ -34,6 +37,7 @@ class AuthViews(ViewSet):
 
         return ApiResponse.created(JWT, "Signup Succesfully Proccesed")
 
+
     def login(self, request):
         auth_service = self.get_auth_service()
 
@@ -47,4 +51,5 @@ class AuthViews(ViewSet):
         
         JWT = auth_service.proccess_login(credentials_result.get_data())
 
-        return ApiResponse.created(JWT, "Signup Succesfully Proccesed")
+        return ApiResponse.created(JWT, "Login Succesfully Proccesed")
+    
