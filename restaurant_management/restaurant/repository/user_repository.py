@@ -37,9 +37,9 @@ class UserRepository(CommonRepository[User]):
                 raise RepositoryException("Cannot update user without ID")
 
             try:
-                user_model = UserModel.objects.get(id=entity.id.value)
+                user_model = UserModel.objects.get(id=entity.id)
             except ObjectDoesNotExist:
-                raise RepositoryException(f"User with id {entity.id.value} not found")
+                raise RepositoryException(f"User with id {entity.id} not found")
 
             updated_model = self.mapper.update_model(user_model, entity)
             updated_model.save()

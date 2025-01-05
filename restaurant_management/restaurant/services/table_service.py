@@ -5,7 +5,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class TableService:
     @inject
     def __init__(self, table_repository: TableRepository):

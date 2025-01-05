@@ -75,9 +75,9 @@ class UserService:
 
     def create_user(self, serializer: dict) -> User:
         user = UserMapper.serializer_to_domain(serializer)
-        hashed_password = PasswordService.hash_password(user.hashed_password)
-        user.set_hashed_password(hashed_password)
-        
+        hashed_password = PasswordService.hash_password(user.password)
+        user.set_password(hashed_password)
+            
         created_user = self.user_repository.create(user)
         logger.info(f"User with ID {created_user.id} created successfully.")
         cache_key = f'user_{created_user.id}'

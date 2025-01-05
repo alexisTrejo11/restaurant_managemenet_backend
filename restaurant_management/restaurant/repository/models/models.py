@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.timezone import now
 from decimal import Decimal
+from django.contrib.auth.models import AbstractUser
 
 class MenuItemModel(models.Model):
     CATEGORY_CHOICES = [
@@ -264,17 +265,21 @@ class PaymentItemModel(models.Model):
         return Decimal(self.price) * Decimal(self.quantity)
     
 
-class UserModel(models.Model):
+class UserModel(AbstractUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10)
     email = models.EmailField(unique=True)
-    hashed_password = models.CharField(max_length=255)
+    password = models.CharField(max_length=255, blank=True, null=True)
     birth_date = models.DateTimeField()
     role = models.CharField(max_length=20)
     joined_at = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
+    groups = models.ManyToManyField(
+        'auth.Group', related_name='restaurant_usermodel_set', blank=True)
+    user_permissions = models.ManyToManyField(
+        'auth.Permission', related_name='restaurant_usermodel_set', blank=True)
 
     class Meta:
         db_table = 'users'

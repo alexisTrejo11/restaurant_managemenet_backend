@@ -10,8 +10,8 @@ class TableRepository(CommonRepository[TableModel]):
 
 
     def get_all(self) -> List[Table]:
-        model = self.table.objects.all().order_by('number')
-        return TableMappers.to_domain(model)
+        models = self.table.objects.all().order_by('number')
+        return [TableMappers.to_domain(model) for model in models]
 
 
     def get_by_id(self, number):

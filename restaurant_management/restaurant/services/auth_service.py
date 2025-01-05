@@ -46,7 +46,7 @@ class AuthService:
             return result
 
         # Validate password
-        if self._validate_password(password, user.hashed_password):
+        if self._validate_password(password, user.password):
             result = Result.success(user)
         else:
             result = Result.error('Incorrect Password')
@@ -71,7 +71,7 @@ class AuthService:
     def __generate_token(self, user: User) -> dict:
         refresh = RefreshToken.for_user(user)
 
-        refresh['id'] = user.id.value
+        refresh['user_id'] = user.id
         refresh['email'] = user.email
         refresh['role'] = user.role.value
 
@@ -82,8 +82,8 @@ class AuthService:
     
 
     def _generate_login_cache_key(self, identifier, password):
-        hashed_password_key = hashlib.md5(password.encode('utf-8')).hexdigest()
-        return f'user_credentials_{identifier}_{hashed_password_key}'
+        password_key = hashlib.md5(password.encode('utf-8')).hexdigest()
+        return f'user_credentials_{identifier}_{password_key}'
 
 
     def _get_user_from_cache_or_service(self, identifier):
@@ -100,5 +100,5 @@ class AuthService:
             return user
     
 
-    def _validate_password(self, input_password, hashed_password):
-        return PasswordService.verify_password(input_password, hashed_password)
+    def _validate_password(self, input_password, password):
+        return PasswordService.verify_password(input_password, password)

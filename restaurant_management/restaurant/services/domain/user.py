@@ -28,10 +28,6 @@ class InvalidPhoneNumberException(UserException):
     """Raised when phone number format is invalid"""
     pass
 
-@dataclass
-class UserId:
-    """Value object for User ID"""
-    value: str
 
 class User:
     def __init__(
@@ -40,20 +36,20 @@ class User:
         last_name: str,
         gender: Gender,
         email: str,
-        hashed_password: str,
+        password: str,
         birth_date: datetime,
         role: Role,
         joined_at: datetime,
         last_login: datetime,
         phone_number: Optional[str] = None,
-        id: Optional[UserId] = None,
+        id: Optional[int] = None,
     ):
         self.__id = id
         self.__first_name = first_name
         self.__last_name = last_name
         self.__gender = gender
         self.__email = email
-        self.__hashed_password = hashed_password
+        self.__password = password
         self.__birth_date = birth_date
         self.__role = role
         self.__joined_at = joined_at
@@ -61,7 +57,7 @@ class User:
         self.__phone_number = phone_number if phone_number else None
 
     @property
-    def id(self) -> Optional[UserId]:
+    def id(self) -> Optional[int]:
         return self.__id
 
     @property
@@ -105,11 +101,11 @@ class User:
         return self.__phone_number
 
     @property
-    def hashed_password(self) -> str:
-        return self.__hashed_password
+    def password(self) -> str:
+        return self.__password
     
-    def set_hashed_password(self, hashed_password) -> str:
-        self.__hashed_password = hashed_password
+    def set_password(self, password) -> str:
+        self.__password = password
 
     @staticmethod
     def validate_password(plain_password: str) -> Result:

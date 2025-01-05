@@ -253,7 +253,7 @@ class EnumField(serializers.ChoiceField):
             self.fail("invalid_choice", input=data)
 
 class UserSerializer(serializers.Serializer):
-    id = serializers.CharField(source='id.value', required=False, allow_null=True)
+    id = serializers.IntegerField()
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     gender = CharField()
@@ -307,6 +307,3 @@ class StaffSignupSerializer(serializers.Serializer):
     birth_date = serializers.DateField()
     phone_number = serializers.CharField(max_length=15, allow_null=True, required=False)
     role = serializers.ChoiceField(choices=[(Role.STAFF, Role.STAFF.name)], default=Role.STAFF, read_only=True)
-
-
-

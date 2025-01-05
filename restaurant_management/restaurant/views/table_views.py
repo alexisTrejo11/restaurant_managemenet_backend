@@ -39,7 +39,7 @@ class TableViews(ViewSet):
     )
     def get_all_tables(self, request):
         table_service = self.get_table_service()
-
+        
         tables = table_service.get_all_tables()
         table_data = TableSerializer(tables, many=True).data
         return ApiResponse.ok(table_data, 'All tables successfully fetched')
@@ -83,3 +83,4 @@ class TableViews(ViewSet):
             return ApiResponse.not_found(f'table', 'number', number)
         
         return ApiResponse.deleted('Table')
+    
