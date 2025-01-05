@@ -6,10 +6,16 @@ from datetime import datetime
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
+from restaurant.utils.permission import RoleBasedPermission
 
 container = Injector([AppModule()])
 
 class PaymentViews(ViewSet):
+    # Role Permissions
+    def get_permissions(self):
+        return [RoleBasedPermission(['admin'])]
+
+    # Payment Service injection
     def get_payment_service(self):
         return container.get(PaymentService)
 

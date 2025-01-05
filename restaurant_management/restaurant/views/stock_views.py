@@ -7,11 +7,13 @@ from restaurant.serializers import StockInsertSerializer, StockSerializer, Stock
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 container = Injector([AppModule()])
 
 class StockViews(ViewSet):
+    permission_classes = [IsAuthenticated]
+
     def get_ingredient_service(self):
         return container.get(IngredientService)
 

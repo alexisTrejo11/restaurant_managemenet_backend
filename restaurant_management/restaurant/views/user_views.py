@@ -5,10 +5,16 @@ from restaurant.services.user_service import UserService
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
+from restaurant.utils.permission import RoleBasedPermission
 
 container = Injector([AppModule()])
 
 class UserViews(ViewSet):
+    # Role Permissions
+    def get_permissions(self):
+        return [RoleBasedPermission(['admin'])]
+
+    # User Service injection
     def get_user_service(self):
         return container.get(UserService)
 

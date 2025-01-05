@@ -6,10 +6,21 @@ from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from restaurant.utils.permission import RoleBasedPermission
 
 container = Injector([AppModule()])
 
 class TableViews(ViewSet):
+    # Role Permissions
+    def get_permissions(self):
+        if self.action == 'get_all_tables':
+             return [RoleBasedPermission(['admin', 'staff', 'waiter'])]
+        elif self.action in ['create_table', 'delete_table_by_number']:
+             return [RoleBasedPermission(['admin'])]
+        else: # get_table_by_number
+            return [RoleBasedPermission(['admin', 'staff'])]
+
+    # Table Service injection
     def get_table_service(self):
         return container.get(TableService)
 

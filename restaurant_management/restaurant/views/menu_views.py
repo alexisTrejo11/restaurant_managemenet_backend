@@ -4,13 +4,20 @@ from restaurant.serializers import MenuItemSerializer, MenuInsertItemSerializer
 from restaurant.utils.response import ApiResponse
 from restaurant.injector.app_module import AppModule
 from injector import Injector
+from restaurant.utils.permission import RoleBasedPermission
 
 container = Injector([AppModule()])
 
 class MenuViews(ViewSet):
+    # Role Permissions
+    def get_permissions(self):
+        if self.action in ['create_menu_item', 'delete_menu_item_by_id']:
+            return [RoleBasedPermission(['admin'])]
+
+
+    # Service injection
     def get_menu_service(self):
         return container.get(MenuItemService)
-
 
     def get_menu_item_by_id(self, request, menu_id=None):
         menu_service = self.get_menu_service()

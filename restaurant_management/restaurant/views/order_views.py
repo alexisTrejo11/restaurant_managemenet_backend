@@ -7,10 +7,19 @@ from restaurant.services.payment_service import PaymentService
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
+from restaurant.utils.permission import RoleBasedPermission
+from rest_framework.permissions import IsAuthenticated
 
 container = Injector([AppModule()])
 
 class OrderViews(ViewSet):
+    def get_permissions(self):
+        if self.action == 'delete_order':
+             return [RoleBasedPermission(['admin'])]
+        else:
+            return [IsAuthenticated]
+
+    # Service injection
     def get_order_service(self):
         return container.get(OrderService)
 

@@ -7,11 +7,20 @@ from restaurant.mappers.reservation_mappers import ReservationMapper
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
+from restaurant.utils.permission import RoleBasedPermission
+
 
 container = Injector([AppModule()])
 
 class ReservationViews(ViewSet):
+    # Role Permissions
+    def get_permissions(self):
+        if self.action in ['get_today_reservation']:
+             return [RoleBasedPermission(['admin', 'staff'])]
+        elif self.action in ['delete_reservation_by_id', 'get_reservations_by_filter', 'get_reservation_by_id']:
+             return [RoleBasedPermission(['admin'])]
+    
+    # Reservation Service injection
     def get_reservation_service(self):
         return container.get(ReservationService)
 

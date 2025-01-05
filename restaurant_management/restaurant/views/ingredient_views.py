@@ -5,10 +5,12 @@ from restaurant.injector.app_module import AppModule
 from rest_framework.viewsets import ViewSet
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import IsAuthenticated
 
 container = Injector([AppModule()])
 
 class IngredientViews(ViewSet):
+    permission_classes = [IsAuthenticated]
 
     def get_ingredient_service(self):
         return container.get(IngredientService)

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'restaurant',
+    'restaurant.repository.models',
 ]
 
 MIDDLEWARE = [
@@ -74,10 +75,17 @@ REST_FRAMEWORK = {
     },
 }
 
+AUTH_USER_MODEL = 'models.UserModel'
+
 SIMPLE_JWT = {
     'SIGNING_KEY': 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg==',
     'ALGORITHM': 'HS256',
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=8),  
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=8), 
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id", 
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
 }
 
 TEMPLATES = [
