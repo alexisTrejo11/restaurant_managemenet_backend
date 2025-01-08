@@ -120,11 +120,12 @@ from restaurant.repository.models.models import OrderModel, OrderItemModel
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(source='menu_item.name', read_only=True)  
+    menu_extra_name = serializers.CharField(source='menu_extra.name', read_only=True)  
     added_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
 
     class Meta:
         model = OrderItemModel
-        fields = ['id', 'menu_item_name', 'notes', 'quantity', 'is_delivered', 'added_at']
+        fields = ['id', 'menu_item_name', 'menu_extra_name','notes', 'quantity', 'is_delivered', 'added_at']
 
 
 class OrderSerializer(serializers.ModelSerializer):

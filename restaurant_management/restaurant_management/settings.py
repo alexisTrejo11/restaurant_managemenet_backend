@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'restaurant',
+    # Remove at migrations
     'restaurant.repository.models',
 ]
 
@@ -75,6 +76,7 @@ REST_FRAMEWORK = {
     },
 }
 
+# Remove at migrations
 AUTH_USER_MODEL = 'models.UserModel'
 
 SIMPLE_JWT = {

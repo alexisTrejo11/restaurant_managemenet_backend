@@ -17,7 +17,7 @@ class OrderViews(ViewSet):
         if self.action == 'delete_order':
              return [RoleBasedPermission(['admin'])]
         else:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
 
     # Service injection
     def get_order_service(self):

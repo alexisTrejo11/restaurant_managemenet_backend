@@ -8,6 +8,7 @@ class MenuItemRepository(CommonRepository[MenuItem]):
      def __init__(self):
         self.menu_item = MenuItemModel
 
+
      def get_all(self) -> List[MenuItem]:
         menu_items = self.menu_item.objects.all().order_by('id')
         menu = [
@@ -16,7 +17,7 @@ class MenuItemRepository(CommonRepository[MenuItem]):
         ]
         
         return menu
-
+     
 
      def get_by_id(self, item_id: int) -> Optional[MenuItem]:
         model = self.menu_item.objects.filter(id=item_id).first()

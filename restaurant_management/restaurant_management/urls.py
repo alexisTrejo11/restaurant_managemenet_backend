@@ -66,7 +66,7 @@ urlpatterns = [
     # Orders
     path('v1/api/orders/<int:id>', OrderViews.as_view({'get': 'get_order_by_id', 'delete': 'delete_order'}), name='order-by-id'),
     path('v1/api/orders/by-status/<str:status>', OrderViews.as_view({'get': 'get_orders_by_status'}), name='orders-by-status'),
-    path('v1/api/orders/<int:table_number>', OrderViews.as_view({'post': 'start_order'}), name='start-order'),
+    path('v1/api/orders/<int:table_number>/init', OrderViews.as_view({'post': 'start_order'}), name='start-order'),
     path('v1/api/orders/<int:id>/cancel', OrderViews.as_view({'put': 'cancel_order'}), name='cancel-order'),
     path('v1/api/orders/<int:id>/end', OrderViews.as_view({'put': 'end_order'}), name='complete-order'),
 

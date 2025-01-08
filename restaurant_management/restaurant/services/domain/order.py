@@ -10,7 +10,13 @@ class OrderStatus:
 
 
 class OrderItem:
-    def __init__(self, menu_item, added_at = datetime.now(), notes=None, quantity=1, id=None, menu_extra=None, is_delivered=False):
+    def __init__(self, 
+                menu_item, 
+                added_at = datetime.now(), 
+                notes=None, quantity=1, 
+                id=None, 
+                menu_extra=None, 
+                is_delivered=False):
         self.id = id
         self.menu_item = menu_item
         self.quantity = quantity
