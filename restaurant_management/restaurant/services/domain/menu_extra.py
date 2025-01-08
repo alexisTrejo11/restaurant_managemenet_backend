@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 class MenuExtraDomain:
     def __init__(self, 
                  name: str, 
-                 price: float, 
+                 price: Decimal, 
                  id : int = None,
                  description: str = None, 
                  created_at: str = None, 

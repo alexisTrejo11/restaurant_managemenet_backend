@@ -252,6 +252,7 @@ class PaymentItemModel(models.Model):
     )
     price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
+    extras_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:

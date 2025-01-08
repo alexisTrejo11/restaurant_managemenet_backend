@@ -8,6 +8,8 @@ from restaurant.services.domain.order import Order
 from restaurant.utils.result import Result
 from injector import inject
 import logging
+from decimal import Decimal
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +51,12 @@ class PaymentService:
 
     def create_payment(self, order: Order):
         payment = self._initialize_payment(order)
-        self._validate_payment(payment, order)
+        self.__validate_payment_creation(order)
 
         payment_items = self._generate_payment_items(order.items)
-        payment = self._calculate_payment(payment, payment_items)
+        payment.items = payment_items
+
+        payment = self._calculate_payment(payment)
 
         payment_created = self._save_payment_and_items(payment, payment_items)
         logger.info(f"Payment created for order with ID {order.id}.")
@@ -114,15 +118,16 @@ class PaymentService:
                 menu_extra_item=order_item.menu_extra,
                 order_item=order_item,
                 quantity=order_item.quantity,
-                price=order_item.menu_item.price
+                price=Decimal(order_item.menu_item.price)
             )
 
         payment_item.calculate_total()
 
         if payment_item.menu_extra_item:
-            payment_item.menu_extra_item = order_item.menu_extra.price
-            payment_item.increase_extra_item_price()
-        
+            payment_item.extra_item_price = Decimal(order_item.menu_extra.price) 
+            payment_item.menu_extra_item = order_item.menu_extra
+            payment_item.increase_menu_extra()
+
         return payment_item
 
 
@@ -135,16 +140,21 @@ class PaymentService:
     def _initialize_payment(self, order: Order):
             return Payment.init_payment(order)
 
-    def _validate_payment(self, payment: Payment, order: Order):
-        payment.validate_payment_creation(order)
+
+    def __validate_payment_creation(self, order: Order):
+        is_order_in_progress = order.is_order_in_progress()
+        if is_order_in_progress:
+            raise ValueError("Can't create payment form a order in progress")
+
 
     def _generate_payment_items(self, order_items):
         return self.generate_payment_items(order_items)
 
-    def _calculate_payment(self, payment: Payment, payment_items):
-        payment.items = payment_items
+
+    def _calculate_payment(self, payment: Payment):
         payment.calculate_numbers()
         return payment
+
 
     def _save_payment_and_items(self, payment: Payment, payment_items):
         payment_created = self.payment_repository.create(payment)

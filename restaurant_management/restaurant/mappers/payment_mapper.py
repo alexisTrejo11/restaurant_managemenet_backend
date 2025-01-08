@@ -1,7 +1,9 @@
+from decimal import Decimal
 from restaurant.services.domain.payment import Payment, PaymentItem
 from restaurant.repository.models.models import PaymentItemModel, PaymentModel
 from restaurant.mappers.order_mappers import OrderMappers, OrderItemMappers
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
+from restaurant.mappers.menu_extra_mappers import MenuExtraMapper
 
 class PaymentMapper:
     @staticmethod
@@ -13,12 +15,12 @@ class PaymentMapper:
             order=payment_model.order if payment_model.order else None,
             payment_method=payment_model.payment_method,
             payment_status=payment_model.payment_status,
-            sub_total=float(payment_model.sub_total),
-            discount=float(payment_model.disccount),
-            vat_rate=float(payment_model.vat_rate),
-            vat=float(payment_model.vat),
+            sub_total=Decimal(payment_model.sub_total),
+            discount=Decimal(payment_model.disccount),
+            vat_rate=Decimal(payment_model.vat_rate),
+            vat=Decimal(payment_model.vat),
             currency_type=payment_model.currency_type,
-            total=float(payment_model.total),
+            total=Decimal(payment_model.total),
             created_at=payment_model.created_at,
             paid_at=payment_model.paid_at,
             items=payment_items 
@@ -42,8 +44,9 @@ class PaymentMapper:
 
         if payment.order:
             payment_model.order = OrderMappers.to_model(payment.order)
-
-        payment_model.items = [PaymentItemMapper.to_model(item) for item in payment.items]
+        
+        if payment.items:
+            payment_model.items = [PaymentItemMapper.to_model(item) for item in payment.items]
 
         return payment_model
 
@@ -54,11 +57,11 @@ class PaymentItemMapper:
         return PaymentItem(
             menu_item=MenuItemMapper.to_domain(payment_item_model.menu_item) if payment_item_model.menu_item else None,
             order_item=payment_item_model.order_item,  
-            price=float(payment_item_model.price),
+            price=Decimal(payment_item_model.price),
             quantity=payment_item_model.quantity,
-            total=float(payment_item_model.total),
-            #extra_item_price=float(payment_item_model.extra_item_price),
-            menu_extra_item=payment_item_model.menu_item_extra
+            total=Decimal(payment_item_model.total),
+            extra_item_price=Decimal(payment_item_model.menu_item_extra.price),
+            menu_extra_item=MenuExtraMapper.to_domain(payment_item_model.menu_item_extra) if payment_item_model.menu_item_extra else None
         )
 
     @staticmethod
@@ -69,6 +72,7 @@ class PaymentItemMapper:
             price=payment_item.price,
             quantity=payment_item.quantity,
             total=payment_item.total,
-            menu_item_extra=payment_item.menu_extra_item
+            extras_charges = payment_item.extra_item_price,
+            menu_item_extra=MenuExtraMapper.to_model(payment_item.menu_extra_item) if payment_item.menu_extra_item else None
         )
         return payment_item_model

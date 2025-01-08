@@ -5,17 +5,20 @@ from decimal import Decimal
 from restaurant.services.domain.order import Order
 from restaurant.utils.result import Result
 from restaurant.utils.exceptions import DomainException
+from restaurant.services.domain.menu_item import MenuItem
+from restaurant.services.domain.order import OrderItem
+from restaurant.services.domain.menu_extra import MenuExtraDomain
 
 class PaymentItem:
     def __init__(
             self,
-            menu_item, 
-            order_item,
+            menu_item : MenuItem, 
+            order_item : OrderItem,
             price,
             quantity, 
             total = 0,
             extra_item_price = 0, 
-            menu_extra_item = None, 
+            menu_extra_item : MenuExtraDomain = None, 
         ):
         self.menu_item = menu_item
         self.menu_extra_item = menu_extra_item
@@ -25,8 +28,8 @@ class PaymentItem:
         self.total = total
         self.extra_item_price = extra_item_price
     
-    def increase_extra_item_price(self):
-        self.price += self.menu_item_extra.price
+    def increase_menu_extra(self):
+        self.total += Decimal(self.extra_item_price)
 
     def increase_item_quantity(self, quantity):
         self.quantity += quantity
@@ -90,10 +93,6 @@ class Payment:
         self.total = self.__calculate_total(self.sub_total, self.discount, self.vat)
 
 
-    def validate_payment_creation(self):
-        if self.payment_status != 'COMPLETED':
-            raise DomainException("Order status must be completed")
-
     def validate_payment_complete(self):
         if not self.__is_status_pending():
            return Result.error("only pending payments can be completed")
@@ -147,10 +146,9 @@ class Payment:
     def __calculate_sub_total(self):
         items = self.items 
 
-        item_total = sum(Decimal(item.price) * Decimal(item.quantity) for item in items)
-        extra_total = sum(Decimal(item.extra_item_price) * Decimal(item.quantity) for item in items)
+        item_total = sum(Decimal(item.total) for item in items)
         
-        return item_total + extra_total
+        return item_total
 
 
     def __calculate_discount(self):

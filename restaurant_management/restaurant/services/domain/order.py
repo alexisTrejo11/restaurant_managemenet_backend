@@ -92,7 +92,9 @@ class Order:
 
     def add_items(self, new_items: List[OrderItem]):
         self.items.extend(new_items)
-
+    
+    def is_order_in_progress(self) -> bool:
+        return self.status == OrderStatus.IN_PROGRESS
 
     def remove_items(self, item_ids: List[int]):
         removed_items = []

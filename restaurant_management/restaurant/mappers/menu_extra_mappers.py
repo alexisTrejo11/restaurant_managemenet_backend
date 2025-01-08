@@ -15,7 +15,7 @@ class MenuExtraMapper:
         )
 
     @staticmethod
-    def to_model(menu_extra_domain: MenuExtraDomain) -> MenuExtraModel :
+    def to_model(menu_extra_domain: MenuExtraDomain) -> MenuExtraModel:
         return MenuExtraModel(
             id=menu_extra_domain.id,
             name=menu_extra_domain.name,
