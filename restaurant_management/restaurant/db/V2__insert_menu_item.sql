@@ -42,10 +42,9 @@ INSERT INTO menu_items (name, price, description, category, created_at, updated_
 
 
 -- Inserting Menu Extras
--- Inserting Menu Extras
-INSERT INTO menu_extras (name, created_at, updated_at) VALUES
-    ('Gluten-Free Option', NOW(), NOW()),
-    ('Vegetarian Option', NOW(), NOW()),
-    ('Vegan Option', NOW(), NOW()),
-    ('Dairy-Free Option', NOW(), NOW()),
-    ('Nut-Free Option', NOW(), NOW());
+INSERT INTO menu_extras (name, price, created_at, updated_at) VALUES
+    ('Gluten-Free Option', 1.00, NOW(), NOW()),
+    ('Vegetarian Option',  1.50, NOW(), NOW()),
+    ('Vegan Option', 1.25, NOW(), NOW()),
+    ('Dairy-Free Option', 0.50, NOW(), NOW()),
+    ('Nut-Free Option', 1.00, NOW(), NOW());

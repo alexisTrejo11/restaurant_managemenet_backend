@@ -1,11 +1,12 @@
 from typing import Optional
 from restaurant.services.domain.menu_extra import MenuExtraDomain
-from restaurant.repository.models.models import MenuExtra
+from restaurant.repository.models.models import MenuExtraModel
 
 class MenuExtraMapper:
     @staticmethod
-    def to_domain(menu_extra_db) -> MenuExtraDomain:
+    def to_domain(menu_extra_db : MenuExtraModel) -> MenuExtraDomain:
         return MenuExtraDomain(
+            id=menu_extra_db.id,
             name=menu_extra_db.name,
             price=float(menu_extra_db.price),
             description=menu_extra_db.description,
@@ -14,8 +15,9 @@ class MenuExtraMapper:
         )
 
     @staticmethod
-    def to_model(menu_extra_domain: MenuExtraDomain) -> MenuExtra :
-        return MenuExtra(
+    def to_model(menu_extra_domain: MenuExtraDomain) -> MenuExtraModel :
+        return MenuExtraModel(
+            id=menu_extra_domain.id,
             name=menu_extra_domain.name,
             price=menu_extra_domain.price,
             description=menu_extra_domain.description,

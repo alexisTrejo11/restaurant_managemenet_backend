@@ -70,16 +70,8 @@ class OrderService:
                 notes=notes
             )
 
-            # Add Extra if provided
-            if menu_extra_id:
-                menu_extra = self.menu_extra_repository.get_by_id(menu_extra_id)
-                if not menu_item:
-                   raise ValueError(f'Menu Extra with [{menu_extra_id}] not found')
-
-                order_item.menu_extra = menu_extra
-
-            created_items.append(order_item)
-
+            self.__handle_menu_extra(order_item, menu_extra_id, created_items)
+          
         logger.info(f"Processed {len(created_items)} items.")
         return created_items
 
@@ -135,3 +127,14 @@ class OrderService:
         
         self.order_repository.update_items(order)
         logger.info(f"Item with ID {item_id} set as delivered in order with ID {order.id}.")
+
+
+    def __handle_menu_extra(self, order_item : OrderItem , menu_extra_id : int, created_items : list):
+        if menu_extra_id:
+            menu_extra = self.menu_extra_repository.get_by_id(menu_extra_id)
+            if not menu_extra:
+                raise ValueError(f'Menu Extra with [{menu_extra_id}] not found')
+
+            order_item.menu_extra = menu_extra
+
+        created_items.append(order_item)

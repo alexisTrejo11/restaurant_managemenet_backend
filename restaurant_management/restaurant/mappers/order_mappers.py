@@ -3,6 +3,7 @@ from restaurant.services.domain.order import Order, OrderItem
 from restaurant.serializers import OrderSerializer
 from restaurant.mappers.table_mappers import TableMappers
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
+from restaurant.mappers.menu_extra_mappers import MenuExtraMapper
 
 class OrderMappers:
     @staticmethod
@@ -40,9 +41,12 @@ class OrderMappers:
 class OrderItemMappers:
     @staticmethod
     def to_model(order_item: OrderItem):
+        menu_extra = MenuExtraMapper.to_model(order_item.menu_extra) if order_item.menu_extra else None
+
         order_item_model = OrderItemModel(
             id=order_item.id,
-            menu_item=MenuItemMapper.to_model(order_item.menu_item),  
+            menu_item=MenuItemMapper.to_model(order_item.menu_item),
+            menu_extra=menu_extra,
             is_delivered=order_item.is_delivered,
             notes=order_item.notes,
             quantity=order_item.quantity,
@@ -53,9 +57,12 @@ class OrderItemMappers:
 
     @staticmethod
     def to_domain(order_item_model: OrderItemModel) -> OrderItem:
+        menu_extra = MenuExtraMapper.to_domain(order_item_model.menu_extra) if order_item_model.menu_extra else None
+
         return OrderItem(
             id=order_item_model.id,
             menu_item=MenuItemMapper.to_domain(order_item_model.menu_item),
+            menu_extra=menu_extra,
             quantity=order_item_model.quantity,
             notes=order_item_model.notes,
             is_delivered=order_item_model.is_delivered,

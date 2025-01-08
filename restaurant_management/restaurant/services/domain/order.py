@@ -1,21 +1,22 @@
 from datetime import datetime
-from pickle import TRUE
 from typing import List, Optional
 from restaurant.utils.exceptions import DomainException
+from restaurant.services.domain.menu_item import MenuItem
+from restaurant.services.domain.menu_extra import MenuExtraDomain
+
 
 class OrderStatus:
     IN_PROGRESS = 'IN_PROGRESS'
     COMPLETED = 'COMPLETED'
     CANCELLED = 'CANCELLED'
 
-
 class OrderItem:
     def __init__(self, 
-                menu_item, 
+                menu_item : MenuItem, 
+                menu_extra : MenuExtraDomain = None, 
                 added_at = datetime.now(), 
                 notes=None, quantity=1, 
                 id=None, 
-                menu_extra=None, 
                 is_delivered=False):
         self.id = id
         self.menu_item = menu_item
@@ -38,7 +39,6 @@ class OrderItem:
             self.notes = formatted_new_notes    
         else:
             self.notes = f"{self.notes} || {formatted_new_notes}"
-
 
 class Order:
     def __init__(

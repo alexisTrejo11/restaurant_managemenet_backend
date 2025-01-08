@@ -244,7 +244,7 @@ class PaymentItemModel(models.Model):
         related_name='payment_items'
     )
     menu_item_extra = models.ForeignKey(
-        'MenuExtra', 
+        'MenuExtraModel', 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 

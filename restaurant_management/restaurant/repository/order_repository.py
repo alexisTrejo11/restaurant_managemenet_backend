@@ -67,7 +67,7 @@ class OrderRepository(CommonRepository):
         for item in order.items:
             item_model = OrderItemMappers.to_model(item)
             item_model.order = order_model
-            print(f"Item: {item_model.menu_item.pk}")
+            
             if item.id:
                 self.__update_items(item, item_model)
             else:

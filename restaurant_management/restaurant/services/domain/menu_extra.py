@@ -1,5 +1,12 @@
 class MenuExtraDomain:
-    def __init__(self, name: str, price: float, description: str = None, created_at: str = None, updated_at: str = None):
+    def __init__(self, 
+                 name: str, 
+                 price: float, 
+                 id : int = None,
+                 description: str = None, 
+                 created_at: str = None, 
+                 updated_at: str = None):
+        self.id = id
         self.name = name
         self.price = price
         self.description = description
