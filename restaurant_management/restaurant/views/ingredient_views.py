@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 container = Injector([AppModule()])
 
 class IngredientViews(ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated()]
 
     def get_ingredient_service(self):
         return container.get(IngredientService)
@@ -41,7 +41,9 @@ class IngredientViews(ViewSet):
     )
     def get_all_ingredients(self, request):
         ingredient_service = self.get_ingredient_service()
+
         ingredients = ingredient_service.get_all_ingredients()
+        
         ingredients_data = IngredientSerializer(ingredients, many=True).data
         return ApiResponse.ok(ingredients_data, 'Ingredients successfully fetched')
 
@@ -56,11 +58,13 @@ class IngredientViews(ViewSet):
     )
     def create_ingredient(self, request):
         ingredient_service = self.get_ingredient_service()
+
         serializer = IngredientInsertSerializer(data=request.data)
         if not serializer.is_valid():
             return ApiResponse.bad_request(serializer.errors)
 
         ingredient = ingredient_service.create_ingredient(request.data)
+        
         ingredients_data = IngredientSerializer(ingredient).data
         return ApiResponse.created(ingredients_data, 'Ingredient successfully created')
 
@@ -74,7 +78,9 @@ class IngredientViews(ViewSet):
     )
     def delete_ingredient_by_id(self, request, ingredient_id):
         ingredient_service = self.get_ingredient_service()
+        
         is_deleted = ingredient_service.delete_ingredient(ingredient_id)
+        
         if not is_deleted:
             return ApiResponse.not_found('Ingredient', 'ID', ingredient_id)
 

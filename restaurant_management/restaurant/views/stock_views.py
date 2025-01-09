@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 container = Injector([AppModule()])
 
 class StockViews(ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated()]
 
     def get_ingredient_service(self):
         return container.get(IngredientService)
@@ -30,6 +30,7 @@ class StockViews(ViewSet):
         stock_service = self.get_stock_service()
 
         stock_list = stock_service.get_all_stocks_sort_by_last_transaction()
+        
         stock_list_serialized = StockSerializer(stock_list, many=True).data
         return ApiResponse.ok(stock_list_serialized, 'Stock List Successfully Fetched')
 
@@ -93,6 +94,7 @@ class StockViews(ViewSet):
             return ApiResponse.bad_request(serializer.errors)
         
         ingredient_id = serializer.validated_data.get('ingredient_id')
+        
         ingredient = ingredient_service.get_ingredient_by_id(ingredient_id)
         if ingredient is None:
             return ApiResponse.not_found('Ingredient', 'ID', ingredient_id)
@@ -102,8 +104,8 @@ class StockViews(ViewSet):
             return ApiResponse.ok(None, f'Ingredient Id [{ingredient_id}] already has stock')
 
         stock = stock_service.init_stock(ingredient, serializer.validated_data)
-        stock_serialized = StockSerializer(stock).data
         
+        stock_serialized = StockSerializer(stock).data
         return ApiResponse.ok(stock_serialized, f'Stock with ingredient Id {ingredient_id} successfully init')
 
 
@@ -122,21 +124,21 @@ class StockViews(ViewSet):
         if not serializer.is_valid():
             return ApiResponse.bad_request(serializer.errors)
 
-        stock_id = serializer.validated_data.get('stock_id')
+        stock_id = serializer.data.get('stock_id')
+        
         stock = stock_service.get_stock_by_id(stock_id)
         if stock is None:
             return ApiResponse.not_found('Stock', 'ID', stock_id)
 
         trasaction = StockTransactionMappers.serializerToDomain(serializer.validated_data)
-        trasaction.stock = stock
 
         validation_result = stock_service.validate_transaction(stock, trasaction)
         if (validation_result.is_failure()):
             return ApiResponse.bad_request(validation_result.get_error_msg())
 
         stock = stock_service.add_transaction(stock, trasaction)
-        stock_serialized = StockSerializer(stock).data
         
+        stock_serialized = StockSerializer(stock).data
         return ApiResponse.ok(stock_serialized, 'Transaction successfully added')
 
 

@@ -47,6 +47,7 @@ class MenuViews(ViewSet):
         menu_service = self.get_menu_service()
 
         menus = menu_service.get_all_menus()
+        
         menu_data = MenuItemSerializer(menus, many=True).data
         return ApiResponse.ok(menu_data, 'Menus successfully fetched')
 
@@ -59,8 +60,8 @@ class MenuViews(ViewSet):
             return ApiResponse.bad_request(serializer.errors)
 
         menu_item = menu_service.create_menu(serializer.validated_data)
-        menu_item_data = MenuItemSerializer(menu_item).data
         
+        menu_item_data = MenuItemSerializer(menu_item).data
         return ApiResponse.created(menu_item_data, 'Menu Item successfully created')
 
 

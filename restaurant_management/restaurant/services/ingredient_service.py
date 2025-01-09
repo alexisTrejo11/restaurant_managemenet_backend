@@ -41,8 +41,8 @@ class IngredientService:
         )
         
         created_ingredient = self.ingredient_repository.create(ingredient)
-        
         logger.info(f"Ingredient with ID {created_ingredient.id} created successfully.")
+        
         return created_ingredient
 
     def delete_ingredient(self, ingredient_id):
@@ -50,4 +50,5 @@ class IngredientService:
         
         if is_delete:
             logger.info(f"Ingredient with ID {ingredient_id} deleted successfully.")
+        
         return is_delete

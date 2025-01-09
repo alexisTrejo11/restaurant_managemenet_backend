@@ -29,11 +29,10 @@ class UserViews(ViewSet):
         user_service = self.get_user_service()
 
         user = user_service.get_user_by_id(user_id)
-        if user is None:
+        if not user:
             return ApiResponse.not_found('User', 'ID', user_id)
         
         user_data = UserSerializer(user).data
-
         return ApiResponse.found(user_data, 'User', 'ID', user_id)
 
 
@@ -48,11 +47,10 @@ class UserViews(ViewSet):
         user_service = self.get_user_service()
 
         user = user_service.get_user_by_email(email)
-        if user is None:
+        if not user:
             return ApiResponse.not_found('User', 'email', email)
         
         user_data = UserSerializer(user).data
-
         return ApiResponse.found(user_data, 'User', 'email', email)
 
 
@@ -94,8 +92,8 @@ class UserViews(ViewSet):
             return ApiResponse.bad_request(user_result.get_error_msg())
 
         user = user_service.create_user(serializer.data)
+        
         user_data = UserSerializer(user).data
-
         return ApiResponse.created(user_data, "User successfully created")
 
 

@@ -41,9 +41,9 @@ class AuthViews(ViewSet):
         
         user = user_service.create_user(serializer.data)
 
-        JWT = auth_service.proccess_signup(user)
+        signup_token = auth_service.proccess_signup(user)
 
-        return ApiResponse.created(JWT, "Signup Successfully Processed")
+        return ApiResponse.created(signup_token, "Signup Successfully Processed")
 
 
     @swagger_auto_schema(
@@ -64,6 +64,6 @@ class AuthViews(ViewSet):
         if credentials_result.is_failure():
             return ApiResponse.bad_request(credentials_result.get_error_msg())
         
-        JWT = auth_service.proccess_login(credentials_result.get_data())
+        login_token = auth_service.proccess_login(credentials_result.get_data())
 
-        return ApiResponse.created(JWT, "Login Successfully Processed")
+        return ApiResponse.created(login_token, "Login Successfully Processed")

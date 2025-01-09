@@ -160,6 +160,7 @@ class OrderViews(ViewSet):
             return ApiResponse.not_found('Order', 'ID', id)
 
         order_service.end_order(order)
+        
         payment = payment_service.create_payment(order)
 
         payment_data = PaymentSerializer(payment).data

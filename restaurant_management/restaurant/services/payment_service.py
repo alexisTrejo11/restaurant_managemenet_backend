@@ -50,15 +50,14 @@ class PaymentService:
 
 
     def create_payment(self, order: Order):
-        payment = self._initialize_payment(order)
-        self.__validate_payment_creation(order)
+        payment = Payment.init_payment(order)
 
         payment_items = self._generate_payment_items(order.items)
         payment.items = payment_items
 
-        payment = self._calculate_payment(payment)
+        payment.calculate_numbers()
 
-        payment_created = self._save_payment_and_items(payment, payment_items)
+        payment_created = self.__save_payment_and_items(payment, payment_items)
         logger.info(f"Payment created for order with ID {order.id}.")
 
         return payment_created
@@ -131,29 +130,23 @@ class PaymentService:
         return payment_item
 
 
-    def _save_payment_and_items(self, payment: Payment, payment_items):
+    def __save_payment_and_items(self, payment: Payment, payment_items):
         payment_created = self.payment_repository.create(payment)
         payment_items_created = self.payment_repository.save_payment_items(payment_created, payment_items)
         payment_created.items = payment_items_created
         return payment_created
 
-    def _initialize_payment(self, order: Order):
-            return Payment.init_payment(order)
 
 
-    def __validate_payment_creation(self, order: Order):
+    def validate_payment_creation(self, order: Order):
         is_order_in_progress = order.is_order_in_progress()
         if is_order_in_progress:
             raise ValueError("Can't create payment form a order in progress")
 
 
+
     def _generate_payment_items(self, order_items):
         return self.generate_payment_items(order_items)
-
-
-    def _calculate_payment(self, payment: Payment):
-        payment.calculate_numbers()
-        return payment
 
 
     def _save_payment_and_items(self, payment: Payment, payment_items):

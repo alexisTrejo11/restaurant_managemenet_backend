@@ -56,14 +56,15 @@ class StockService:
         logger.info(f"Stock with ID {id} cleared successfully.")
         return stock
 
-
+    # Check
     def add_transaction(self, stock: Stock, transaction: StockTransaction) -> Stock:
         stock.add_transaction(transaction)
+
         self.stock_repository.save_transaction(transaction)
         
         updated_stock = self.stock_repository.update(stock)
-        
         logger.info(f"Transaction added to stock with ID {stock.id}. Transaction ID: {transaction.id}")
+        
         return updated_stock
 
 
@@ -76,6 +77,7 @@ class StockService:
             logger.warning(f"Failed to delete stock with ID {id}.")
         
         return deleted
+
 
     def validate_transaction(self, stock: Stock, transaction: StockTransaction) -> Result:
         validation_map = stock.validate_transaction(transaction)

@@ -8,7 +8,7 @@ from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
 from restaurant.utils.permission import RoleBasedPermission
-
+from datetime import datetime
 
 container = Injector([AppModule()])
 
@@ -35,11 +35,10 @@ class ReservationViews(ViewSet):
         reservation_service = self.get_reservation_service()
 
         reservation = reservation_service.get_by_id(reservation_id)
-        if reservation is None:
+        if not reservation:
             return ApiResponse.not_found("Reservation", 'ID', reservation_id)
 
         reservations_data = ReservationSerializer(reservation).data
-        
         return ApiResponse.ok(reservations_data, f'Reservation with reservation Id {reservation_id} successfully fetched')
 
 
@@ -82,8 +81,8 @@ class ReservationViews(ViewSet):
         end = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         reservations = reservation_service.get_by_time_range(start, end)
+        
         reservations_serialized = ReservationSerializer(reservations, many=True).data
-
         return ApiResponse.ok(reservations_serialized, f"Today's reservation successfully fetched. Today Date: {today.date()}")
 
 
@@ -97,24 +96,14 @@ class ReservationViews(ViewSet):
     def get_reservation_by_date_range(self, request):
         reservation_service = self.get_reservation_service()
 
-        start = request.GET.get('start')
-        end = request.GET.get('end')
-        today = datetime.now()
+        start = request.query_params.get('start', None)
+        end = request.query_params.get('end', None)
 
-
-        if not start or not end:
-            start = today.replace(hour=0, minute=0, second=0, microsecond=0)
-            end = today.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-        try:
-            start_date = datetime.strptime(start, "%Y-%m-%d")
-            end_date = datetime.strptime(end, "%Y-%m-%d")
-        except ValueError as e:
-            return ApiResponse.bad_request(f"Invalid date format: {e}")
+        start_date, end_date = self.format_date_range(start, end)
 
         reservations = reservation_service.get_by_time_range(start_date, end_date)
+        
         reservations_serialized = ReservationSerializer(reservations, many=True).data
-
         return ApiResponse.ok(reservations_serialized, f"Reservation successfully fetched. Date Range: {start}-{end_date}")
 
 
@@ -130,7 +119,7 @@ class ReservationViews(ViewSet):
         reservation_service = self.get_reservation_service()
             
         serializer = ReservationInsertSerializer(data=request.data)
-        if serializer.is_valid() is False:
+        if not serializer.is_valid():
             return ApiResponse.bad_request(f'Validation failed: {serializer.errors}')  
 
         new_reservation = ReservationMapper.serializer_to_domain(serializer.data)
@@ -140,8 +129,8 @@ class ReservationViews(ViewSet):
             return ApiResponse.bad_request(validation_result.get_error_msg())  
 
         reservation_created = reservation_service.create(new_reservation)        
+        
         reservation_serialized = ReservationSerializer(reservation_created).data
-
         return ApiResponse.created(reservation_serialized, 'Reservation successfully created')
 
 
@@ -160,3 +149,19 @@ class ReservationViews(ViewSet):
             return ApiResponse.not_found("Reservation", 'ID', reservation_id)
 
         return ApiResponse.deleted('Reservation')
+
+
+    def format_date_range(start: str, end: str):
+        today = datetime.now()
+
+        if not start or not end:
+            start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+        else:
+            try:
+                start_date = datetime.strptime(start, "%Y-%m-%d")
+                end_date = datetime.strptime(end, "%Y-%m-%d")
+            except ValueError as e:
+                raise ValueError(f"Invalid date format: {e}")
+        
+        return start_date, end_date

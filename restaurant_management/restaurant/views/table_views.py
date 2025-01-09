@@ -39,7 +39,6 @@ class TableViews(ViewSet):
             return ApiResponse.not_found('Table', 'number', number)
         
         table_data = TableSerializer(table).data
-
         return ApiResponse.created(table_data, f'Table with number {number} successfully fetched')
 
     @swagger_auto_schema(
@@ -52,6 +51,7 @@ class TableViews(ViewSet):
         table_service = self.get_table_service()
         
         tables = table_service.get_all_tables()
+        
         table_data = TableSerializer(tables, many=True).data
         return ApiResponse.ok(table_data, 'All tables successfully fetched')
 

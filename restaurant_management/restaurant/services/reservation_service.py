@@ -15,6 +15,7 @@ class ReservationService:
         self.reservation_repository = ReservationRepository()
         self.table_repository = TableRepository()
 
+
     def get_all(self):
         reservations = cache.get('all_reservations')
 
@@ -24,6 +25,7 @@ class ReservationService:
         
         return reservations
 
+
     def get_by_id(self, id):
         reservation = cache.get(f'reservation_{id}')
         
@@ -32,6 +34,7 @@ class ReservationService:
             cache.set(f'reservation_{id}', reservation, timeout=3600)
         
         return reservation
+
 
     def get_by_filter(self, filter, value):
         cache_key = f'reservations_{filter}_{value}'
@@ -51,6 +54,7 @@ class ReservationService:
 
             cache.set(cache_key, reservations, timeout=3600)
         return reservations
+
 
     def get_by_time_range(self, start: datetime, end: datetime):
         cache_key = f'reservations_time_range_{start.timestamp()}_{end.timestamp()}'
@@ -79,9 +83,8 @@ class ReservationService:
         return Result.success(None)
 
     
-
     def create(self, reservation: Reservation) -> Reservation:
-        suitable_tables = self._find_suitable_tables(reservation.customer_number)
+        suitable_tables = self.__find_suitable_tables(reservation.customer_number)
         if not suitable_tables:
             logger.warning(f"No suitable tables available for {reservation.customer_number} customers.")
             raise DomainException("No suitable tables available for the requested number of customers.")
@@ -94,12 +97,15 @@ class ReservationService:
 
             if not reservation_conflict: 
                 reservation.assign_table(table) 
+                
                 created_reservation = self.reservation_repository.create(reservation)
                 logger.info(f"Reservation created successfully with ID {created_reservation.id} for table {table.id}.")
+                
                 return created_reservation
 
         logger.warning(f"No tables available for the requested date {reservation.reservation_date} and customer capacity {reservation.customer_number}.")
         raise DomainException("No tables available for the requested date and customer capacity.")
+
 
     def delete_by_id(self, id):
         deleted = self.reservation_repository.delete(id)
@@ -110,8 +116,7 @@ class ReservationService:
         return deleted
 
 
-
-    def _find_suitable_tables(self, party_size):
+    def __find_suitable_tables(self, party_size):
         all_tables = self.table_repository.get_all()
 
         suitables_tables = []

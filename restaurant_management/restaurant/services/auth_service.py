@@ -9,7 +9,6 @@ from restaurant.utils.password.password_handler import PasswordService
 from django.core.cache import cache
 import hashlib
 
-
 class AuthService:
     @inject
     def __init__(self, user_service : UserService, user_repository: UserRepository):
