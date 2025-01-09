@@ -13,18 +13,19 @@ class ReservationRepository(CommonRepository):
     def get_by_id(self, id: int) -> Optional[Reservation]:
         reservation = self.reservation_model.objects.filter(id=id).first()
         return ReservationMapper.to_domain(reservation) if reservation else None
-
-    def get_by_table_and_reservation_time(self, table, reservation_date) -> Optional[Reservation]:
+    
+    def get_by_table_and_reservation_time(self, table_number, reservation_date) -> Optional[Reservation]:
         start_time = reservation_date - timedelta(hours=2)
         end_time = reservation_date + timedelta(hours=2)
-    
+
         reservation = self.reservation_model.objects.filter(
-            table=table,
+            table__number=table_number,
             reservation_date__range=(start_time, end_time)
         ).first()
-        
-        return ReservationMapper.to_domain(reservation) if reservation else None
 
+        return ReservationMapper.to_domain(reservation) if reservation else None
+    
+    
     def get_by_email(self, email: str) -> List[Reservation]:
         return self._filter_by_field("email", email)
 

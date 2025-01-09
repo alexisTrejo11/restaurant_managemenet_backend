@@ -19,6 +19,8 @@ class ReservationViews(ViewSet):
              return [RoleBasedPermission(['admin', 'staff'])]
         elif self.action in ['delete_reservation_by_id', 'get_reservations_by_filter', 'get_reservation_by_id']:
              return [RoleBasedPermission(['admin'])]
+        else:
+            return []
     
     # Reservation Service injection
     def get_reservation_service(self):
@@ -128,7 +130,9 @@ class ReservationViews(ViewSet):
         if validation_result.is_failure():
             return ApiResponse.bad_request(validation_result.get_error_msg())  
 
-        reservation_created = reservation_service.create(new_reservation)        
+        reservation_with_table = reservation_service.assign_table(new_reservation)
+        
+        reservation_created = reservation_service.create(reservation_with_table)        
         
         reservation_serialized = ReservationSerializer(reservation_created).data
         return ApiResponse.created(reservation_serialized, 'Reservation successfully created')

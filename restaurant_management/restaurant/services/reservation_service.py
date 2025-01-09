@@ -1,4 +1,4 @@
-from restaurant.serializers import ReservationSerializer
+from restaurant.services.domain.table import Table
 from restaurant.utils.result import Result
 from restaurant.repository.reservation_repository import ReservationRepository
 from restaurant.repository.table_respository import TableRepository
@@ -7,6 +7,7 @@ from datetime import datetime
 from restaurant.utils.exceptions import DomainException
 from django.core.cache import cache
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -83,29 +84,25 @@ class ReservationService:
         return Result.success(None)
 
     
-    def create(self, reservation: Reservation) -> Reservation:
+    def create(self, reservation: Reservation) -> Reservation:            
+        created_reservation = self.reservation_repository.create(reservation)
+        logger.info(f"Reservation created successfully with ID {created_reservation.id} for table {created_reservation.table.id}.")
+        
+        return created_reservation
+
+
+    def assign_table(self, reservation: Reservation) -> Reservation:
         suitable_tables = self.__find_suitable_tables(reservation.customer_number)
         if not suitable_tables:
             logger.warning(f"No suitable tables available for {reservation.customer_number} customers.")
             raise DomainException("No suitable tables available for the requested number of customers.")
+        
+        available_table = self.__search_for_the_best_table(suitable_tables, reservation)
 
-        for table in suitable_tables:
-            reservation_conflict = self.reservation_repository.get_by_table_and_reservation_time(
-                table,
-                reservation.reservation_date
-            )
+        reservation.assing_table(available_table)
 
-            if not reservation_conflict: 
-                reservation.assign_table(table) 
+        return reservation
                 
-                created_reservation = self.reservation_repository.create(reservation)
-                logger.info(f"Reservation created successfully with ID {created_reservation.id} for table {table.id}.")
-                
-                return created_reservation
-
-        logger.warning(f"No tables available for the requested date {reservation.reservation_date} and customer capacity {reservation.customer_number}.")
-        raise DomainException("No tables available for the requested date and customer capacity.")
-
 
     def delete_by_id(self, id):
         deleted = self.reservation_repository.delete(id)
@@ -116,7 +113,7 @@ class ReservationService:
         return deleted
 
 
-    def __find_suitable_tables(self, party_size):
+    def __find_suitable_tables(self, party_size) -> List[Table]:
         all_tables = self.table_repository.get_all()
 
         suitables_tables = []
@@ -129,3 +126,16 @@ class ReservationService:
             key=lambda table: table.capacity
         )
         
+    def __search_for_the_best_table(self, suitable_tables : List[Table], reservation : Reservation) -> Table:
+        for table in suitable_tables:
+            reservation_conflict = self.reservation_repository.get_by_table_and_reservation_time(
+                table.number,
+                reservation.reservation_date
+            )
+
+            if not reservation_conflict: 
+                return table
+            
+        logger.warning(f"No tables available for the requested date {reservation.reservation_date} and customer capacity {reservation.customer_number}.")    
+        raise DomainException("No tables available for the requested date and customer capacity.")
+            

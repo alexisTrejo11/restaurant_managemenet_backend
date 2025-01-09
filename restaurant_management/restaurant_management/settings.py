@@ -113,6 +113,7 @@ WSGI_APPLICATION = 'restaurant_management.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -124,13 +125,13 @@ DATABASES = {
     }
 }
 
-if os.getenv('TESTING', 'False') == 'True' or 'test' in sys.argv:
+if os.getenv('TESTING', 'False') == 'True' or 'test' in sys.argv:  
     temp_db_file = tempfile.NamedTemporaryFile(delete=False)
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': temp_db_file.name,
+        'NAME': temp_db_file.name,  
     }
-    
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',

@@ -100,7 +100,7 @@ class StockTransactionInsertSerializer(serializers.Serializer):
 class ReservationInsertSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.CharField(required=False, allow_null=True)
-    phone_number = serializers.CharField(required=False, allow_null=True)
+    phone_number = serializers.CharField(required=False, allow_null=True, default="")
     reservation_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     customer_number = serializers.IntegerField()
 

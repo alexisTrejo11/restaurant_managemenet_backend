@@ -31,7 +31,7 @@ services:
       - db
       - memcached
     environment:
-      - TESTING=True 
+      - TESTING=False 
       - DJANGO_SETTINGS_MODULE=restaurant_management.settings
       - DJANGO_DB_HOST=db
       - DJANGO_DB_NAME=mydb

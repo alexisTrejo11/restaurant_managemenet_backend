@@ -1,7 +1,7 @@
 from datetime import datetime
 from restaurant.repository.models.models import ReservationModel 
 from restaurant.services.domain.reservation import Reservation
-from restaurant.services.domain.table import Table
+from restaurant.mappers.table_mappers import TableMappers
 
 class ReservationMapper:
     @staticmethod
@@ -12,7 +12,7 @@ class ReservationMapper:
             email=model.email,
             phone_number=model.phone_number,
             customer_number=model.customer_number,
-            table=Table(number=model.table.number, capacity=model.table.capacity), 
+            table=TableMappers.to_domain(model.table), 
             reservation_date=model.reservation_date,
             status=model.status,
             created_at=model.created_at,
@@ -25,7 +25,7 @@ class ReservationMapper:
             model = ReservationModel()
 
         model.name = domain.name
-        model.table_id = domain.table.id
+        model.table = TableMappers.to_model(domain.table)
         model.reservation_date = domain.reservation_date
         model.status = domain.status
         model.email = domain.email
