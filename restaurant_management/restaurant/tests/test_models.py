@@ -1,8 +1,8 @@
 from restaurant.tests.factories.model_factories import TableFactory, MenuItemFactory, MenuExtraFactory, OrderItemFactory, OrderFactory
-from restaurant.repository.models.models import TableModel, MenuItemModel, MenuExtra
-from restaurant.repository.models.models import ReservationModel, TableModel, IngredientModel, StockModel, OrderItem, OrderModel, PaymentModel
-from restaurant.tests.factories.model_factories import ReservationFactory, TableFactory, IngredientFactory, MenuItemFactory, StockFactory, PaymentFactory
-
+from restaurant.repository.models.models import TableModel, MenuItemModel, MenuExtraModel
+from restaurant.repository.models.models import ReservationModel, TableModel, IngredientModel, StockModel, OrderItemModel, OrderModel, PaymentModel, PaymentItemModel
+from restaurant.tests.factories.model_factories import ReservationFactory, TableFactory, IngredientFactory, MenuItemFactory, StockFactory, PaymentFactory, PaymentItemFactory, UserFactory  
+from decimal import Decimal
 from django.test import TestCase
 from faker import Faker
 
@@ -94,7 +94,7 @@ class MenuExtraTest(TestCase):
         menu_extra = MenuExtraFactory()
 
         self.assertIsNotNone(menu_extra)
-        self.assertIsInstance(menu_extra, MenuExtra)
+        self.assertIsInstance(menu_extra, MenuExtraModel)
 
         self.assertIsInstance(menu_extra.created_at, type(fake.date_this_decade()))
         self.assertIsInstance(menu_extra.updated_at, type(fake.date_this_decade()))
@@ -104,18 +104,18 @@ class MenuExtraTest(TestCase):
 
         menu_extra.save()
 
-        saved_extra = MenuExtra.objects.get(id=menu_extra.id)
+        saved_extra = MenuExtraModel.objects.get(id=menu_extra.id)
         self.assertEqual(saved_extra.name, menu_extra.name)
 
     def test_delete_menu_extra(self):
         menu_extra = MenuExtraFactory()
         menu_extra.save()
 
-        self.assertTrue(MenuExtra.objects.filter(id=menu_extra.id).exists())
+        self.assertTrue(MenuExtraModel.objects.filter(id=menu_extra.id).exists())
 
         menu_extra.delete()
 
-        self.assertFalse(MenuExtra.objects.filter(id=menu_extra.id).exists())
+        self.assertFalse(MenuExtraModel.objects.filter(id=menu_extra.id).exists())
 
 
 class ReservationModelTest(TestCase):
@@ -123,7 +123,6 @@ class ReservationModelTest(TestCase):
         self.table = TableFactory()
         
     def test_create_reservation(self):
-        # Crear una nueva reserva
         reservation = ReservationFactory(table=self.table)
 
         self.assertEqual(reservation.status, 'BOOKED')
@@ -258,57 +257,44 @@ class StockModelTest(TestCase):
         self.assertFalse(StockModel.objects.filter(id=stock.id).exists())
 
 class OrderModelTest(TestCase):
-
     def setUp(self):
-        # Crear una orden y sus ítems
         self.order = OrderFactory()
         self.order_item = OrderItemFactory(order=self.order)
 
     def test_create_order(self):
-        # Verificar que la orden se haya creado correctamente
         order = OrderModel.objects.get(id=self.order.id)
 
-        # Verificar los datos de la orden
         self.assertEqual(order.table, self.order.table)
         self.assertEqual(order.status, self.order.status)
         self.assertEqual(order.created_at, self.order.created_at)
         self.assertEqual(order.end_at, self.order.end_at)
 
     def test_order_str_method(self):
-        # Verificar que el método __str__ devuelve la representación correcta
         order = OrderFactory()
         self.assertEqual(str(order), f'Order {order.id} - Table {order.table.number}')
 
     def test_read_order(self):
-        # Recuperar la orden desde la base de datos
         order = OrderModel.objects.get(id=self.order.id)
 
-        # Verificar que los datos de la orden coinciden
         self.assertEqual(order.status, self.order.status)
         self.assertEqual(order.created_at, self.order.created_at)
 
     def test_update_order(self):
-        # Actualizar el estado de la orden
         order = OrderFactory()
         new_status = 'COMPLETED'
         order.status = new_status
         order.save()
 
-        # Recuperar la orden actualizada
         updated_order = OrderModel.objects.get(id=order.id)
 
-        # Verificar que el estado de la orden ha sido actualizado
         self.assertEqual(updated_order.status, new_status)
 
     def test_delete_order(self):
-        # Verificar que la orden existe en la base de datos
         order = OrderFactory()
         self.assertTrue(OrderModel.objects.filter(id=order.id).exists())
 
-        # Eliminar la orden
         order.delete()
 
-        # Verificar que la orden ha sido eliminada
         self.assertFalse(OrderModel.objects.filter(id=order.id).exists())
 
 
@@ -317,7 +303,7 @@ class OrderItemModelTest(TestCase):
         self.order_item = OrderItemFactory()
 
     def test_create_order_item(self):
-        order_item = OrderItem.objects.get(id=self.order_item.id)
+        order_item = OrderItemModel.objects.get(id=self.order_item.id)
 
         self.assertEqual(order_item.menu_item, self.order_item.menu_item)
         self.assertEqual(order_item.order, self.order_item.order)
@@ -333,17 +319,17 @@ class OrderItemModelTest(TestCase):
         order_item.is_delivered = new_is_delivered
         order_item.save()
 
-        updated_order_item = OrderItem.objects.get(id=order_item.id)
+        updated_order_item = OrderItemModel.objects.get(id=order_item.id)
 
         self.assertEqual(updated_order_item.is_delivered, new_is_delivered)
 
     def test_delete_order_item(self):
         order_item = OrderItemFactory()
-        self.assertTrue(OrderItem.objects.filter(id=order_item.id).exists())
+        self.assertTrue(OrderItemModel.objects.filter(id=order_item.id).exists())
 
         order_item.delete()
 
-        self.assertFalse(OrderItem.objects.filter(id=order_item.id).exists())
+        self.assertFalse(OrderItemModel.objects.filter(id=order_item.id).exists())
 
 
 class PaymentModelTest(TestCase):
@@ -391,3 +377,94 @@ class PaymentModelTest(TestCase):
 
         self.assertFalse(PaymentModel.objects.filter(id=payment.id).exists())
 
+
+class PaymentItemModelTest(TestCase):
+    def setUp(self):
+        self.payment_item = PaymentItemFactory()
+
+    def test_create_payment_item(self):
+        payment_item = PaymentItemModel.objects.get(id=self.payment_item.id)
+
+        self.assertEqual(payment_item.payment, self.payment_item.payment)
+        self.assertEqual(payment_item.order_item, self.payment_item.order_item)
+        self.assertEqual(payment_item.menu_item, self.payment_item.menu_item)
+        self.assertEqual(payment_item.menu_item_extra, self.payment_item.menu_item_extra)
+        self.assertEqual(payment_item.price, self.payment_item.price)
+        self.assertEqual(payment_item.quantity, self.payment_item.quantity)
+        self.assertEqual(payment_item.extras_charges, self.payment_item.extras_charges)
+        self.assertEqual(payment_item.total, self.payment_item.total)
+
+    def test_payment_item_str_method(self):
+        payment_item = PaymentItemFactory()
+        self.assertEqual(str(payment_item), f'{payment_item.quantity}x {payment_item.menu_item.name} - {payment_item.total}')
+
+    def test_read_payment_item(self):
+        payment_item = PaymentItemModel.objects.get(id=self.payment_item.id)
+
+        self.assertEqual(payment_item.price, self.payment_item.price)
+        self.assertEqual(payment_item.quantity, self.payment_item.quantity)
+        self.assertEqual(payment_item.total, self.payment_item.total)
+
+    def test_update_payment_item(self):
+        payment_item = PaymentItemFactory()
+        new_price = Decimal('19.99')
+        payment_item.price = new_price
+        payment_item.save()
+
+        updated_payment_item = PaymentItemModel.objects.get(id=payment_item.id)
+
+        self.assertEqual(updated_payment_item.price, new_price)
+
+    def test_delete_payment_item(self):
+        payment_item = PaymentItemFactory()
+        self.assertTrue(PaymentItemModel.objects.filter(id=payment_item.id).exists())
+
+        payment_item.delete()
+
+        self.assertFalse(PaymentItemModel.objects.filter(id=payment_item.id).exists())
+
+from django.contrib.auth import get_user_model
+
+class UserModelTest(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+
+    def test_create_user(self):
+        user = get_user_model().objects.get(id=self.user.id)
+
+        self.assertEqual(user.first_name, self.user.first_name)
+        self.assertEqual(user.last_name, self.user.last_name)
+        self.assertEqual(user.gender, self.user.gender)
+        self.assertEqual(user.email, self.user.email)
+        self.assertEqual(user.password, self.user.password)
+        self.assertEqual(user.role, self.user.role)
+        self.assertEqual(user.phone_number, self.user.phone_number)
+
+    def test_user_str_method(self):
+        user = UserFactory()
+        self.assertEqual(str(user), f'{user.first_name} {user.last_name}')
+
+    def test_read_user(self):
+        user = get_user_model().objects.get(id=self.user.id)
+
+        self.assertEqual(user.first_name, self.user.first_name)
+        self.assertEqual(user.last_name, self.user.last_name)
+        self.assertEqual(user.email, self.user.email)
+
+    def test_update_user(self):
+        user = UserFactory()
+        new_email = 'newemail@example.com'
+        user.email = new_email
+        user.save()
+
+        updated_user = get_user_model().objects.get(id=user.id)
+
+        self.assertEqual(updated_user.email, new_email)
+
+    def test_delete_user(self):
+        user = UserFactory()
+        self.assertTrue(get_user_model().objects.filter(id=user.id).exists())
+
+        user.delete()
+
+        self.assertFalse(get_user_model().objects.filter(id=user.id).exists())

@@ -2,7 +2,12 @@ import factory
 from factory.django import DjangoModelFactory
 from django.utils import timezone
 from faker import Faker
-from restaurant.repository.models.models import MenuItemModel, MenuExtra, TableModel, ReservationModel, IngredientModel, StockModel, StockTransactionModel, PaymentModel, OrderItem, OrderModel
+from datetime import datetime
+from restaurant.repository.models.models import MenuItemModel, MenuExtraModel, TableModel, ReservationModel, IngredientModel, StockModel, StockTransactionModel, PaymentModel, OrderItemModel, OrderModel, PaymentItemModel, UserModel
+import pytz
+from decimal import Decimal 
+from django.utils.timezone import make_aware
+
 
 fake = Faker()
 
@@ -25,17 +30,20 @@ class MenuItemFactory(DjangoModelFactory):
     price = factory.Faker('random_number', digits=2)
     description = factory.Faker('sentence', nb_words=10)
     category = factory.Iterator(MenuItemModel.CATEGORY_CHOICES, getter=lambda c: c[0])
-    created_at = factory.LazyFunction(fake.date_this_decade)
-    updated_at = factory.LazyFunction(fake.date_this_decade)
+    created_at = factory.LazyFunction(lambda: timezone.make_aware(datetime.now()))
+    updated_at = factory.LazyFunction(lambda: timezone.make_aware(datetime.now()))
+
 
 
 class MenuExtraFactory(DjangoModelFactory):
     class Meta:
-        model = MenuExtra
+        model = MenuExtraModel
 
     name = factory.Faker('word')
-    created_at = factory.LazyFunction(fake.date_this_decade)
-    updated_at = factory.LazyFunction(fake.date_this_decade)
+    price = factory.Faker("random_number", digits=2)
+    description = factory.Faker("sentence")
+    created_at = factory.LazyFunction(timezone.now)
+    updated_at = factory.LazyFunction(timezone.now)
 
 
 class ReservationFactory(DjangoModelFactory):
@@ -93,13 +101,15 @@ class OrderFactory(DjangoModelFactory):
 
     table = factory.SubFactory(TableFactory)
     status = factory.Faker('random_element', elements=['IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
-    created_at = factory.LazyFunction(fake.date_this_century)
-    end_at = factory.LazyAttribute(lambda o: fake.date_this_century() if o.status == 'COMPLETED' else None)
+    created_at = factory.LazyFunction(timezone.now)
+    end_at = factory.LazyAttribute(
+        lambda o: make_aware(fake.date_time_this_century(), pytz.UTC) if o.status == 'COMPLETED' else None
+    )    
 
 
 class OrderItemFactory(DjangoModelFactory):
     class Meta:
-        model = OrderItem
+        model = OrderItemModel
 
     order = factory.SubFactory(OrderFactory)
     menu_item = factory.SubFactory(MenuItemFactory)
@@ -120,5 +130,36 @@ class PaymentFactory(DjangoModelFactory):
     vat = factory.Faker('pydecimal', left_digits=5, right_digits=2, positive=True)
     currency_type = factory.Faker('random_element', elements=['MXN', 'USD', 'EUR'])
     total = factory.Faker('pydecimal', left_digits=5, right_digits=2, positive=True)
-    created_at = factory.LazyFunction(fake.date_this_century)
-    paid_at = factory.LazyAttribute(lambda o: fake.date_this_century() if o.payment_status == 'COMPLETED' else None)
+    created_at = factory.LazyFunction(timezone.now)
+    paid_at = factory.LazyAttribute(lambda o: make_aware(fake.date_time_this_century(), pytz.UTC)if o.payment_status == 'COMPLETED' else None)
+
+
+class PaymentItemFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = PaymentItemModel
+
+    payment = factory.SubFactory(PaymentFactory)
+    order_item = factory.SubFactory(OrderItemFactory) 
+    menu_item = factory.SubFactory(MenuItemFactory) 
+    menu_item_extra = factory.SubFactory(MenuExtraFactory) 
+    price = factory.Faker('random_number', digits=5)
+    quantity = factory.Faker('random_int', min=1, max=10)
+    extras_charges = Decimal('0.00')
+    total = factory.LazyAttribute(lambda o: o.price * o.quantity + o.extras_charges)
+
+
+from django.contrib.auth import get_user_model
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = get_user_model()
+
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    gender = factory.Faker('random_element', elements=['Male', 'Female', 'Other'])
+    email = factory.Faker('email')
+    password = factory.Faker('password')
+    birth_date = factory.Faker('date_of_birth')
+    role = factory.Faker('random_element', elements=['Admin', 'User', 'Manager'])
+    phone_number = factory.Faker('phone_number')
+    username = factory.LazyAttribute(lambda x: fake.user_name())

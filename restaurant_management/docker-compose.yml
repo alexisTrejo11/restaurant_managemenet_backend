@@ -21,9 +21,8 @@ services:
     networks:
       - app_network
 
-  web:
+  restaurant_app:
     build: .
-    command: ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - .:/restaurant_management_backend
     ports:
@@ -32,6 +31,8 @@ services:
       - db
       - memcached
     environment:
+      - TESTING=True 
+      - DJANGO_SETTINGS_MODULE=restaurant_management.settings
       - DJANGO_DB_HOST=db
       - DJANGO_DB_NAME=mydb
       - DJANGO_DB_USER=postgres
@@ -39,6 +40,14 @@ services:
       - DJANGO_DB_PORT=5432
       - DJANGO_CACHE_BACKEND=django.core.cache.backends.memcached.MemcachedCache
       - DJANGO_CACHE_LOCATION=memcached:11211
+    command: >
+      bash -c "
+        if [ \"$TESTING\" == 'True' ]; then 
+          python manage.py migrate --noinput;
+          python manage.py test;
+        else 
+          python manage.py runserver 0.0.0.0:8000;
+        fi"
     networks:
       - app_network
 
