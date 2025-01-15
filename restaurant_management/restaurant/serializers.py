@@ -161,27 +161,12 @@ class OrderItemsDeleteSerilizer(serializers.Serializer):
     )
 
 
-class OrderInitSerializer(serializers.ModelSerializer):
-    table_number = serializers.IntegerField()
-    order_items = serializers.ListField(
-        child=OrderItemInsertSerializer(),  
-        required=True,
-        allow_empty=False
-    )
-
-    def validate_order_items(self, value):
-        if not value:
-            raise serializers.ValidationError("Order items cannot be empty.")
-        return value
-
-
 class PaymentItemSerializer(serializers.Serializer):
     menu_item_name = serializers.CharField(source='menu_item.name') 
     order_item_id = serializers.CharField(source='order_item.id') 
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
     quantity = serializers.IntegerField()
     total = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
-    #extra_item_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     menu_extra_item = serializers.CharField(required=False) 
 
 
@@ -307,4 +292,3 @@ class StaffSignupSerializer(serializers.Serializer):
     password = serializers.CharField()
     birth_date = serializers.DateField()
     phone_number = serializers.CharField(max_length=15, allow_null=True, required=False)
-    role = serializers.ChoiceField(choices=[(Role.STAFF, Role.STAFF.name)], default=Role.STAFF, read_only=True)
