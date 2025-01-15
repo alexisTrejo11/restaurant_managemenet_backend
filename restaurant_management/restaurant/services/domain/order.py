@@ -4,7 +4,6 @@ from restaurant.utils.exceptions import DomainException
 from restaurant.services.domain.menu_item import MenuItem
 from restaurant.services.domain.menu_extra import MenuExtraDomain
 
-
 class OrderStatus:
     IN_PROGRESS = 'IN_PROGRESS'
     COMPLETED = 'COMPLETED'

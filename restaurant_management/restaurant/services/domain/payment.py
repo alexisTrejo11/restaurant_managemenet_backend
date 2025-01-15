@@ -108,7 +108,7 @@ class Payment:
     def validate_payment_method(self, payment_method):
         valid_payment_methods = ['CARD', 'CASH']
         if not payment_method in valid_payment_methods:
-           return Result.success("invalid payment method")
+           return Result.error("invalid payment method")
 
         return Result.success()
     
@@ -134,20 +134,13 @@ class Payment:
         self.paid_at = datetime.now()
 
 
-    def add_tip(self, tip: Decimal):
-        self.tip += tip
-        self.total += tip
-
-
     def set_as_complete(self):
         self.payment_status = 'COMPLETED'
 
 
     def __calculate_sub_total(self):
         items = self.items 
-
         item_total = sum(Decimal(item.total) for item in items)
-        
         return item_total
 
 

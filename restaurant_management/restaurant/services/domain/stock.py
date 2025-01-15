@@ -39,8 +39,6 @@ class Stock:
         )
 
         self.stock_transactions.append(transaction)
-
-        self.stock_transactions.append(transaction)
     
 
     def is_stock_available(self, quantity: int) -> bool:
