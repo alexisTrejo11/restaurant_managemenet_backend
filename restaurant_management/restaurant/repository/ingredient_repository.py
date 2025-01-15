@@ -24,14 +24,21 @@ class IngredientRepository(CommonRepository[Ingredient]):
             return IngredientMappers.modelToDomain(ingredient_model)
         return None
 	
-
     def create(self, ingredient: Ingredient) -> Ingredient:
-        new_ingredient = self.ingredient_model(
+        db_ingredient = self.ingredient_model(
             name=ingredient.name,
             unit=ingredient.unit
         )
-        new_ingredient.save()
-        return ingredient
+        db_ingredient.save()
+        
+        domain_ingredient = Ingredient(
+            id=db_ingredient.id,
+            name=db_ingredient.name,
+            unit=db_ingredient.unit,
+            quantity=db_ingredient.quantity  
+        )
+        
+        return domain_ingredient 
 
 
     def update(self, ingredient: Ingredient) -> Optional[Ingredient]:

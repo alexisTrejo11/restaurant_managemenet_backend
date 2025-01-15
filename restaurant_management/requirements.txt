@@ -4,6 +4,7 @@ psycopg2-binary
 python-dateutil
 pytest
 pytest-django
+pytest-mockito
 factory-boy
 injector
 pymemcache

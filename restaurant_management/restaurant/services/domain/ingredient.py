@@ -5,9 +5,9 @@ from typing import Optional
 class Ingredient:
     def __init__(
         self,
-        id: str,
         name: str,
         unit: str,
+        id = None,
         quantity: Decimal = Decimal('0.00'), 
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
@@ -20,7 +20,7 @@ class Ingredient:
         self.__updated_at = updated_at or datetime.now()
 
     @property
-    def id(self) -> str:
+    def id(self):
         return self.__id
 
     @property
