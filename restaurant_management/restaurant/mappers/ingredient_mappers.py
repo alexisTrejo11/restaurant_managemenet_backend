@@ -1,5 +1,5 @@
 from restaurant.services.domain.ingredient import Ingredient
-from restaurant.repository.models.models import IngredientModel
+from restaurant.models import IngredientModel
 
 
 class IngredientMappers:

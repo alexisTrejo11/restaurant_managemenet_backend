@@ -1,4 +1,4 @@
-from restaurant.repository.models.models import TableModel 
+from restaurant.models import TableModel 
 from restaurant.services.domain.table import Table 
 from restaurant.repository.common_repository import CommonRepository
 from typing import List

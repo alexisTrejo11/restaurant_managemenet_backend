@@ -1,4 +1,4 @@
-from restaurant.repository.models.models import OrderModel, OrderItemModel
+from restaurant.models import OrderModel, OrderItemModel
 from restaurant.services.domain.order import Order
 from restaurant.repository.common_repository import CommonRepository
 from typing import List, Optional

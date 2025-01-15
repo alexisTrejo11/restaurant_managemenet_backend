@@ -1,5 +1,5 @@
 from datetime import datetime
-from restaurant.repository.models.models import ReservationModel 
+from restaurant.models import ReservationModel 
 from restaurant.services.domain.reservation import Reservation
 from restaurant.mappers.table_mappers import TableMappers
 

@@ -1,4 +1,4 @@
-from restaurant.repository.models.models import UserModel
+from restaurant.models import UserModel
 from restaurant.services.domain.user import Role, User, Gender
 from typing import Optional, List
 from datetime import datetime

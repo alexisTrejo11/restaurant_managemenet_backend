@@ -1,4 +1,4 @@
-from restaurant.repository.models.models import IngredientModel
+from restaurant.models import IngredientModel
 from restaurant.services.domain.ingredient import Ingredient
 from restaurant.repository.common_repository import CommonRepository
 from restaurant.mappers.ingredient_mappers import IngredientMappers

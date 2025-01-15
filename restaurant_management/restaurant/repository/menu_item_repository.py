@@ -1,5 +1,5 @@
 from restaurant.services.domain.menu_item import MenuItem
-from restaurant.repository.models.models import MenuItemModel
+from restaurant.models import MenuItemModel
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.repository.common_repository import CommonRepository
 from typing import List, Optional

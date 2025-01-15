@@ -1,5 +1,5 @@
 from restaurant.services.domain.menu_extra import MenuExtraDomain
-from restaurant.repository.models.models import MenuExtraModel
+from restaurant.models import MenuExtraModel
 from restaurant.mappers.menu_extra_mappers import MenuExtraMapper
 from restaurant.repository.common_repository import CommonRepository
 from typing import List, Optional

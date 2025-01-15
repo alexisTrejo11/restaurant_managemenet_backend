@@ -1,4 +1,4 @@
-from restaurant.repository.models.models import OrderModel, OrderItemModel, TableModel, MenuItemModel
+from restaurant.models import OrderModel, OrderItemModel, TableModel, MenuItemModel
 from restaurant.services.domain.order import Order, OrderItem
 from restaurant.serializers import OrderSerializer
 from restaurant.mappers.table_mappers import TableMappers

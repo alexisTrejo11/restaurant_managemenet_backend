@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from decimal import Decimal
 from restaurant.services.domain.menu_item import MenuItem, CategoryEnum
-from restaurant.repository.models.models import MenuItemModel
+from restaurant.models import MenuItemModel
 
 class MenuItemMapper:
      @staticmethod

@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Optional, List
-from restaurant.repository.models.models import PaymentModel, PaymentItemModel
+from restaurant.models import PaymentModel, PaymentItemModel
 from restaurant.services.domain.payment import Payment  
 from restaurant.mappers.payment_mapper import PaymentMapper, PaymentItemMapper
 from restaurant.repository.common_repository import CommonRepository

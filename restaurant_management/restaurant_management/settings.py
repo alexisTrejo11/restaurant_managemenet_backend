@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'restaurant',
-    # Remove at migrations
-    'restaurant.repository.models',
 ]
 
 MIDDLEWARE = [
@@ -78,7 +76,7 @@ REST_FRAMEWORK = {
 }
 
 # Remove at migrations
-AUTH_USER_MODEL = 'models.UserModel'
+AUTH_USER_MODEL = 'restaurant.UserModel'
 
 SIMPLE_JWT = {
     'SIGNING_KEY': 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg==',

@@ -1,10 +1,12 @@
 from restaurant.tests.factories.model_factories import TableFactory, MenuItemFactory, MenuExtraFactory, OrderItemFactory, OrderFactory
-from restaurant.repository.models.models import TableModel, MenuItemModel, MenuExtraModel
-from restaurant.repository.models.models import ReservationModel, TableModel, IngredientModel, StockModel, OrderItemModel, OrderModel, PaymentModel, PaymentItemModel
+from restaurant.models import TableModel, MenuItemModel, MenuExtraModel
+from restaurant.models import ReservationModel, TableModel, IngredientModel, StockModel, OrderItemModel, OrderModel, PaymentModel, PaymentItemModel
 from restaurant.tests.factories.model_factories import ReservationFactory, TableFactory, IngredientFactory, MenuItemFactory, StockFactory, PaymentFactory, PaymentItemFactory, UserFactory  
 from decimal import Decimal
 from django.test import TestCase
 from faker import Faker
+from django.contrib.auth import get_user_model
+
 
 fake = Faker()
 
@@ -423,7 +425,6 @@ class PaymentItemModelTest(TestCase):
 
         self.assertFalse(PaymentItemModel.objects.filter(id=payment_item.id).exists())
 
-from django.contrib.auth import get_user_model
 
 class UserModelTest(TestCase):
     def setUp(self):

@@ -5,6 +5,7 @@ import re
 from datetime import  date
 from enum import Enum
 from restaurant.services.domain.user import Gender, Role
+from restaurant.models import OrderModel, OrderItemModel
 
 
 
@@ -115,8 +116,7 @@ class ReservationSerializer(serializers.Serializer):
     status = serializers.CharField()
     created_at = serializers.DateTimeField()
 
-from rest_framework import serializers
-from restaurant.repository.models.models import OrderModel, OrderItemModel
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(source='menu_item.name', read_only=True)  

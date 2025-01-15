@@ -1,6 +1,6 @@
 from decimal import Decimal
 from restaurant.services.domain.payment import Payment, PaymentItem
-from restaurant.repository.models.models import PaymentItemModel, PaymentModel
+from restaurant.models import PaymentItemModel, PaymentModel
 from restaurant.mappers.order_mappers import OrderMappers, OrderItemMappers
 from restaurant.mappers.menu_item_mappers import MenuItemMapper
 from restaurant.mappers.menu_extra_mappers import MenuExtraMapper

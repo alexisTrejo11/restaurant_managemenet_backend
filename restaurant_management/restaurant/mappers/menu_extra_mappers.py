@@ -1,6 +1,6 @@
 from typing import Optional
 from restaurant.services.domain.menu_extra import MenuExtraDomain
-from restaurant.repository.models.models import MenuExtraModel
+from restaurant.models import MenuExtraModel
 
 class MenuExtraMapper:
     @staticmethod

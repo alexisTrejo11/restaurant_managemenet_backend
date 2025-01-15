@@ -1,7 +1,7 @@
 from restaurant.repository.common_repository import CommonRepository
 from restaurant.services.domain.stock import Stock, StockTransaction
 from restaurant.mappers.stock_mappers import StockMappers, StockTransactionMappers
-from restaurant.repository.models.models import StockModel, StockTransactionModel
+from restaurant.models import StockModel, StockTransactionModel
 from typing import List, Optional
 
 

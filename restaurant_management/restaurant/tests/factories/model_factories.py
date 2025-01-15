@@ -3,7 +3,7 @@ from factory.django import DjangoModelFactory
 from django.utils import timezone
 from faker import Faker
 from datetime import datetime
-from restaurant.repository.models.models import MenuItemModel, MenuExtraModel, TableModel, ReservationModel, IngredientModel, StockModel, StockTransactionModel, PaymentModel, OrderItemModel, OrderModel, PaymentItemModel, UserModel
+from restaurant.models import MenuItemModel, MenuExtraModel, TableModel, ReservationModel, IngredientModel, StockModel, StockTransactionModel, PaymentModel, OrderItemModel, OrderModel, PaymentItemModel, UserModel
 import pytz
 from decimal import Decimal 
 from django.utils.timezone import make_aware
@@ -161,5 +161,5 @@ class UserFactory(factory.django.DjangoModelFactory):
     password = factory.Faker('password')
     birth_date = factory.Faker('date_of_birth')
     role = factory.Faker('random_element', elements=['Admin', 'User', 'Manager'])
-    phone_number = factory.Faker('phone_number')
+    phone_number = factory.LazyAttribute(lambda _: fake.phone_number()[:20])
     username = factory.LazyAttribute(lambda x: fake.user_name())

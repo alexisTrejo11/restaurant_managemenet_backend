@@ -5,8 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
+restaurant_management/restaurant/migrations/
+\033\033
 
-./env
 
 # Distribution / packaging
 .Python

@@ -1,5 +1,5 @@
 from restaurant.services.domain.table import Table
-from restaurant.repository.models.models import TableModel
+from restaurant.models import TableModel
 
 class TableMappers:
     @staticmethod

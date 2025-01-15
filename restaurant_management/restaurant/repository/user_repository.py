@@ -4,7 +4,7 @@ from django.db import transaction
 from restaurant.repository.common_repository import CommonRepository
 from restaurant.services.domain.user import User
 from restaurant.mappers.user_mappers import UserMapper
-from restaurant.repository.models.models import UserModel
+from restaurant.models import UserModel
 from restaurant.utils.exceptions import RepositoryException
 
 class UserRepository(CommonRepository[User]):

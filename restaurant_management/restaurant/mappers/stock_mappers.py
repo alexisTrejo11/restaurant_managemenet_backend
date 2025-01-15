@@ -1,5 +1,5 @@
 from restaurant.services.domain.stock import Stock, StockTransaction
-from restaurant.repository.models.models import StockModel, StockTransactionModel
+from restaurant.models import StockModel, StockTransactionModel
 from restaurant.mappers.ingredient_mappers import IngredientMappers
 
 class StockMappers:
