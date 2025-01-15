@@ -1,28 +1,32 @@
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
 from typing import Optional
 import re
 from restaurant.utils.result import Result
 from restaurant.utils.password.password_validator import PasswordValidator
+
 
 class Gender(Enum):
     MALE = "male"
     FEMALE = "female"
     OTHER = "other"
 
+
 class Role(Enum):
     ADMIN = "admin"
     CUSTOMER = "customer"
     STAFF = "staff"
 
+
 class UserException(Exception):
     """Base exception for User domain"""
     pass
 
+
 class InvalidEmailException(UserException):
     """Raised when email format is invalid"""
     pass
+
 
 class InvalidPhoneNumberException(UserException):
     """Raised when phone number format is invalid"""
@@ -54,7 +58,7 @@ class User:
         self.__role = role
         self.__joined_at = joined_at
         self.__last_login = last_login
-        self.__phone_number = phone_number if phone_number else None
+        self.__phone_number = phone_number
 
     @property
     def id(self) -> Optional[int]:
@@ -103,21 +107,19 @@ class User:
     @property
     def password(self) -> str:
         return self.__password
-    
-    def set_password(self, password) -> str:
+
+    def set_password(self, password: str) -> None:
         self.__password = password
 
     @staticmethod
     def validate_password(plain_password: str) -> Result:
         return PasswordValidator.validate_password_strict(plain_password)
 
-
     @staticmethod
     def validate_email(email: str) -> Result:
         email_pattern = re.compile(r'^[a-zA-Z0-9.__%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
         if not email_pattern.match(email):
             return Result.error("Invalid email format")
-        
         return Result.success()
 
     @staticmethod
@@ -125,24 +127,20 @@ class User:
         phone_pattern = re.compile(r'^\+?1?\d{9,15}$')
         if not phone_pattern.match(phone_number):
             return Result.error("Invalid phone number format")
-        
         return Result.success()
-        
 
     def update_last_login(self, new_login_time: datetime) -> None:
         """Update the last login time"""
         self.__last_login = new_login_time
 
-
     def change_role(self, new_role: Role) -> None:
         """Change user's role"""
         self.__role = new_role
 
-
     def to_dict(self) -> dict:
         """Convert user to dictionary representation"""
         return {
-            'id': str(self.__id.value) if self.__id else None,
+            'id': str(self.__id) if self.__id else None,
             'first_name': self.__first_name,
             'last_name': self.__last_name,
             'gender': self.__gender.value,
@@ -154,13 +152,10 @@ class User:
             'phone_number': self.__phone_number
         }
 
-
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, User):
             return False
         return self.__id == other.__id
 
-
     def __hash__(self) -> int:
         return hash(self.__id)
-    

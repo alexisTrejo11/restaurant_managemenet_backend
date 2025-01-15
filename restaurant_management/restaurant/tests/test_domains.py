@@ -369,7 +369,7 @@ class TestPayment(unittest.TestCase):
 
     def test_create_payment(self):
         self.assertEqual(self.payment.order, self.order)
-        self.assertEqual(self.payment.payment_status, 'pending_payment')
+        self.assertEqual(self.payment.payment_status, 'PENDING_PAYMENT')
         self.assertEqual(self.payment.sub_total, Decimal('0.00'))
         self.assertEqual(self.payment.total, Decimal('0.00'))
         self.assertEqual(self.payment.currency_type, 'MXN')
@@ -400,7 +400,7 @@ class TestPayment(unittest.TestCase):
         self.payment.payment_status = 'CANCELLED'
         result = self.payment.validate_payment_complete()
         self.assertTrue(result.is_failure())
-        self.assertEqual(result.get_error_msg(), "only pending payments can be completed")
+        self.assertEqual(result.get_error_msg(), "Only pending payments can be completed")
 
     def test_validate_payment_cancel_success(self):
         self.payment.payment_status = 'PENDING_PAYMENT'
@@ -411,7 +411,7 @@ class TestPayment(unittest.TestCase):
         self.payment.payment_status = 'COMPLETE'
         result = self.payment.validate_payment_cancel()
         self.assertTrue(result.is_failure())
-        self.assertEqual(result.get_error_msg(), "only pending payments can be cancel")
+        self.assertEqual(result.get_error_msg(), "Only pending payments can be cancel")
 
     def test_validate_payment_method_success(self):
         result = self.payment.validate_payment_method('CARD')
@@ -420,7 +420,7 @@ class TestPayment(unittest.TestCase):
     def test_validate_payment_method_error(self):
         result = self.payment.validate_payment_method('BITCOIN')
         self.assertTrue(result.is_failure())
-        self.assertEqual(result.get_error_msg(), "invalid payment method")
+        self.assertEqual(result.get_error_msg(), "Invalid payment method")
 
     def test_complete_payment(self):
         self.payment.payment_status = 'PENDING_PAYMENT'

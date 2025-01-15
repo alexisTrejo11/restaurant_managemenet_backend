@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from restaurant.services.domain.table import Table
-
 from typing import Optional
 from restaurant.utils.result import Result
 
@@ -32,47 +31,93 @@ class Reservation:
         cancelled_at: Optional[datetime] = None,
         id: Optional[int] = None,
     ):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.customer_number = customer_number
-        self.phone_number = phone_number
-        self.table = table
-        self.reservation_date = reservation_date
-        self.status = status
-        self.created_at = created_at or datetime.now()
-        self.cancelled_at = cancelled_at
+        self.__id = id
+        self.__name = name
+        self.__email = email
+        self.__phone_number = phone_number
+        self.__customer_number = customer_number
+        self.__reservation_date = reservation_date
+        self.__status = status
+        self.__table = table
+        self.__created_at = created_at or datetime.now()
+        self.__cancelled_at = cancelled_at
 
+    @property
+    def id(self):
+        return self.__id
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def email(self):
+        return self.__email
+
+    @property
+    def phone_number(self):
+        return self.__phone_number
+
+    @property
+    def customer_number(self):
+        return self.__customer_number
+
+    @property
+    def reservation_date(self):
+        return self.__reservation_date
+
+    @reservation_date.setter
+    def reservation_date(self, value: datetime):
+        self.__reservation_date = value
+
+    @property
+    def status(self):
+        return self.__status
+
+    @status.setter
+    def status(self, value: str):
+        self.__status = value
+
+    @property
+    def table(self):
+        return self.__table
+
+    @table.setter
+    def table(self, value: Table):
+        self.__table = value
+
+    @property
+    def created_at(self):
+        return self.__created_at
+
+    @property
+    def cancelled_at(self):
+        return self.__cancelled_at
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.reservation_date}"
-
+        return f"{self.__name} - {self.__reservation_date}"
 
     def cancel(self):
-        if self.status == self.Status.CANCELLED:
+        if self.__status == self.Status.CANCELLED:
             raise ValueError("Reservation is already cancelled.")
-        self.status = self.Status.CANCELLED
-        self.cancelled_at = datetime.now()
-
+        self.__status = self.Status.CANCELLED
+        self.__cancelled_at = datetime.now()
 
     def attend(self):
-        if self.status == self.Status.CANCELLED:
+        if self.__status == self.Status.CANCELLED:
             raise ValueError("Cannot mark a cancelled reservation as attended.")
-        self.status = self.Status.ATTENDED
-
+        self.__status = self.Status.ATTENDED
 
     def mark_not_attended(self):
-        if self.status == self.Status.CANCELLED:
+        if self.__status == self.Status.CANCELLED:
             raise ValueError("Cannot mark a cancelled reservation as not attended.")
-        self.status = self.Status.NOT_ATTENDED
+        self.__status = self.Status.NOT_ATTENDED
 
-
-    def assing_table(self, table : Table):
-        self.table = table
-
+    def assign_table(self, table: Table):
+        self.__table = table
 
     def validate_date(self) -> Result:
-        reservation_date = self.reservation_date
+        reservation_date = self.__reservation_date
 
         now = datetime.now()
         max_date_allowed = now + relativedelta(months=1)
@@ -85,13 +130,11 @@ class Reservation:
 
         if reservation_date > max_date_allowed:
             return Result.error("Reservations can only be made up to one month in advance.")
-        
 
         return Result.success(None)
-    
 
     def validate_hour(self):
-        reservation_hour = self.reservation_date.hour
+        reservation_hour = self.__reservation_date.hour
         OPENING_HOUR = 12  # 12:00 PM
         CLOSING_HOUR = 22  # 10:00 PM
 
@@ -100,9 +143,8 @@ class Reservation:
 
         return Result.success(None)
 
-
     def validate_customer_limit(self) -> Result:
-        if self.customer_number > 8:
+        if self.__customer_number > 8:
             return Result.error("Reservation can't be above 8 customers")
 
         return Result.success(None)
