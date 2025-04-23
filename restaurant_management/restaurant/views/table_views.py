@@ -1,7 +1,7 @@
 from restaurant.utils.response import ApiResponse
 from restaurant.serializers import TableSerializer, TableInsertSerializer
 from rest_framework.viewsets import ViewSet
-from restaurant.services.table_service import TableService
+from restaurant_management.orders.services.table_service import TableService
 from restaurant.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema

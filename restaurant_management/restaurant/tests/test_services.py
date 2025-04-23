@@ -1,6 +1,6 @@
 import pytest
 from mockito import mock, verify, when, any, eq
-from restaurant.services.table_service import TableService
+from restaurant_management.orders.services.table_service import TableService
 from restaurant.repository.table_respository import TableRepository
 from restaurant.services.domain.table import Table
 

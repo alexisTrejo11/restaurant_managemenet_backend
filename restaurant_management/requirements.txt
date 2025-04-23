@@ -1,5 +1,6 @@
 Django==5.1.2
 djangorestframework
+django-phonenumber-field
 psycopg2-binary
 python-dateutil
 pytest
@@ -11,4 +12,3 @@ pymemcache
 djangorestframework-simplejwt
 django-ratelimit
 drf-yasg
-

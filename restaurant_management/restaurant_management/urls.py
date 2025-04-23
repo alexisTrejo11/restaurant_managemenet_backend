@@ -1,12 +1,12 @@
 from django.urls import path
-from restaurant.views.table_views import TableViews
-from restaurant.views.menu_views import MenuViews
+from restaurant.views.table_views import TableVxiews
+from menu.views import MenuViews
 from restaurant.views.reservation_views import ReservationViews
-from restaurant.views.order_views import OrderViews
-from restaurant.views.stock_views import StockViews
-from restaurant.views.payment_views import PaymentViews
-from restaurant.views.ingredient_views import IngredientViews
-from restaurant.views.user_views import UserViews
+from orders.views import OrderViews
+from stock.views import StockViews
+from payments.views import PaymentViews
+from stock.views import IngredientViews
+from users.views import UserViews
 from restaurant.views.auth_views import AuthViews
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -29,9 +29,16 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # Swagger 
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
+   path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
+   path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
 
+   # Menu view
+   path('v1/api/menu_items/<int:menu_id>', MenuViews.as_view({'get': 'get_menu_item_by_id', 'delete': 'delete_menu_item_by_id'}), name='menu_item-detail'),
+   path('v1/api/menu_items/all', MenuViews.as_view({'get': 'get_all_menu_items'}), name='get_all_menu_items'),
+   path('v1/api/menu_items/category', MenuViews.as_view({'get': 'get_menus_items_by_category'}), name='get_menus_items_by_category'),
+   path('v1/api/menu_items', MenuViews.as_view({'post': 'create_menu_item'}), name='create_menu_item'),
+
+   """
     # Tables
     path('v1/api/tables/<int:number>', TableViews.as_view({'get': 'get_table_by_number', 'delete': 'delete_table_by_number'}), name='table-detail'),
     path('v1/api/tables/all', TableViews.as_view({'get': 'get_all_tables'}), name='get_all_tables'),
@@ -48,13 +55,6 @@ urlpatterns = [
     path('v1/api/stocks/all', StockViews.as_view({'get': 'get_all_stocks_sort_by_last_transaction'}), name='stock-detail'),
     path('v1/api/stocks', StockViews.as_view({'post': 'init_stock'}), name='init_stock'),
     path('v1/api/stocks/transaction', StockViews.as_view({'put': 'add_transaction'}), name='stock-by-ingredient'),
-
-    # Menu view
-    path('v1/api/menu_items/<int:menu_id>', MenuViews.as_view({'get': 'get_menu_item_by_id', 'delete': 'delete_menu_item_by_id'}), name='menu_item-detail'),
-    path('v1/api/menu_items/all', MenuViews.as_view({'get': 'get_all_menu_items'}), name='get_all_menu_items'),
-    path('v1/api/menu_items/category', MenuViews.as_view({'get': 'get_menus_items_by_category'}), name='get_menus_items_by_category'),
-    path('v1/api/menu_items', MenuViews.as_view({'post': 'create_menu_item'}), name='create_menu_item'),
-
     # Resevations
     path('v1/api/reservations/<int:reservation_id>', ReservationViews.as_view({'get': 'get_reservation_by_id', 'delete': 'delete_reservation_by_id'}), name='reservation-detail'),
     path('v1/api/reservations/today', ReservationViews.as_view({'get': 'get_today_reservation'}), name='today-reservations'),
@@ -92,6 +92,7 @@ urlpatterns = [
     # Auth
     path('v1/api/auth/signup-staff', AuthViews.as_view({'post': 'signup_staff'}), name='signup-staff'),
     path('v1/api/auth/login', AuthViews.as_view({'post': 'login'}), name='login'),
+   """
 
 ] 
  
