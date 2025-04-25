@@ -1,5 +1,5 @@
 from django.urls import path
-from restaurant.views.table_views import TableVxiews
+from restaurant.views.table_views import TableViews
 from menu.views import MenuViews
 from restaurant.views.reservation_views import ReservationViews
 from orders.views import OrderViews

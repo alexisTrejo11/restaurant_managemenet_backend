@@ -1,33 +1,43 @@
 from rest_framework.viewsets import ViewSet
-from common.utils.response import ApiResponse
+from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from restaurant.serializers import OrderSerializer, OrderItemSerializer, OrderItemsInsertSerilizer, OrderItemsDeleteSerilizer, PaymentSerializer
-from restaurant_management.orders.services.order_services import OrderService
-from restaurant_management.orders.services.table_service import TableService
 from restaurant_management.payments.service.payment_service import PaymentService
-from common.injector.app_module import AppModule
+from core.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
-from common.utils.permission import RoleBasedPermission
+from drf_yasg import openapi
+from core.utils.permission import RoleBasedPermission
 from rest_framework.permissions import IsAuthenticated
+from ....application.use_case.order_command_use_case import (
+    CreateOrderUseCase,
+    UpdateOrderUseCase,
+    DeleteOrderUseCase,
+)
+from ....application.use_case.order_query_use_case import (
+    GetAllOrdersUseCase,
+    GetOrderByIdUseCase,
+    SearchOrdersUseCase
+)
+from rest_framework.decorators import action
+
 
 container = Injector([AppModule()])
 
 class OrderViews(ViewSet):
+    def __init__(self, **kwargs):
+        self.search_orders_use_case = container.get(SearchOrdersUseCase)
+        self.get_order_by_id_use_case = container.get(GetOrderByIdUseCase)
+        self.get_all_orders_use_case = container.get(GetAllOrdersUseCase)
+        self.create_order_use_case = container.get(CreateOrderUseCase)
+        self.update_order_use_case = container.get(UpdateOrderUseCase)
+        self.delete_order_use_case = container.get(DeleteOrderUseCase)
+        super().__init__(**kwargs)
+
     def get_permissions(self):
-        if self.action == 'delete_order':
+        if self.action in ['delete_order', 'search_orders'] :
              return [RoleBasedPermission(['admin'])]
         else:
             return [IsAuthenticated()]
-
-    # Service injection
-    def get_order_service(self):
-        return container.get(OrderService)
-
-    def get_table_service(self):
-        return container.get(TableService)
-    
-    def get_payment_service(self):
-        return container.get(PaymentService)
 
     @swagger_auto_schema(
         operation_description="Get order by ID",
@@ -37,31 +47,58 @@ class OrderViews(ViewSet):
         }
     )
     def get_order_by_id(self, request, id):
-        order_service = self.get_order_service()
+        order_dto = self.get_order_by_id_use_case.execute(id, raise_exception=True)
+        return ResponseWrapper.found(
+            data=order_dto.to_dict(), 
+            entity='Order',
+            param='ID',
+            value=id,
+        )
 
-        order = order_service.get_order_by_id(id)
-        if order is None:
-            return ApiResponse.not_found('Order', 'ID', id)
 
-        order_data = OrderSerializer(order).data
-        return ApiResponse.found(order_data, 'Order', 'ID', id)
-
+class OrderViews(ViewSet):
+    def __init__(self, **kwargs):
+        self.search_orders_use_case = container.get(SearchOrdersUseCase)
+        super().__init__(**kwargs)
 
     @swagger_auto_schema(
-        operation_description="Get orders by status",
+        operation_description="Search orders with dynamic filters",
+        manual_parameters=[
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by order status", type=openapi.TYPE_STRING),
+            openapi.Parameter('table_number', openapi.IN_QUERY, description="Filter by table number", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('created_at__gte', openapi.IN_QUERY, description="Filter by orders created after this date", type=openapi.TYPE_STRING),
+            openapi.Parameter('created_at__lte', openapi.IN_QUERY, description="Filter by orders created before this date", type=openapi.TYPE_STRING),
+            openapi.Parameter('end_at__isnull', openapi.IN_QUERY, description="Filter by orders with or without an end date", type=openapi.TYPE_BOOLEAN),
+        ],
         responses={
-            200: OrderSerializer(many=True),
-            404: "Orders with specified status not found"
+            200: "Filtered orders",
+            400: "Invalid filter parameters"
         }
     )
-    def get_orders_by_status(self, request, status):
-        order_service = self.get_order_service()
+    @action(detail=False, methods=['GET'])
+    def search_orders(self, request):
+        """
+        Search orders with dynamic filters based on query parameters.
+        """
+        search_filters = {
+            'status': request.query_params.get('status'),
+            'table__number': request.query_params.get('table_number'),
+            'created_at__gte': request.query_params.get('created_at__gte'),
+            'created_at__lte': request.query_params.get('created_at__lte'),
+            'end_at__isnull': request.query_params.get('end_at__isnull'),
+        }
 
-        orders = order_service.get_orders_by_status(status)
-        
-        order_data = OrderSerializer(orders, many=True).data
-        return ApiResponse.ok(order_data, f'Order with status [{status}] not found')
+        try:
+            order_dto_list = self.search_orders_use_case.execute(search_filters)
+        except ValueError as e:
+            return ResponseWrapper.bad_request(str(e))
 
+        order_dict_list = [dto.to_dict() for dto in order_dto_list]
+
+        return ResponseWrapper.found(
+            data=order_dict_list,
+            entity='Filtered Orders'
+        )
 
     @swagger_auto_schema(
         operation_description="Start a new order",
@@ -77,14 +114,14 @@ class OrderViews(ViewSet):
 
         table = table_service.get_table_by_number(table_number)
         if table is None:
-            return ApiResponse.not_found(f'Table with {table_number} not found')
+            return ResponseWrapper.not_found(f'Table with {table_number} not found')
         elif not table.is_available:
-            return ApiResponse.conflict(f'Table with number {table_number} is not available')
+            return ResponseWrapper.conflict(f'Table with number {table_number} is not available')
 
         order = order_service.init_order(table)        
         order_data = OrderSerializer(order).data
 
-        return ApiResponse.created(order_data, 'Order Successfully Initialized')
+        return ResponseWrapper.created(order_data, 'Order Successfully Initialized')
 
 
     @swagger_auto_schema(
@@ -100,13 +137,13 @@ class OrderViews(ViewSet):
 
         serializer = OrderItemsInsertSerilizer(data=request.data)
         if not serializer.is_valid():
-            return ApiResponse.bad_request(serializer.errors)
+            return ResponseWrapper.bad_request(serializer.errors)
         
         order_id = serializer.data.get('order_id')
 
         order = order_service.get_order_by_id(order_id)
         if order is None:
-            return ApiResponse.not_found('Order', 'ID', order_id)
+            return ResponseWrapper.not_found('Order', 'ID', order_id)
         
         item_data = serializer.data.get('order_items')
         order_items = order_service.proccess_items(item_data)
@@ -114,7 +151,7 @@ class OrderViews(ViewSet):
         order_updated = order_service.add_items_to_order(order, order_items)
 
         order_data = OrderSerializer(order_updated).data
-        return ApiResponse.ok(order_data, 'Order Successfully Updated')
+        return ResponseWrapper.ok(order_data, 'Order Successfully Updated')
 
 
     @swagger_auto_schema(
@@ -130,18 +167,18 @@ class OrderViews(ViewSet):
 
         serializer = OrderItemsDeleteSerilizer(data=request.data)
         if not serializer.is_valid():
-            return ApiResponse.bad_request(serializer.errors)
+            return ResponseWrapper.bad_request(serializer.errors)
         
         order_id = serializer.data.get('order_id')
         order = order_service.get_order_by_id(order_id)
         if order is None:
-            return ApiResponse.not_found('Order', 'ID', order_id)
+            return ResponseWrapper.not_found('Order', 'ID', order_id)
 
         items_ids = serializer.data.get('item_ids')
         order_updated = order_service.delete_items_to_order(order, items_ids)
         
         order_data = OrderSerializer(order_updated).data
-        return ApiResponse.ok(order_data, 'Order Successfully Updated')
+        return ResponseWrapper.ok(order_data, 'Order Successfully Updated')
     
     
     @swagger_auto_schema(
@@ -157,14 +194,14 @@ class OrderViews(ViewSet):
 
         order = order_service.get_order_by_id(id)
         if order is None:
-            return ApiResponse.not_found('Order', 'ID', id)
+            return ResponseWrapper.not_found('Order', 'ID', id)
 
         order_service.end_order(order)
         
         payment = payment_service.create_payment(order)
 
         payment_data = PaymentSerializer(payment).data
-        return ApiResponse.ok(payment_data, 'Order Successfully Ended. Payment is pending to be paid')
+        return ResponseWrapper.ok(payment_data, 'Order Successfully Ended. Payment is pending to be paid')
     
 
     @swagger_auto_schema(
@@ -179,11 +216,11 @@ class OrderViews(ViewSet):
 
         order = order_service.get_order_by_id(id)
         if order is None:
-            return ApiResponse.not_found('Order', 'ID', id)
+            return ResponseWrapper.not_found('Order', 'ID', id)
 
         order_service.cancel_order(order)
 
-        return ApiResponse.ok('Order Successfully Cancelled')
+        return ResponseWrapper.ok('Order Successfully Cancelled')
     
 
     @swagger_auto_schema(
@@ -198,9 +235,9 @@ class OrderViews(ViewSet):
 
         is_deleted = order_service.delete_order_by_id(id)
         if not is_deleted:
-            return ApiResponse.not_found('Order', 'ID', id)
+            return ResponseWrapper.not_found('Order', 'ID', id)
 
-        return ApiResponse.ok('Order Successfully Deleted')
+        return ResponseWrapper.ok('Order Successfully Deleted')
     
     
     @swagger_auto_schema(
@@ -214,7 +251,7 @@ class OrderViews(ViewSet):
 
         order_service.set_item_as_delivered(order_id, item_id)
 
-        return ApiResponse.ok('Item Successfully set as delivered')
+        return ResponseWrapper.ok('Item Successfully set as delivered')
 
 
     @swagger_auto_schema(
@@ -229,4 +266,4 @@ class OrderViews(ViewSet):
         items = order_service.get_not_delivered_items()
 
         item_data = OrderItemSerializer(items, many=True).data
-        return ApiResponse.ok(item_data, 'Order Items Successfully Fetched')
+        return ResponseWrapper.ok(item_data, 'Order Items Successfully Fetched')

@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import OrderItemModel, OrderModel
+from ...models.order_item_model import OrderItemModel
+from ...models.order_model import OrderModel
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(source='menu_item.name', read_only=True)  

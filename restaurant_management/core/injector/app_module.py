@@ -13,10 +13,10 @@ class AppModule(Module):
     def configure(self, binder):
         #Menu Item
         binder.bind(MenuItemRepository, to=MenuItemRepository, scope=singleton)
-        binder.bind(CreateMenuUseCase, to=CreateMenuUseCase, scope=singleton)
-        binder.bind(DeleteMenuUseCase, to=DeleteMenuUseCase, scope=singleton)
-        binder.bind(GetAllMenusUseCase, to=GetAllMenusUseCase, scope=singleton)
-        binder.bind(GetMenuByIdUseCase, to=GetMenuByIdUseCase, scope=singleton)
+        binder.bind(MenuItemRepository, to=CreateMenuUseCase, scope=singleton)
+        binder.bind(MenuItemRepository, to=DeleteMenuUseCase, scope=singleton)
+        binder.bind(MenuItemRepository, to=GetAllMenusUseCase, scope=singleton)
+        binder.bind(MenuItemRepository, to=GetMenuByIdUseCase, scope=singleton)
         
         """
         #Ingredient

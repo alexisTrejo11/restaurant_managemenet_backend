@@ -5,11 +5,8 @@ class TableInsertSerializer(serializers.Serializer):
     number = serializers.IntegerField()
     capacity = serializers.IntegerField()
 
-
-class TableSerializer(serializers.Serializer):
-    number = serializers.IntegerField()
-    capacity = serializers.IntegerField()
-    is_available = serializers.BooleanField()
+    def validate(self, attrs):
+        return super().validate(attrs)
 
 
 class IngredientInsertSerializer(serializers.ModelSerializer):

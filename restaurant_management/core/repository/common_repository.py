@@ -10,7 +10,7 @@ class CommonRepository(Generic[T], ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, id: int, raise_expection=False) -> Optional[T]:
+    def get_by_id(self, id: int, raise_exception=False) -> Optional[T]:
         """Get entity por ID, Raise an expection if set as True or will return a None"""
         pass
 

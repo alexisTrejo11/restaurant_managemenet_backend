@@ -1,22 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
-from ...domain.entities.table_entitiy import Table
-
-@dataclass
-class Order:
-    """
-    Domain entity representing an order placed at a table.
-    """
-    id: Optional[int] = None
-    table: 'Table' = None
-    status: str = "IN_PROGRESS"
-    created_at: Optional[datetime] = None
-    end_at: Optional[datetime] = None
-
-    def __str__(self):
-        return f"Order {self.id} - Table {self.table.number}"
-
+from ...domain.entities.table_entity import Table
 
 @dataclass
 class OrderItem:
@@ -33,3 +18,30 @@ class OrderItem:
 
     def __str__(self):
         return f"MenuItem {self.menu_item_id} - Order {self.order_id if self.order_id else 'Unknown'}"
+
+
+@dataclass
+class Order:
+    """
+    Domain entity representing an order placed at a table.
+    """
+    id: Optional[int] = None
+    table: 'Table' = None
+    status: str = "IN_PROGRESS"
+    created_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+    order_items : List[OrderItem] = []
+
+    def __str__(self):
+        return f"Order {self.id} - Table {self.table.number}"
+
+    @staticmethod
+    def start(table : 'Table', items : List[OrderItem] = []):
+        return Order(
+            table=table,
+            created_at= datetime.now(),
+            order_items=items,
+        )
+
+    def update(self, updated_data : dict) -> None:
+        pass
