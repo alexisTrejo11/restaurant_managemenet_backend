@@ -8,7 +8,7 @@ class OrderItem:
     """
     Domain entity representing an item within an order.
     """
-    menu_item_id: int
+    menu_item_id: int = None
     order_id: Optional[int] = None
     menu_extra_id: Optional[int] = None
     quantity: int = 1
@@ -45,3 +45,12 @@ class Order:
 
     def update(self, updated_data : dict) -> None:
         pass
+
+    def update_items(self, items : List[OrderItem]) -> None:
+        pass
+
+    def get_new_items(self, incoming_items : List[OrderItem]) -> List[OrderItem]:
+        pass
+
+    def add_items(self, incoming_items : dict) -> None :
+        self.order_items.append(incoming_items)

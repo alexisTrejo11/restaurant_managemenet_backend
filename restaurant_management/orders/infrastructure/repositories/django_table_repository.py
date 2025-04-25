@@ -1,7 +1,8 @@
 from typing import List, Optional
-from restaurant.models import TableModel
+from ..models.table_model import TableModel
 from restaurant.services.domain.table import Table
 from core.cache.django_cache_manager import CacheManager
+from core.exceptions.custom_exceptions import EntityNotFoundException
 from ...core.repositories.table_repository import TableMappers
 from ...core.repositories.table_repository import TableRepository
 
@@ -11,7 +12,6 @@ TABLE_ALL_CACHE_PREFIX = "TABLE_ALL"
 class DjangoTableRepository(TableRepository):
     def __init__(self):
         self.cache_manager = CacheManager(TABLE_CACHE_PREFIX)
-        self.table = TableModel
 
     def get_all(self) -> List[Table]:
         """
@@ -24,14 +24,14 @@ class DjangoTableRepository(TableRepository):
         if tables_cache:
             return tables_cache
 
-        models = self.table.objects.all().order_by('number')
+        models = TableModel.objects.all().order_by('number')
         tables_list = [TableMappers.to_domain(model) for model in models]
 
         self.cache_manager.set(TABLE_ALL_CACHE_PREFIX, tables_list)
 
         return tables_list
 
-    def get_by_id(self, number: int) -> Optional[Table]:
+    def get_by_id(self, number: int, raise_exception=False) -> Optional[Table]:
         """
         Retrieve a table by its number, checking the cache first.
         
@@ -47,59 +47,12 @@ class DjangoTableRepository(TableRepository):
 
         return self._get_by_id_db(number)
 
-    def create(self, table: Table) -> Table:
-        """
-        Create a new table and save it to the database and cache.
+    def save(self, table: Table) -> Table:
+        if not table.id:
+            return self._create(table)
         
-        Args:
-            table (Table): The table entity to create.
-        
-        Returns:
-            Table: The created table.
-        """
-        model = self.table.objects.create(
-            number=table.number,
-            capacity=table.capacity,
-            is_available=table.is_available
-        )
-
-        created_table = TableMappers.to_domain(model)
-
-        # Update cache
-        cache_key = self.cache_manager.get_cache_key(created_table.number)
-        self.cache_manager.set(cache_key, created_table)
-        self._refresh_query_set_cache()
-
-        return created_table
-
-    def update(self, table: Table) -> Table:
-        """
-        Update an existing table in the database and cache.
-        
-        Args:
-            table (Table): The table entity to update.
-        
-        Returns:
-            Table: The updated table.
-        """
-        table_model = self.table.objects.filter(number=table.number).first()
-        if not table_model:
-            raise ValueError(f"Table with number {table.number} not found")
-
-        # Update fields
-        table_model.capacity = table.capacity
-        table_model.is_available = table.is_available
-        table_model.save()
-
-        updated_table = TableMappers.to_domain(table_model)
-
-        # Update cache
-        cache_key = self.cache_manager.get_cache_key(updated_table.number)
-        self.cache_manager.set(cache_key, updated_table)
-        self._refresh_query_set_cache()
-
-        return updated_table
-
+        return self._update(table)
+    
     def delete(self, number: int) -> bool:
         """
         Delete a table from the database and cache.
@@ -110,9 +63,8 @@ class DjangoTableRepository(TableRepository):
         Returns:
             bool: True if the table was deleted, False otherwise.
         """
-        deleted, _ = self.table.objects.filter(number=number).delete()
+        deleted, _ = TableModel.objects.filter(number=number).delete()
 
-        # Invalidate cache
         cache_key = self.cache_manager.get_cache_key(number)
         self.cache_manager.delete(cache_key)
         self._refresh_query_set_cache()
@@ -126,12 +78,11 @@ class DjangoTableRepository(TableRepository):
         Args:
             number (int): The number of the table to update.
         """
-        table_model = self.table.objects.filter(number=number).first()
+        table_model = TableModel.objects.filter(number=number).first()
         if table_model:
             table_model.is_available = True
             table_model.save()
 
-            # Update cache
             cache_key = self.cache_manager.get_cache_key(number)
             self.cache_manager.set(cache_key, TableMappers.to_domain(table_model))
             self._refresh_query_set_cache()
@@ -143,15 +94,63 @@ class DjangoTableRepository(TableRepository):
         Args:
             number (int): The number of the table to update.
         """
-        table_model = self.table.objects.filter(number=number).first()
+        table_model = TableModel.objects.filter(number=number).first()
         if table_model:
             table_model.is_available = False
             table_model.save()
 
-            # Update cache
             cache_key = self.cache_manager.get_cache_key(number)
             self.cache_manager.set(cache_key, TableMappers.to_domain(table_model))
             self._refresh_query_set_cache()
+
+    def _create(self, table: Table) -> Table:
+        """
+        Create a new table and save it to the database and cache.
+        
+        Args:
+            table (Table): The table entity to create.
+        
+        Returns:
+            Table: The created table.
+        """
+        model = TableModel.objects.create(
+            number=table.number,
+            capacity=table.capacity,
+            is_available=table.is_available
+        )
+
+        created_table = TableMappers.to_domain(model)
+
+        cache_key = self.cache_manager.get_cache_key(created_table.number)
+        self.cache_manager.set(cache_key, created_table)
+        self._refresh_query_set_cache()
+
+        return created_table
+
+    def _update(self, table: Table) -> Table:
+        """
+        Update an existing table in the database and cache.
+        
+        Args:
+            table (Table): The table entity to update.
+        
+        Returns:
+            Table: The updated table.
+        """
+        existing_table_model = self.get_by_id(table.number,  raise_exception=True)
+
+        existing_table_model.capacity = table.capacity
+        existing_table_model.is_available = table.is_available
+        existing_table_model.save()
+
+        table_updated =  TableMappers.to_domain(existing_table_model)
+
+        cache_key = self.cache_manager.get_cache_key(table_updated.number)
+        self.cache_manager.set(cache_key, table_updated)
+        self._refresh_query_set_cache()
+
+        return table_updated
+
 
     def _get_by_id_cache(self, number: int) -> Optional[Table]:
         """
@@ -166,7 +165,7 @@ class DjangoTableRepository(TableRepository):
         cache_key = self.cache_manager.get_cache_key(number)
         return self.cache_manager.get(cache_key)
 
-    def _get_by_id_db(self, number: int) -> Optional[Table]:
+    def _get_by_id_db(self, number: int, raise_exception=False) -> Optional[Table]:
         """
         Retrieve a table by its number from the database.
         
@@ -176,8 +175,11 @@ class DjangoTableRepository(TableRepository):
         Returns:
             Optional[Table]: The retrieved table, or None if not found.
         """
-        model = self.table.objects.filter(number=number).first()
-        return TableMappers.to_domain(model) if model else None
+        try:
+            table_model = TableModel.objects.get(number=number)
+            return TableMappers.to_domain(table_model) if table_model else None
+        except:
+            raise EntityNotFoundException("Table", number)
 
     def _get_query_set_from_cache(self) -> Optional[List[Table]]:
         """
@@ -195,6 +197,6 @@ class DjangoTableRepository(TableRepository):
         """
         Refresh the cache for all tables.
         """
-        models = self.table.objects.all().order_by('number')
+        models = TableModel.objects.all().order_by('number')
         tables_list = [TableMappers.to_domain(model) for model in models]
         self.cache_manager.set(TABLE_ALL_CACHE_PREFIX, tables_list)

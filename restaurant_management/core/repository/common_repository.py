@@ -20,6 +20,6 @@ class CommonRepository(Generic[T], ABC):
         pass
 
     @abstractmethod
-    def delete(self, id: int) -> None:
+    def delete(self, id: int) -> bool:
         """Delete an entity"""
         pass

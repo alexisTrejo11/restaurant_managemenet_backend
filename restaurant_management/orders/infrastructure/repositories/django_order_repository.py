@@ -6,6 +6,8 @@ from ..models.order_item_model import OrderItemModel
 from ...core.mappers.order_mappers import OrderMapper, OrderItemMapper
 from core.cache.django_cache_manager import CacheManager
 from django.db.models import Q
+from core.exceptions.custom_exceptions import EntityNotFoundException
+
 
 ORDER_CACHE_PREFIX = "ORDER_"
 ORDER_ALL_CACHE_PREFIX = "ORDER_ALL"
@@ -195,7 +197,7 @@ class DjangoOrderRepository(OrderRepository):
             return OrderMapper.to_domain(model)
         except OrderModel.DoesNotExist:
             if raise_exception:
-                raise ValueError("Order Not Found")
+                raise EntityNotFoundException("Order", id)
             else:
                 return None
 

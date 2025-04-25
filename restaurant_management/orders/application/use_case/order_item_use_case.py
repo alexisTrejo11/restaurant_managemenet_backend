@@ -1,34 +1,40 @@
 from injector import inject
-from ...core.domain.entities.order_entity import Order, OrderItem
+from ...core.repositories.order_item_repository import OrderItemRepository
 from ...core.repositories.order_repository import OrderRepository
-from ...core.repositories.table_repository import TableRepository
-from ..dtos.order_dto import OrderDTO
-from ...core.mappers.order_mappers import OrderMapper
-from typing import List, Dict, Any
-
-class AddOrderItemsUseCase:
-    @inject
-    def __init__(self, order_repository: OrderRepository):
-        self.order_repository = order_repository
-
-    def execute(self, order_id : int, items_validate_data : List[Dict[str, Any]]) -> None:
-        pass
-
-class RemoveOrderItemUseCase:
-    @inject
-    def __init__(self, order_repository: OrderRepository, table_repository : TableRepository):
-        self.order_repository = order_repository
-        self.table_repository = table_repository
-
-    def execute(self, order_id : int, items_validate_data : List[int]) -> None:
-        pass
-
+from ...core.mappers.order_mappers import OrderItemMapper
 
 class UpdateOrderItemUseCase:
     @inject
-    def __init__(self, order_repository: OrderRepository):
+    def __init__(self, order_repository: OrderRepository, order_item_repository: OrderItemRepository):
         self.order_repository = order_repository
+        self.order_item_repository = order_item_repository
 
-    def execute(self, item_id : int, order_item_data : dict):
-        pass
+    def execute(self, order_id : int, order_item_data : dict) -> None:
+        order = self.order_repository.get_by_id(order_id, raise_exception=True)
+        items = [OrderItemMapper.dict_to_domain(item) for item in order_item_data]
 
+        new_item_list = order.get_new_items(items)
+        if len(new_item_list) > 0:
+            # TODO:
+            print(f"{len(new_item_list)} items send to kitchen prepare queue")
+
+        order.update_items(items)
+        
+        self.order_item_repository.update_order_items(order)
+
+
+class SetItemDeliveredStausUseCase:
+    @inject
+    def __init__(self, order_repository: OrderRepository, order_item_repository: OrderItemRepository):
+        self.order_repository = order_repository
+        self.order_item_repository = order_item_repository
+
+    def execute(self, item_id : int, is_delivered : bool) -> None:
+        existing_item = self.order_item_repository.get_by_id(item_id, raise_exception=True)
+
+        existing_item.is_delivered = is_delivered
+        
+        self.order_item_repository.save(existing_item)
+
+        
+        

@@ -1,10 +1,11 @@
+from typing import List
 from ..domain.entities.table_entity import Table
 from ..domain.entities.order_entity import Order
 from ...application.dtos.order_dto import OrderDTO
-from ...models import OrderModel
+from ...infrastructure.models.order_model import OrderModel
+from ...infrastructure.models.order_item_model import OrderItemModel
 from ..domain.entities.order_entity import OrderItem
 from ...application.dtos.order_dto import OrderItemDTO
-from ...models import OrderItemModel
 
 class OrderMapper:
     """
@@ -78,10 +79,10 @@ class OrderItemMapper:
     def domain_to_dto(order_item: OrderItem) -> OrderItemDTO:
         """
         Maps an OrderItem domain entity to an OrderItemDTO.
-        
+
         Args:
             order_item (OrderItem): The OrderItem domain entity to map.
-        
+
         Returns:
             OrderItemDTO: The corresponding OrderItemDTO.
         """
@@ -99,10 +100,10 @@ class OrderItemMapper:
     def dict_to_domain(data: dict) -> OrderItem:
         """
         Maps a dictionary representation to an OrderItem domain entity.
-        
+
         Args:
             data (dict): A dictionary containing the serialized data for the OrderItem.
-        
+
         Returns:
             OrderItem: The corresponding OrderItem domain entity.
         """
@@ -120,10 +121,10 @@ class OrderItemMapper:
     def domain_to_model(order_item: OrderItem) -> OrderItemModel:
         """
         Maps an OrderItem domain entity to an OrderItemModel (Django model).
-        
+
         Args:
             order_item (OrderItem): The OrderItem domain entity to map.
-        
+
         Returns:
             OrderItemModel: The corresponding Django model instance.
         """
@@ -136,3 +137,52 @@ class OrderItemMapper:
             is_delivered=order_item.is_delivered,
             added_at=order_item.added_at,
         )
+
+    @staticmethod
+    def domain_list_to_model_list(domain_items: List[OrderItem]) -> List[OrderItemModel]:
+        """
+        Maps a list of OrderItem domain entities to a list of OrderItemModel (Django model) instances.
+
+        Args:
+            domain_items (List[OrderItem]): A list of OrderItem domain entities to map.
+
+        Returns:
+            List[OrderItemModel]: A list of corresponding Django model instances.
+        """
+        model_instances = [OrderItemMapper.domain_to_model(item) for item in domain_items]
+        return model_instances
+
+    @staticmethod
+    def model_to_domain(order_item_model: OrderItemModel) -> OrderItem:
+        """
+        Maps an OrderItemModel (Django model) instance to an OrderItem domain entity.
+
+        Args:
+            order_item_model (OrderItemModel): The OrderItemModel instance to map.
+
+        Returns:
+            OrderItem: The corresponding OrderItem domain entity.
+        """
+        return OrderItem(
+            menu_item_id=order_item_model.menu_item_id,
+            order_id=order_item_model.order_id,
+            menu_extra_id=order_item_model.menu_extra_id,
+            quantity=order_item_model.quantity,
+            notes=order_item_model.notes,
+            is_delivered=order_item_model.is_delivered,
+            added_at=order_item_model.added_at,
+        )
+
+    @staticmethod
+    def model_list_to_domain_list(model_items: List[OrderItemModel]) -> List[OrderItem]:
+        """
+        Maps a list of OrderItemModel (Django model) instances to a list of OrderItem domain entities.
+
+        Args:
+            model_items (List[OrderItemModel]): A list of OrderItemModel instances to map.
+
+        Returns:
+            List[OrderItem]: A list of corresponding OrderItem domain entities.
+        """
+        domain_instances = [OrderItemMapper.model_to_domain(item) for item in model_items]
+        return domain_instances
