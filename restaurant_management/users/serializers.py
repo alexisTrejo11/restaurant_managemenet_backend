@@ -76,33 +76,3 @@ class UserInsertSerializer(serializers.Serializer):
     birth_date = serializers.DateField()
     role = EnumField(enum_type=Role)
     phone_number = serializers.CharField(max_length=15, allow_null=True, required=False)
-
-
-class LoginResponseSerializer(serializers.Serializer):
-    """Serializer for login response data"""
-    access_token = serializers.CharField()
-    token_type = serializers.CharField()
-    expires_in = serializers.IntegerField()
-    user = serializers.DictField()
-
-
-class PasswordResetSerializer(serializers.Serializer):
-    """Optional serializer for password reset"""
-    email = serializers.EmailField(
-        error_messages={
-            'required': 'Email is required',
-            'invalid': 'Please enter a valid email address'
-        }
-    )
-
-    def validate_email(self, value: str) -> str:
-        return value.lower()
-    
-class StaffSignupSerializer(serializers.Serializer):
-    first_name = serializers.CharField(max_length=255)
-    last_name = serializers.CharField(max_length=255)
-    gender = EnumField(enum_type=Gender)
-    email = serializers.EmailField()
-    password = serializers.CharField()
-    birth_date = serializers.DateField()
-    phone_number = serializers.CharField(max_length=15, allow_null=True, required=False)
