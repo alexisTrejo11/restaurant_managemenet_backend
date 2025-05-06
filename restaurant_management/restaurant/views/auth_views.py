@@ -4,7 +4,6 @@ from restaurant.serializers import StaffSignupSerializer, LoginSerializer
 from rest_framework.viewsets import ViewSet
 from restaurant.injector.app_module import AppModule
 from injector import Injector
-from restaurant.utils.response import ApiResponse
 from restaurant.services.domain.user import Role
 from rest_framework.throttling import UserRateThrottle
 from drf_yasg.utils import swagger_auto_schema
@@ -28,9 +27,6 @@ class AuthViews(ViewSet):
         }
     )
     def signup_staff(self, request):
-        auth_service = self.get_auth_service()
-        user_service = self.get_user_service()
-
         serializer = StaffSignupSerializer(data=request.data)
         if not serializer.is_valid():
             return ApiResponse.bad_request(serializer.errors)

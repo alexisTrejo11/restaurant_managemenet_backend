@@ -129,7 +129,7 @@ class OrderViews(ViewSet):
             404: "Order not found"
         }
     )
-    def delete(self, request, id):
+    def destroy(self, request, id):
         """
         Delete an order.
         """

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -9,7 +9,7 @@ from domain.entities.user import User
 logger = logging.getLogger(__name__)
 
 @dataclass
-class UserResponseModel:
+class UserResponse:
     id: UUID
     username: str
     email: str
@@ -22,7 +22,7 @@ class UserResponseModel:
     joined_at: datetime = None
     last_login: Optional[datetime] = None
     is_active: bool = True
-    
+
     @classmethod
     def from_entity(cls, user: User):
         return cls(
@@ -39,3 +39,7 @@ class UserResponseModel:
             last_login=user.last_login,
             is_active=user.is_active
         )
+
+    def to_dict(self) -> dict:
+        """Converts the UserResponse object to a dictionary."""
+        return asdict(self)

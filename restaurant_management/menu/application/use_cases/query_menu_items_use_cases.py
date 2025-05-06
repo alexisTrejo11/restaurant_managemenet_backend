@@ -1,17 +1,16 @@
 from injector import inject
 from typing import Dict, Any, List, Optional
-from dataclasses import asdict
 from ...core.repositories.menu_item_repository import MenuItemRepository
 from ...core.domain.entities.menu_item import MenuItem
 from ...core.mappers.menu_item_mapper import MenuItemMapper
-
+from ..dtos.menu_item_dto import MenuItemDTO
 
 class GetMenuByIdUseCase:
     @inject
     def __init__(self, menu_repository: MenuItemRepository):
         self.menu_repository = menu_repository
 
-    def execute(self, menu_id: int,  raise_expection=False) -> Optional[Dict[str, Any]]:
+    def execute(self, menu_id: int,  raise_expection=False) -> Optional[MenuItemDTO]:
         """
         Retrieve a Menu Item by its ID and return it as a dictionary.
         
@@ -33,7 +32,7 @@ class GetMenuByIdUseCase:
         if not menu_entity:
             return None
 
-        return asdict(MenuItemMapper.to_menu_extra_domain(menu_entity))
+        return MenuItemMapper.domain_to_dto(menu_entity)
 
 
 class GetAllMenusUseCase:
@@ -41,7 +40,7 @@ class GetAllMenusUseCase:
     def __init__(self, menu_repository: MenuItemRepository):
         self.menu_repository = menu_repository
 
-    def execute(self) -> List[Dict[str, Any]]:
+    def execute(self) -> List[MenuItemDTO]:
         """
         Retrieve all Menu Items and return them as a list of dictionaries.
         

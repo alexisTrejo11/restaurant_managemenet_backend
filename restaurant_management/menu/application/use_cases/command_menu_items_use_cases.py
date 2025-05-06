@@ -1,9 +1,9 @@
 from injector import inject
 from typing import Dict, Any
-from dataclasses import asdict
 from ...core.repositories.menu_item_repository import MenuItemRepository
 from ...core.domain.entities.menu_item import MenuItem
 from ...core.mappers.menu_item_mapper import MenuItemMapper
+from ..dtos.menu_item_dto import MenuItemDTO
 
 class CreateMenuUseCase:
     @inject
@@ -23,7 +23,7 @@ class CreateMenuUseCase:
             - serializer_data (Dict): A dictionary containing the serialized data for the menu item.
         
         Returns:
-            - MenuItem: The newly created menu item as a domain entity.
+            - MenuItem: The newly created menu item as a DTO data class.
         """
         menu_item = MenuItemMapper.dict_to_domain(serializer_data)
 
@@ -31,7 +31,7 @@ class CreateMenuUseCase:
 
         created_menu = self.menu_repository.create(menu_item)
 
-        return created_menu
+        return MenuItemMapper.domain_to_dt(created_menu)
 
 
 class DeleteMenuUseCase:

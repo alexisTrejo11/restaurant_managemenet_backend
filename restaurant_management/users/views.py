@@ -5,7 +5,6 @@ from .user_service import UserService
 from common.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
-from common.utils.permission import RoleBasedPermission
 
 container = Injector([AppModule()])
 

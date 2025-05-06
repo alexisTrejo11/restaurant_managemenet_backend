@@ -1,17 +1,13 @@
 from django.urls import path
-from restaurant.views.table_views import TableViews
-from menu.views import MenuViews
 from restaurant.views.reservation_views import ReservationViews
-from orders.views import OrderViews
-from stock.views import StockViews
-from payments.views import PaymentViews
-from stock.views import IngredientViews
-from users.views import UserViews
-from restaurant.views.auth_views import AuthViews
+from orders.infrastructure.api.views.order_admin_views import OrderViews
+from menu.infrastructure.api.views.menu_views import MenuViews
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -26,18 +22,25 @@ schema_view = get_schema_view(
    permission_classes=(permissions.AllowAny,),
 )
 
+router = DefaultRouter()
+router.register(r'orders', OrderViews, basename='order') 
+router.register(r'menus', MenuViews, basename='menu')
+
 
 urlpatterns = [
-    # Swagger 
+   path('', include(router.urls)),
+
+   # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
 
    # Menu view
+   """
    path('v1/api/menu_items/<int:menu_id>', MenuViews.as_view({'get': 'get_menu_item_by_id', 'delete': 'delete_menu_item_by_id'}), name='menu_item-detail'),
    path('v1/api/menu_items/all', MenuViews.as_view({'get': 'get_all_menu_items'}), name='get_all_menu_items'),
    path('v1/api/menu_items/category', MenuViews.as_view({'get': 'get_menus_items_by_category'}), name='get_menus_items_by_category'),
    path('v1/api/menu_items', MenuViews.as_view({'post': 'create_menu_item'}), name='create_menu_item'),
-
+   """
    """
     # Tables
     path('v1/api/tables/<int:number>', TableViews.as_view({'get': 'get_table_by_number', 'delete': 'delete_table_by_number'}), name='table-detail'),
