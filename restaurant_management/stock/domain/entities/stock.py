@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..exceptions.stock_exceptions import InvalidStockFieldError
 
 class Stock:
     def __init__(self, 
@@ -58,6 +59,16 @@ class Stock:
     def __str__(self):
         return f'{self.__ingredient.name} - {self.__total_stock} {self.__ingredient.unit}'
 
+    def validate_fields(self) -> None:
+        if self.__total_stock < 0:
+            raise InvalidStockFieldError("total stock can be negative")
+        
+        if self.__optimal_stock_quantity < 0:
+            raise InvalidStockFieldError("optimal stock can be negative")
+
+
+
+
     def validate_transaction(self, transaction: "StockTransaction") -> dict:
         if transaction.transaction_type == 'OUT' and not self.is_out_valid(transaction.ingredient_quantity):
             return {"is_valid": False, "message": "Quantity to withdraw exceeds current total stock"}
@@ -72,6 +83,13 @@ class Stock:
         )
 
         self.__stock_transactions.append(transaction)
+
+
+    def update_transaction(self, transaction: "StockTransaction"):
+        pass
+
+    def delete_transaction(self, transaction: "StockTransaction"):
+        pass
 
     def is_stock_available(self, quantity: int) -> bool:
         return self.__total_stock >= abs(quantity)
