@@ -1,5 +1,4 @@
 from restaurant.services.domain.ingredient import Ingredient
-from rest_framework import serializers
 
 class TableInsertSerializer(serializers.Serializer):
     number = serializers.IntegerField()

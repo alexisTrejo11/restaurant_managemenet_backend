@@ -1,8 +1,8 @@
 import pytest
 from mockito import mock, verify, when, any, eq
-from restaurant_management.orders.services.table_service import TableService
+from orders.services.table_service import TableService
 from restaurant.repository.table_respository import TableRepository
-from restaurant.services.domain.table import Table
+from restaurant_management.reservations.domain.entities.table import Table
 
 @pytest.fixture
 def table_repository_mock():

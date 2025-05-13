@@ -12,7 +12,7 @@ class StockNotFoundError(Exception):
         self.message = message
         super().__init__(self.message)
 
-class DomainException(Exception):
+class BuisnessLogicFailException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

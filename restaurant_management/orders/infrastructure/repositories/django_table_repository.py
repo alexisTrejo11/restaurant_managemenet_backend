@@ -1,6 +1,6 @@
 from typing import List, Optional
 from ..models.table_model import TableModel
-from restaurant.services.domain.table import Table
+from restaurant_management.reservations.domain.entities.table import Table
 from core.cache.django_cache_manager import CacheManager
 from core.exceptions.custom_exceptions import EntityNotFoundException
 from ...core.repositories.table_repository import TableMappers

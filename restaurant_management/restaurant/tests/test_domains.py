@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, timedelta
 from decimal import Decimal
 from restaurant.services.domain.ingredient import Ingredient
-from restaurant.services.domain.table import Table
+from restaurant_management.reservations.domain.entities.table import Table
 from restaurant.services.domain.order import OrderItem, Order
 from restaurant.services.domain.stock import Stock, StockTransaction
 from restaurant.services.domain.payment import Payment, PaymentItem

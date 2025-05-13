@@ -1,4 +1,4 @@
-from restaurant.services.domain.table import Table
+from restaurant_management.reservations.domain.entities.table import Table
 from restaurant.models import TableModel
 
 class TableMappers:
