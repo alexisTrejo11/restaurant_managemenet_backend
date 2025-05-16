@@ -29,13 +29,14 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    'core.apps.CoreConfig',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,7 +54,10 @@ INSTALLED_APPS = [
     'stock'
 ]
 
+DEBUG_PROPAGATE_EXCEPTIONS = True
+
 MIDDLEWARE = [
+    'core.exceptions.json_middleware.JSONExceptionMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -67,10 +71,11 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'restaurant_management.urls'
 
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'core.exceptions.exception_handler.custom_exception_handler',
+    'NON_FIELD_ERRORS_KEY': 'error',
     # JWT
-    'EXCEPTION_HANDLER': 'restaurant.utils.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     # Rate limitng
     'DEFAULT_THROTTLE_CLASSES': [
@@ -140,9 +145,12 @@ if os.getenv('TESTING', 'False') == 'True' or 'test' in sys.argv:
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': 'memcached:11211', 
-        'TIMEOUT': 300,
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'TIMEOUT': 600,  
     }
 }
 

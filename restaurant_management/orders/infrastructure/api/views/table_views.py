@@ -1,8 +1,6 @@
 from core.response.django_response import DjangoResponseWrapper
-from restaurant.serializers import TableSerializer, TableInsertSerializer
+from ..serializers.table_serializer import TableSerializer
 from rest_framework.viewsets import ViewSet
-from core.injector.app_module import AppModule
-from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.utils.permission import RoleBasedPermission
@@ -17,8 +15,6 @@ from ....application.use_case.table_query_use_cases import (
     GetAllTablesUseCase,
     GetTableByIdUseCase
 )
-
-container = Injector([AppModule()])
 
 class TableViews(ViewSet):
     def __init__(self, **kwargs):
@@ -73,14 +69,14 @@ class TableViews(ViewSet):
 
     @swagger_auto_schema(
         operation_description="Create a new table",
-        request_body=TableInsertSerializer,
+        request_body=TableSerializer,
         responses={
             201: TableSerializer,
             400: openapi.Response('Invalid request or table already exists')
         }
     )
     def create_table(self, request):
-        serializer = TableInsertSerializer(data=request.data)
+        serializer = TableSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         table_dto = self.create_table_use_case.execute(**serializer.validated_data)

@@ -1,23 +1,17 @@
 from rest_framework.views import APIView
 from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from ..serializers.order_serializer import *
-from restaurant_management.payments.service.payment_service import PaymentService
-from core.injector.app_module import AppModule
-from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
-from core.utils.permission import RoleBasedPermission
-from rest_framework.permissions import IsAuthenticated
 from ....application.use_case.order_item_use_case import (
     UpdateOrderItemUseCase,
     SetItemDeliveredStausUseCase
 )
 
-container = Injector([AppModule()])
 
 class OrderItemApiView(APIView):
     def __init__(self, **kwargs):
-        self.update_order_items_use_case =  container.get(UpdateOrderItemUseCase)
-        self.set_item_delivered_use_case =  container.get(SetItemDeliveredStausUseCase)
+        self.update_order_items_use_case =  UpdateOrderItemUseCase()
+        self.set_item_delivered_use_case =  SetItemDeliveredStausUseCase()
         super().__init__(**kwargs)
 
     @swagger_auto_schema(

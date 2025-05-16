@@ -26,7 +26,6 @@ router = DefaultRouter()
 router.register(r'orders', OrderViews, basename='order') 
 router.register(r'menus', MenuViews, basename='menu')
 
-
 urlpatterns = [
    path('', include(router.urls)),
 

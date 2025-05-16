@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ViewSet
 from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
-from restaurant.serializers import OrderSerializer, OrderItemSerializer, OrderItemsInsertSerilizer, OrderItemsDeleteSerilizer, PaymentSerializer
-from restaurant_management.payments.service.payment_service import PaymentService
+from ..serializers.order_serializer import OrderSerializer
+from payments.serializers import PaymentSerializer
 from core.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
@@ -17,15 +17,14 @@ from ....application.use_case.order_query_use_case import (
     GetOrderByIdUseCase,
 )
 
-container = Injector([AppModule()])
 
 class OrderViews(ViewSet):
     def __init__(self, **kwargs):
-        self.get_order_by_id_use_case = container.get(GetOrderByIdUseCase)
-        self.get_all_orders_use_case = container.get(GetAllOrdersUseCase)
-        self.create_order_use_case = container.get(CreateOrderUseCase)
-        self.update_order_use_case = container.get(UpdateOrderUseCase)
-        self.delete_order_use_case = container.get(DeleteOrderUseCase)
+        self.get_order_by_id_use_case = GetOrderByIdUseCase()
+        self.get_all_orders_use_case = GetAllOrdersUseCase()
+        self.create_order_use_case = CreateOrderUseCase()
+        self.update_order_use_case = UpdateOrderUseCase()
+        self.delete_order_use_case = DeleteOrderUseCase()
         super().__init__(**kwargs)
 
     def get_permissions(self):

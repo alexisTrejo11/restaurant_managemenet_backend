@@ -7,9 +7,9 @@ pytest
 pytest-django
 pytest-mockito
 factory-boy
-injector
-pymemcache
+django-redis
 djangorestframework-simplejwt
 django-ratelimit
 drf-yasg
 python-dotenv
+dependency-injector

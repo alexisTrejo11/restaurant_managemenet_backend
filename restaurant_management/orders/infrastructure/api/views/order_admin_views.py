@@ -16,15 +16,14 @@ from ....application.use_case.order_query_use_case import (
     GetOrderByIdUseCase,
 )
 
-container = Injector([AppModule()])
 
 class OrderViews(ViewSet):
     def __init__(self, **kwargs):
-        self.get_order_by_id_use_case = container.get(GetOrderByIdUseCase)
-        self.get_all_orders_use_case = container.get(GetAllOrdersUseCase)
-        self.create_order_use_case = container.get(CreateOrderUseCase)
-        self.update_order_use_case = container.get(UpdateOrderUseCase)
-        self.delete_order_use_case = container.get(DeleteOrderUseCase)
+        self.get_order_by_id_use_case = GetOrderByIdUseCase()
+        self.get_all_orders_use_case = GetAllOrdersUseCase()
+        self.create_order_use_case = CreateOrderUseCase()
+        self.update_order_use_case = UpdateOrderUseCase()
+        self.delete_order_use_case = DeleteOrderUseCase()
         super().__init__(**kwargs)
 
     def get_permissions(self):

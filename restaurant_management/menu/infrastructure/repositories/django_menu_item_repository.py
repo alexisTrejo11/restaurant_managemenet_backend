@@ -1,9 +1,11 @@
-from ...core.domain.entities.menu_item import MenuItem
+from decimal import Decimal
 from typing import List, Optional
-from ...core.repositories.menu_item_repository import MenuItemRepository
 from core.cache.django_cache_manager import CacheManager
+from ...core.domain.entities.menu_item import MenuItem
+from ...core.repositories.menu_item_repository import MenuItemRepository
 from ...models import MenuItemModel
 from ...core.mappers.menu_item_mapper import MenuItemMapper
+from core.exceptions.custom_exceptions import EntityNotFoundException
 
 MENU_ITEM_CACHE_PREFIX = "MENU_ITEM_"
 MENU_ITEM_ALL_CACHE_PREFIX = "MENU_ITEM_ALL"
@@ -18,7 +20,7 @@ class DjangoMenuItemRepository(MenuItemRepository):
          if menu_items_cache or len(menu_items_cache) > 0:
             return menu_items_cache
 
-         menu_items = self.menu_item.objects.all().order_by('id')
+         menu_items = MenuItemModel.objects.all().order_by('id')
          menu = [MenuItemMapper.to_domain(model) for model in menu_items]
          
          return menu
@@ -28,7 +30,7 @@ class DjangoMenuItemRepository(MenuItemRepository):
          if menu_item_cache:
             return menu_item_cache
          
-         return self._get_by_id_db(item_id)
+         return self._get_by_id_db(item_id, raise_expection)
       
       def search(self, filter_params : dict) -> List[MenuItem]:
          pass
@@ -53,7 +55,7 @@ class DjangoMenuItemRepository(MenuItemRepository):
          return menu_item
 
       def delete(self, item_id: int) -> None:
-         self.menu_item.objects.filter(id=item_id).delete()
+         MenuItemModel.objects.filter(id=item_id).delete()
          
          cache_key = self.cache_manager.get_cache_key(item_id)
          self.cache_manager.delete(cache_key)  
@@ -66,11 +68,11 @@ class DjangoMenuItemRepository(MenuItemRepository):
  
       def _get_by_id_db(self, item_id: int, raise_expection=False) -> Optional[MenuItem]:
          try:   
-            model = self.menu_item.objects.get(id=item_id)
+            model = MenuItemModel.objects.get(id=item_id)
             return MenuItemMapper.to_domain(model)
          except MenuItemModel.DoesNotExist:
             if raise_expection:
-               raise ValueError('Menu Item Not Found')
+               raise EntityNotFoundException('Menu Item', item_id)
             else:
                return None
          
