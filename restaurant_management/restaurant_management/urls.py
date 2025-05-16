@@ -2,7 +2,7 @@ from django.urls import path
 
 from menu.infrastructure.api.views.menu_views import MenuViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
-from menu.infrastructure.api.views.menu_views import MenuViews
+from orders.infrastructure.api.views.table_views import TableViews
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -25,6 +25,7 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 router.register(r'orders', OrderViews, basename='order') 
 router.register(r'menus', MenuViews, basename='menu')
+router.register(r'tables', TableViews, basename='table')
 
 urlpatterns = [
    path('', include(router.urls)),

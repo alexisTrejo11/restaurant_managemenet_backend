@@ -32,18 +32,18 @@ class GetTableByIdUseCase:
     def __init__(self, table_repository: TableRepository):
         self.table_repository = table_repository
 
-    def execute(self, number: int, raise_exception=False) -> Optional[TableDTO]:
+    def execute(self, id: int, raise_exception=False) -> Optional[TableDTO]:
         """
-        Retrieve a table by its number.
+        Retrieve a table by its id.
         
         Args:
-            number (int): The number of the table to retrieve.
-            raise_excpetion (bool: False as default): The number of the table to retrieve.
+            id (int): The id of the table to retrieve.
+            raise_excpetion (bool: False as default): The id of the table to retrieve.
 
         Returns:
             Optional[Table]: The retrieved table, or None if not found.
         """
-        table_entity = self.table_repository.get_by_id(number, raise_exception=raise_exception)
+        table_entity = self.table_repository.get_by_id(id, raise_exception=raise_exception)
         if not table_entity:
             return None
         

@@ -4,5 +4,5 @@ from ...models.table_model import TableModel
 class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = TableModel
-        fields = ['__all__']
+        fields = '__all__'
 

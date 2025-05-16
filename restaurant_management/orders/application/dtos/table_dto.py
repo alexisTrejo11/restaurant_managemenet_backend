@@ -7,7 +7,7 @@ class TableDTO:
     """
     Data Transfer Object for transferring Table data.
     """
-    number: int
+    id: int
     capacity: int
     is_available: bool
     created_at: Optional[datetime]

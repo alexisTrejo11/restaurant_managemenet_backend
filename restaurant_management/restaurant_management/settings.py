@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'menu',
     'orders',
     'payments',
-    'stock'
+    'stock',
+    'reservations',
 ]
 
 DEBUG_PROPAGATE_EXCEPTIONS = True

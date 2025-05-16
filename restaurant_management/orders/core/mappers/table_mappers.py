@@ -19,7 +19,7 @@ class TableMapper:
             TableDTO: The corresponding TableDTO.
         """
         return TableDTO(
-            number=table.number,
+            id=table.id,
             capacity=table.capacity,
             is_available=table.is_available,
             created_at=table.created_at,
@@ -27,7 +27,7 @@ class TableMapper:
         )
 
     @staticmethod
-    def to_domain(dto: TableDTO) -> Table:
+    def dict_to_domain(dto: dict) -> Table:
         """
         Maps a TableDTO to a Table domain entity.
         
@@ -38,9 +38,27 @@ class TableMapper:
             Table: The corresponding Table domain entity.
         """
         return Table(
-            number=dto.number,
-            capacity=dto.capacity,
-            is_available=dto.is_available,
-            created_at=dto.created_at,
-            updated_at=dto.updated_at,
+            id=dto.get('id'),
+            capacity=dto.get('capacity'),
+            is_available=True,
+        )
+    
+
+    @staticmethod
+    def model_to_domain(model) -> Table:
+        """
+        Maps a TableDTO to a Table domain entity.
+        
+        Args:
+            dto (TableDTO): The TableDTO to map.
+        
+        Returns:
+            Table: The corresponding Table domain entity.
+        """
+        return Table(
+            id=model.id,
+            capacity=model.capacity,
+            is_available=model.is_available,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
         )

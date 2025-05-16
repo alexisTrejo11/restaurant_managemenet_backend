@@ -22,7 +22,7 @@ class CreateTableUseCase:
         Returns:
             Table: The created table.
         """
-        new_table = TableMapper.to_domain(validated_data)
+        new_table = TableMapper.dict_to_domain(validated_data)
         
         table_created = self.table_repository.save(new_table)
         

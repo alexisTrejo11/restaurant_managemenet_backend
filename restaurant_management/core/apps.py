@@ -5,7 +5,7 @@ class CoreConfig(AppConfig):
     
     def ready(self):
         """Se ejecuta cuando Django está completamente cargado"""
-        from .injector.config_di import configure_di
+        from .injector.di_config import configure_di
         configure_di()
         
        

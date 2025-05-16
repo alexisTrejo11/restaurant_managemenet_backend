@@ -8,32 +8,38 @@ from ....application.use_case.table_command_use_cases import (
     CreateTableUseCase,
     UpdateTableUseCase,
     DeleteTableUseCase,
-    SetTableAsAvailableUseCase,
-    SetTableAsUnavailableUseCase,
 )
 from ....application.use_case.table_query_use_cases import (
     GetAllTablesUseCase,
     GetTableByIdUseCase
 )
 
+from dependency_injector.wiring import Provide
+from core.injector.table_container import TableContainer
+
+
 class TableViews(ViewSet):
-    def __init__(self, **kwargs):
-        self.get_table_by_number_use_case = GetTableByIdUseCase()
-        self.get_all_tables_use_case = GetAllTablesUseCase()
-        self.create_table_use_case = CreateTableUseCase()
-        self.update_table_use_case = UpdateTableUseCase()
-        self.set_as_available_table_use_case = SetTableAsAvailableUseCase()
-        self.set_as_unavailable_table_use_case = SetTableAsUnavailableUseCase()
-        self.delete_table_use_case = DeleteTableUseCase()
+    def __init__(self, 
+        get_table_by_id: GetTableByIdUseCase = Provide[TableContainer.get_table_by_id],
+        get_all_tables: GetAllTablesUseCase = Provide[TableContainer.get_all_tables],
+        create_table: CreateTableUseCase = Provide[TableContainer.create_table],
+        delete_table: DeleteTableUseCase = Provide[TableContainer.delete_table],
+        **kwargs):
+        self.get_table_by_number = get_table_by_id
+        self.get_all_tables = get_all_tables
+        self.create_table = create_table 
+        self.delete_table = delete_table
         super().__init__(**kwargs)
 
+    """
     def get_permissions(self):
-        if self.action == 'get_all_tables':
-             return [RoleBasedPermission(['admin', 'staff', 'waiter'])]
-        elif self.action in ['create_table', 'delete_table_by_number']:
-             return [RoleBasedPermission(['admin'])]
-        else: # get_table_by_number
-            return [RoleBasedPermission(['admin', 'staff'])]
+    if self.action == 'get_all_tables':
+            return [RoleBasedPermission(['admin', 'staff', 'waiter'])]
+    elif self.action in ['create_table', 'delete_table_by_number']:
+            return [RoleBasedPermission(['admin'])]
+    else: # get_table_by_number
+        return [RoleBasedPermission(['admin', 'staff'])]
+    """
 
     @swagger_auto_schema(
         operation_description="Fetch a table by its number",
@@ -42,14 +48,14 @@ class TableViews(ViewSet):
             404: openapi.Response('Table not found', TableSerializer),
         }
     )
-    def get_table_by_number(self, request, number):
-        table_output_dto = self.get_table_by_number_use_case.execute(number, raise_exception=True)
+    def retrieve(self, request, pk):
+        table_output_dto = self.get_table_by_number.execute(pk, raise_exception=True)
 
         return DjangoResponseWrapper.found(
             data=table_output_dto.to_dict(), 
             entity="Table",
             param="Number",
-            value=number,
+            value=pk,
         )
     
     @swagger_auto_schema(
@@ -58,8 +64,13 @@ class TableViews(ViewSet):
             200: TableSerializer(many=True),
         }
     )
-    def get_all_tables(self, request):        
-        table_dto_list = self.get_all_tables_use_case.execute()
+    def list(self, request):        
+        table_dto_list = self.get_all_tables.execute()
+        if not table_dto_list or len(table_dto_list) == 0:
+            return DjangoResponseWrapper.success(
+                data=[],
+                message="Not Tables Found"
+            )
         
         tables_dict = [dto.to_dict() for dto in table_dto_list]
         return DjangoResponseWrapper.found(
@@ -75,11 +86,11 @@ class TableViews(ViewSet):
             400: openapi.Response('Invalid request or table already exists')
         }
     )
-    def create_table(self, request):
+    def create(self, request):
         serializer = TableSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        table_dto = self.create_table_use_case.execute(**serializer.validated_data)
+        table_dto = self.create_table.execute(serializer.validated_data)
 
         return DjangoResponseWrapper.created(
             data=table_dto.to_dict(), 
@@ -93,7 +104,7 @@ class TableViews(ViewSet):
             404: openapi.Response('Table not found')
         }
     )
-    def delete_table_by_number(self, request, number):
-        self.delete_table_use_case.execute(number)
+    def destroy(self, request, pk):
+        self.delete_table.execute(pk)
         return DjangoResponseWrapper.no_content(message='Table successfully deleted')
     
