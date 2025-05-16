@@ -49,3 +49,15 @@ class MenuItemMapper:
                 description=menu_item.description,
                 category=menu_item.category,
             )
+
+
+    @staticmethod
+    def model_to_domain(model: MenuItemModel) -> MenuItem:
+        return MenuItem(
+            id=model.id,
+            name = model.name,
+            price = model.price,
+            description = model.description,
+            category = model.category,
+        )
+         

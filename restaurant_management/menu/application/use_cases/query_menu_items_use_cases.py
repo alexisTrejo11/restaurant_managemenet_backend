@@ -55,5 +55,4 @@ class GetAllMenusUseCase:
             - List[Dict[str, Any]]: A list of dictionary representations of all menu items.
         """
         menu_entity_list = self.menu_repository.get_all()
-
         return [MenuItemMapper.domain_to_dto(menu_entity) for menu_entity in menu_entity_list]

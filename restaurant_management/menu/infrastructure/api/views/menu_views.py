@@ -43,9 +43,13 @@ class MenuViews(ViewSet):
 
 
     def list(self, request): 
-        menus_response = self.get_all_menus_use_case.execute()
+        menus = self.get_all_menus_use_case.execute()
+        if not menus or len(menus) == 0:
+            return DjangoResponseWrapper.success(
+                data=menus,
+                message="Any Menu Items Found")
 
-        menus_to_dict = [asdict(menu) for menu in menus_response]
+        menus_to_dict = [asdict(menu) for menu in menus]
         return DjangoResponseWrapper.found(
             data=menus_to_dict, 
             entity='Menus Item List'
@@ -55,14 +59,14 @@ class MenuViews(ViewSet):
         serializer = MenuInsertItemSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        menu_item_created = self.create_menus_use_case.execute(**serializer.validated_data)
+        menu_item_created = self.create_menus_use_case.execute(serializer.validated_data)
 
         return DjangoResponseWrapper.created(
             data=asdict(menu_item_created),
             entity="Menu Item"    
         )
 
-    def destroy(self, request, menu_id):
-        self.delete_menus_use_case.execute(menu_id)
+    def destroy(self, request, pk):
+        self.delete_menus_use_case.execute(pk)
 
-        return DjangoResponseWrapper.deleted('Menu Item')
+        return DjangoResponseWrapper.no_content('Menu Item Successfully Deleted')

@@ -29,9 +29,9 @@ class CreateMenuUseCase:
 
         menu_item.validate()
 
-        created_menu = self.menu_repository.create(menu_item)
+        created_menu = self.menu_repository.save(menu_item)
 
-        return MenuItemMapper.domain_to_dt(created_menu)
+        return MenuItemMapper.domain_to_dto(created_menu)
 
 
 class DeleteMenuUseCase:
@@ -49,6 +49,6 @@ class DeleteMenuUseCase:
         Returns:
             - None
         """
-        self.menu_repository.exist_by_id(menu_id, raise_execption=True)
+        self.menu_repository.get_by_id(menu_id, raise_expection=True)
 
         self.menu_repository.delete(menu_id)
