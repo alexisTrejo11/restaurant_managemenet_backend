@@ -12,7 +12,6 @@ from core.injector.app_module import AppModule
 from rest_framework.views import APIView
 from core.response.django_response import DjangoResponseWrapper
 from ..serializers.reresvation_serializers import ReservationInsertSerializer, ReservationUpdateSerializer
-from datetime import datetime
 
 container = Injector([AppModule()])
 

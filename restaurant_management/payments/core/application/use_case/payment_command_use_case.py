@@ -13,7 +13,7 @@ class CompletePaymentUseCase:
     def __init__(self, payment_service: PaymentService):
         self.payment_service = payment_service
 
-    def execute(self):
+    def execute(self, payment_id: int):
         pass
 
 class CancelPaymentUseCase:

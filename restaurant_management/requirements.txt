@@ -12,3 +12,4 @@ pymemcache
 djangorestframework-simplejwt
 django-ratelimit
 drf-yasg
+python-dotenv

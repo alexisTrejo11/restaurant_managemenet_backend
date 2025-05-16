@@ -1,4 +1,4 @@
-from restaurant.services.domain.menu_item import MenuItem
+from ...core.domain.entities.menu_item import MenuItem
 from typing import List, Optional
 from ...core.repositories.menu_item_repository import MenuItemRepository
 from core.cache.django_cache_manager import CacheManager

@@ -1,9 +1,8 @@
-from api_response import ApiResponse
+from .api_response import ApiResponse
 from datetime import datetime
 from rest_framework.response import Response
 from rest_framework import status
 from dataclasses import asdict
-
 
 class DjangoResponseWrapper:
     """

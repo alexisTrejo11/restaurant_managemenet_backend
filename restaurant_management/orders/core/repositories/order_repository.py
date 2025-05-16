@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List
 from ...core.domain.entities.order_entity import Order
 
-class OrderRepository(CommonRepository[Order, ABC]):
+class OrderRepository(CommonRepository[Order]):
     @abstractmethod
     def get_by_status(self, status: str) -> List[Order]:
         pass

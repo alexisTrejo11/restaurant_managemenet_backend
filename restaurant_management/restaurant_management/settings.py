@@ -15,6 +15,8 @@ import sys
 import os
 import tempfile
 import datetime
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,8 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d=m5c9gittt@q2714$l=xefx)392kz*!_0ks2g9mz7f5i**bq5'
+load_dotenv()
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -84,7 +87,7 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.UserModel'
 
 SIMPLE_JWT = {
-    'SIGNING_KEY': 'U29tZSByYW5kb20gdGV4dCBzdHJpbmcgdG8gYmUgdXNlZCBpbiBhbGxpZ29yYXRoIG5hbWVzIGFuZCBjb250ZXh0IGluIGJhc2U2NCBjb2RlIGluIHJlYWQgYXQgdGhlIGV4dHJhIGVuY29kaW5nLg==',
+    'SIGNING_KEY': os.getenv('JWT_SECRET_KEY'),
     'ALGORITHM': 'HS256',
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=8), 
     "USER_ID_FIELD": "id",

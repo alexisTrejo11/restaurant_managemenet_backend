@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from datetime import datetime
 from ...domain.entities.table_entity import Table
@@ -30,7 +30,7 @@ class Order:
     status: str = "IN_PROGRESS"
     created_at: Optional[datetime] = None
     end_at: Optional[datetime] = None
-    order_items : List[OrderItem] = []
+    order_items : List[OrderItem] = field(default_factory=list)
 
     def __str__(self):
         return f"Order {self.id} - Table {self.table.number}"

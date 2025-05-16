@@ -24,7 +24,6 @@ class MenuViews(ViewSet):
         self.delete_menus_use_case = container.get(DeleteMenuUseCase)
         super().__init__(**kwargs)
 
-    # Role Permissions
     def get_permissions(self):
         permissions = []
         if self.action in ['create_menu_item', 'delete_menu_item_by_id']:
