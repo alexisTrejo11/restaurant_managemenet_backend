@@ -4,9 +4,11 @@ from core.exceptions.custom_exceptions import EntityNotFoundException
 from ..mappers.reservation_mapper import ReservationMapper
 from ..dto.reservation_dto import ReservationDTO
 from typing import List
+from injector import inject
 
 
-class ScheduleReservationUseCase:
+class RequestReservationUseCase:
+    @inject
     def __init__(self, reservation_service: ReservationService):
         self.reservation_service = reservation_service
 
@@ -18,6 +20,7 @@ class ScheduleReservationUseCase:
         return ReservationMapper.to_dto(reservation_created)
 
 class UpdateReservationUseCase:
+    @inject
     def __init__(self, reservation_service: ReservationService):
         self.reservation_service = reservation_service
 
@@ -30,6 +33,7 @@ class UpdateReservationUseCase:
         return ReservationMapper.to_dto(reservation_updated)
 
 class CancelReservationUseCase:
+    @inject
     def __init__(self, reservation_service: ReservationService):
         self.reservation_service = reservation_service
 
@@ -42,6 +46,7 @@ class CancelReservationUseCase:
     
 
 class GetTodaysReservationUseCase:
+    @inject
     def __init__(self, reservation_service: ReservationService) -> List[ReservationDTO]:
         self.reservation_service = reservation_service
 
@@ -56,6 +61,7 @@ class GetTodaysReservationUseCase:
 
 
 class GetReservationsByDateRangeUseCase:
+    @inject
     def __init__(self, reservation_service: ReservationService):
         self.reservation_service = reservation_service
 

@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.conf import settings
 import traceback
 
+
 class JSONExceptionMiddleware:
     """
     Middleware que intercepta todas las excepciones y las convierte en respuestas JSON.

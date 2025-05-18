@@ -1,11 +1,13 @@
+from injector import inject
 from ...domain.entities.reservation import Reservation
 from orders.core.domain.entities.table_entity import Table
 from orders.core.repositories.table_repository import TableRepository
 from datetime import datetime
-from core.utils.exceptions import BuisnessLogicFailException
+from core.exceptions.custom_exceptions import BusinessRuleViolationException
 from typing import List
 
 class ReservationService:
+    @inject
     def __init__(self, reservation_repository, table_repository: TableRepository):
         self.reservation_repository = reservation_repository
         self.table_repository = table_repository
@@ -63,7 +65,7 @@ class ReservationService:
     def assign_table(self, reservation: Reservation) -> Reservation:
         suitable_tables = self.__find_suitable_tables(reservation.customer_number)
         if not suitable_tables:
-            raise BuisnessLogicFailException("No suitable tables available for the requested number of customers.")
+            raise BusinessRuleViolationException("No suitable tables available for the requested number of customers.")
         
         available_table = self.__search_for_the_best_table(suitable_tables, reservation)
 
@@ -97,5 +99,5 @@ class ReservationService:
             if not reservation_conflict: 
                 return table
             
-        raise BuisnessLogicFailException("No tables available for the requested date and customer capacity.")
+        raise BusinessRuleViolationException("No tables available for the requested date and customer capacity.")
             

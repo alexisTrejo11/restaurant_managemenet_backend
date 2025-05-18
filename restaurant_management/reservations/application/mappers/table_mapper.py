@@ -1,6 +1,6 @@
 from datetime import datetime
-from restaurant.models import ReservationModel 
-from restaurant.services.domain.reservation import Reservation
+from ...infrastructure.models.reservation_model import ReservationModel 
+from ...domain.entities.reservation import Reservation
 from core.mappers.table_mappers import TableMappers
 
 class ReservationMapper:

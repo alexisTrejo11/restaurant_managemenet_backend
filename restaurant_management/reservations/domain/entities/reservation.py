@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from restaurant_management.reservations.domain.entities.table import Table
+from reservations.domain.entities.table import Table
 from ..exceptions.expections import (
     ReservationDateInvalid,
     ReservationHourInvalid,
@@ -10,6 +10,7 @@ from typing import Optional
 
 class Reservation:
     class Status:
+        PENDING = 'PENDING'
         BOOKED = 'BOOKED'
         ATTENDED = 'ATTENDED'
         NOT_ATTENDED = 'NOT_ATTENDED'

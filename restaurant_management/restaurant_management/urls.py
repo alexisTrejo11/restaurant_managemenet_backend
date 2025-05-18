@@ -1,5 +1,14 @@
 from django.urls import path
 
+from reservations.infrastructure.views.reservation_views import (
+    get_reservations_by_date_range,
+    today_list,
+    schedule_reservation,
+    update_reservation,
+    cancel_reservation,
+
+)
+
 from menu.infrastructure.api.views.menu_views import MenuViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
 from orders.infrastructure.api.views.table_views import TableViews
@@ -29,6 +38,21 @@ router.register(r'tables', TableViews, basename='table')
 
 urlpatterns = [
    path('', include(router.urls)),
+
+   # GET: /api/reservations?start_date=...&end_date=...
+   path('api/reservations', get_reservations_by_date_range),
+
+   # GET: /api/reservations/today
+   path('api/reservations/today', today_list),
+
+   # POST: /api/reservations
+   path('api/reservations', schedule_reservation),
+
+   # PUT: /api/reservations/<str:reservation_id>
+   path('api/reservations/<str:reservation_id>', update_reservation),
+
+   # DELETE: /api/reservations/cancel/<str:request_id>
+   path('api/reservations/cancel/<str:request_id>', cancel_reservation),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),

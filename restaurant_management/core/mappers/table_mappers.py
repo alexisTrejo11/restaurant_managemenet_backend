@@ -1,5 +1,5 @@
-from restaurant_management.reservations.domain.entities.table import Table
-from restaurant.models import TableModel
+from reservations.domain.entities.table import Table
+from orders.infrastructure.models.table_model import TableModel
 
 class TableMappers:
     @staticmethod
