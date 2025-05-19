@@ -1,8 +1,8 @@
-from ...domain.entities.stock import Stock, StockTransaction
-from injector import inject
-from ...application.repositories.stock_transaction import StockTransactionRepository
-from typing import List, Optional
 from datetime import datetime
+from injector import inject
+from typing import List, Optional
+from ...domain.entities.stock import Stock, StockTransaction
+from ...application.repositories.stock_transaction import StockTransactionRepository
 
 class StockTransactionService:
     @inject
@@ -22,7 +22,6 @@ class StockTransactionService:
             start_date=start_of_current_day, 
             end_date=start_of_next_day
         )
-
 
     def get_stock_transactions(self, stock: Stock) -> List[StockTransaction]:
         return self.transaction_repository.get_transaction_list_by_stock(stock)

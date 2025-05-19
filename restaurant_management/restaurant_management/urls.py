@@ -8,10 +8,10 @@ from reservations.infrastructure.views.reservation_views import (
     cancel_reservation,
 
 )
-
 from menu.infrastructure.api.views.menu_views import MenuViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
 from orders.infrastructure.api.views.table_views import TableViews
+from stock.infrastructure.views.stock_views import StockViews
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -35,25 +35,18 @@ router = DefaultRouter()
 router.register(r'orders', OrderViews, basename='order') 
 router.register(r'menus', MenuViews, basename='menu')
 router.register(r'tables', TableViews, basename='table')
+router.register(r'tables', TableViews, basename='table')
+router.register(r'stock', StockViews, basename='stocks')
 
 urlpatterns = [
    path('', include(router.urls)),
 
-   # GET: /api/reservations?start_date=...&end_date=...
    path('api/reservations', get_reservations_by_date_range),
-
-   # GET: /api/reservations/today
    path('api/reservations/today', today_list),
-
-   # POST: /api/reservations
    path('api/reservations', schedule_reservation),
-
-   # PUT: /api/reservations/<str:reservation_id>
    path('api/reservations/<str:reservation_id>', update_reservation),
-
-   # DELETE: /api/reservations/cancel/<str:request_id>
    path('api/reservations/cancel/<str:request_id>', cancel_reservation),
-
+   
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),

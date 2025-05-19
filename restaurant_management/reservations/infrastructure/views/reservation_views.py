@@ -1,7 +1,5 @@
 from rest_framework.decorators import api_view
 from dependency_injector.wiring import inject, Provide
-from rest_framework.request import Request
-from rest_framework.response import Response
 
 # Use Cases
 from reservations.application.use_case.reservation_use_case import (
@@ -32,8 +30,8 @@ def get_reservations_by_date_range(
 
     if not start_date_str or not end_date_str:
         return DjangoResponseWrapper.bad_request({
-            "error": "Both start_date and end_date parameters are required.",
-            "example": "/api/reservations?start_date=2023-05-01&end_date=2023-05-31"
+            "[error] Both start_date and end_date parameters are required.  " +
+            "[example] /api/reservations?start_date=2023-05-01&end_date=2023-05-31"
         })
 
     try:

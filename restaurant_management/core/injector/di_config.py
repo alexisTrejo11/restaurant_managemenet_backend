@@ -1,11 +1,12 @@
 from .app_module import AppModule as MenuContainer
 from .table_container import TableContainer
 from .reservation_container import ReservationContainer
-from dependency_injector.wiring import inject, Provide
+from .stock_container import StockContainer, StockTransaxtionContainer
 
 menu_container = MenuContainer()
 table_container = TableContainer()
 reservation_container = ReservationContainer()
+stock_container = StockContainer()
 
 def configure_di():
     menu_container.wire(
@@ -20,4 +21,12 @@ def configure_di():
         modules=["reservations.infrastructure.views.reservation_views"],
         packages=["reservations"]
     )
+    stock_container.wire(
+        modules=[
+        "stock.infrastructure.views.stock_views", 
+        "stock.infrastructure.views.stock_transaction_views"
+        ],
+        packages=["stock"]
+    )
+
 

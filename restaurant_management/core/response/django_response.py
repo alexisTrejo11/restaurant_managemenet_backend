@@ -246,6 +246,32 @@ class DjangoResponseWrapper:
         return Response(data=asdict(response_body), status=status.HTTP_409_CONFLICT)
 
     @staticmethod
+    def deleted(entity=None) -> Response:
+        """
+        Creates a 204 No Content response indicating that the request was successful but there is no content to return.
+        
+        Args:
+            message (str, optional): A custom message. Defaults to 'No Content'.
+        
+        Returns:
+            Response: A DRF Response object with a 204 No Content status code and an optional message.
+        """
+        if not entity:
+            message = 'Entity Successfully Deleted'
+        else:
+            message = f'{entity} Successfully Deleted'
+
+        response_body = ApiResponse(
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            success=False,
+            status_code=status.HTTP_204_NO_CONTENT,
+            message=message
+        )
+
+        return Response(data=asdict(response_body), status=status.HTTP_204_NO_CONTENT)
+
+    @staticmethod
     def no_content(message=None) -> Response:
         """
         Creates a 204 No Content response indicating that the request was successful but there is no content to return.

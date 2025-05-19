@@ -1,10 +1,12 @@
 from typing import List
+from injector import inject
 from ..dto.ingredient_response import IngredientResponse
 from ...domain.entities.ingredient import Ingredient
 from ..mapper.ingredient_mappers import IngredientMappers
 from ...application.repositories.ingredient_repository import IngredientRepository
 
 class GetAllIngredientsUseCase:
+    @inject
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
 
@@ -13,6 +15,7 @@ class GetAllIngredientsUseCase:
         return [IngredientMappers.domainToDTO(ingredient) for ingredient in ingredients]
 
 class GetIngredientsByIdUseCase:
+    @inject
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
@@ -24,6 +27,7 @@ class GetIngredientsByIdUseCase:
         return IngredientMappers.domainToDTO(ingredient)
 
 class CreateIngredientUseCase:
+    @inject
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
@@ -36,6 +40,7 @@ class CreateIngredientUseCase:
         
 
 class UpdateIngredientUseCase:
+    @inject
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
@@ -49,6 +54,7 @@ class UpdateIngredientUseCase:
 
 
 class DeleteIngredientUseCase:
+    @inject
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
 
