@@ -23,11 +23,11 @@ from core.injector.stock_container import StockContainer
 from dependency_injector.wiring import Provide
 
 class StockViews(ViewSet):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def __init__(
         self,
-        list_stock_use_case: ListStocksUseCase = Provide[StockContainer.clear_stock_use_case],
+        list_stock_use_case: ListStocksUseCase = Provide[StockContainer.list_stock_use_case],
         get_stock_by_id_use_case: GetStockByIdUseCase = Provide[StockContainer.get_stock_by_id_use_case],
         get_stock_by_ingredient_use_case: GetStockByIngredientUseCase = Provide[StockContainer.get_stock_by_ingredient_use_case],
         get_stock_history_use_case: GetStockHistoryUseCase = Provide[StockContainer.get_stock_history_use_case],
@@ -53,9 +53,17 @@ class StockViews(ViewSet):
         responses={200: StockSerializer(many=True)}
     )
     def list(self, request):
-        stock_list = self.list_stock_use_case.execute()
-        serialized = StockSerializer(stock_list, many=True).data
-        return DjangoResponseWrapper.found(data=serialized, entity='Stock')
+        stock_list = self.list_stock_use_case.execute(active_only=True)
+        if not stock_list or len(stock_list) < 1:
+            return DjangoResponseWrapper.success(
+                data=[], 
+                message='No Stock Found'
+            )
+
+        return DjangoResponseWrapper.found(
+            data=[stock for stock in stock_list], 
+            entity='Stock List'
+        )
 
     @swagger_auto_schema(
         operation_description="Get stock by ID",
@@ -75,8 +83,8 @@ class StockViews(ViewSet):
     def create(self, request):
         serializer = StockInsertSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        stock = self.create_stock_use_case.execute(**serializer.validated_data)
-        return DjangoResponseWrapper.created(data=StockSerializer(stock).data, entity='Stock')
+        stock = self.create_stock_use_case.execute(serializer.validated_data)
+        return DjangoResponseWrapper.created(data=stock.to_dict(), entity='Stock')
 
     @swagger_auto_schema(
         operation_description="Update existing stock",
@@ -86,8 +94,8 @@ class StockViews(ViewSet):
     def update(self, request, pk=None):
         serializer = StockInsertSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        stock = self.update_stock_use_case.execute(pk, **serializer.validated_data)
-        return DjangoResponseWrapper.updated(data=StockSerializer(stock).data, message='Stock updated')
+        stock = self.update_stock_use_case.execute(pk, serializer.validated_data)
+        return DjangoResponseWrapper.updated(data=stock.to_dict(), entity='Stock')
 
     @swagger_auto_schema(
         operation_description="Delete stock by ID",
@@ -95,17 +103,17 @@ class StockViews(ViewSet):
     )
     def destroy(self, request, pk=None):
         self.delete_stock_use_case.execute(pk)
-        return DjangoResponseWrapper.deleted('Stock')
+        return DjangoResponseWrapper.deleted(entity='Stock')
 
     @action(detail=True, methods=['get'])
     def history(self, request, pk=None):
         history = self.get_stock_history_use_case.execute(stock_id=pk)
-        return DjangoResponseWrapper.success(data=history, message='Stock History')
+        return DjangoResponseWrapper.found(data=history, message='Stock History')
 
     @action(detail=False, methods=['get'])
     def report(self, request):
         report = self.generate_stock_report_use_case.execute()
-        return DjangoResponseWrapper.success(data=report, message='Stock Report')
+        return DjangoResponseWrapper.success(data=report, message='Stock Report Generated')
 
     @action(detail=False, methods=['get'], url_path='by-ingredient/(?P<ingredient_id>[^/.]+)')
     def retrieve_by_ingredient(self, request, ingredient_id=None):

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 class StockTransactionInsertSerializer(serializers.Serializer):
     stock_id = serializers.IntegerField()
-    transaction_type = serializers.CharField()
+    transaction_type = serializers.CharField(required=True)
     ingredient_quantity = serializers.IntegerField()
     date = serializers.DateTimeField()
     employee_name = serializers.CharField()
@@ -25,6 +25,7 @@ class IngredientSerializer(serializers.Serializer):
     unit = serializers.CharField()
 
 class IngredientInsertSerializer(serializers.Serializer):
+    stock_id = serializers.IntegerField()
     name = serializers.CharField()
     unit = serializers.CharField()
 

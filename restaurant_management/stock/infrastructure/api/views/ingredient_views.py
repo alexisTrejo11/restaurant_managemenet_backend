@@ -43,14 +43,14 @@ class IngredientViews(ViewSet):
             404: "Ingredient not found"
         }
     )
-    def retrieve(self, request, ingredient_id):
-        ingredient_data = self.get_ingredient_by_id_use_case.execute(ingredient_id)
+    def retrieve(self, request, pk):
+        ingredient_data = self.get_ingredient_by_id_use_case.execute(pk)
         
         return DjangoResponseWrapper.found(
-            data=ingredient_data, 
+            data=ingredient_data.to_dict(), 
             entity='Ingredient', 
             param='ID',
-            value=ingredient_id
+            value=pk
         )
 
     @swagger_auto_schema(
@@ -60,9 +60,15 @@ class IngredientViews(ViewSet):
         }
     )
     def list(self, request):
-        ingredients_data = self.get_all_ingredients_use_case.execute()
+        ingredient_list = self.get_all_ingredients_use_case.execute()
+        if not ingredient_list or len(ingredient_list) == 0:
+            return DjangoResponseWrapper.success(
+                data=[], 
+                message='No Ingredients Found'
+            )   
+        
         return DjangoResponseWrapper.found(
-            data=ingredients_data, 
+            data=[ingredient.to_dict() for ingredient in ingredient_list], 
             entity='All Ingredients'
         )
 
@@ -74,15 +80,16 @@ class IngredientViews(ViewSet):
             400: "Invalid data"
         }
     )
-    def create(self, request, stock_id):
+    def create(self, request):
         serializer = IngredientInsertSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        ingredient = self.create_ingredient_use_case.execute(**serializer.validated_data)
+        ingredient = self.create_ingredient_use_case.execute(serializer.validated_data)
         
-        ingredients_data = IngredientSerializer(ingredient).data
-        return DjangoResponseWrapper.created(ingredients_data, 'Ingredient successfully created')
-
+        return DjangoResponseWrapper.created(
+            data=ingredient.to_dict(), 
+            entity='Ingredient',
+        )
 
     @swagger_auto_schema(
         operation_description="Delete an ingredient by its ID",
@@ -91,6 +98,6 @@ class IngredientViews(ViewSet):
             404: "Ingredient not found"
         }
     )
-    def destroy(self, request, ingredient_id):
-        self.delete_ingredient_use_case.execute(ingredient_id)
+    def destroy(self, request, pk):
+        self.delete_ingredient_use_case.execute(pk)
         return DjangoResponseWrapper.deleted(f'Ingredient')

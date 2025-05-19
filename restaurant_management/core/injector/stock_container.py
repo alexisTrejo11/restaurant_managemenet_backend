@@ -10,6 +10,7 @@ from stock.application.use_case.stock_command_use_case import (
 from stock.application.use_case.stock_query_use_case import (
     GenerateStockReportUseCase,
     GetStockByIdUseCase,
+    ListStocksUseCase,
     GetStockByIngredientUseCase,
     GetStockHistoryUseCase,
 )
@@ -36,45 +37,54 @@ class StockContainer(containers.DeclarativeContainer):
     """Container with providers."""
 
     stock_repository = providers.Singleton(DjangoStockRepository)
-    
+    stock_service = providers.Singleton(
+        StockService,
+        stock_repository=stock_repository
+    )
+
     create_stock_use_case = providers.Factory(
         CreateStockUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
     
     update_stock_use_case = providers.Factory(
         UpdateStockUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
     
     delete_stock_use_case = providers.Factory(
         DeleteStockUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
 
     clear_stock_use_case = providers.Factory(
         ClearStockUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
     
     get_stock_history_use_case = providers.Factory(
         GetStockHistoryUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
 
     get_stock_by_ingredient_use_case = providers.Factory(
         GetStockByIngredientUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
 
     get_stock_by_id_use_case = providers.Factory(
         GetStockByIdUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
+    )
+
+    list_stock_use_case = providers.Factory(
+        ListStocksUseCase,
+        stock_service=stock_service
     )
 
     generate_stock_use_case = providers.Factory(
         GenerateStockReportUseCase,
-        stock_repository=stock_repository
+        stock_service=stock_service
     )
 
 
@@ -99,14 +109,14 @@ class StockTransactionContainer(containers.DeclarativeContainer):
         stock_service=stock_service
     )
 
-    adjust_transaction_use_case = providers.Factory(
-        AdjustStockMovementUseCase,
-        transaction_service=stock_transaction_service,
-        stock_service=stock_service
-    )
-
     delete_transaction_use_case = providers.Factory(
         DeleteStockMovementUseCase,
+        transaction_service=stock_transaction_service,
+        stock_service=stock_service,
+    )
+
+    adjust_transaction_use_case = providers.Factory(
+        AdjustStockMovementUseCase,
         transaction_service=stock_transaction_service,
         stock_service=stock_service
     )

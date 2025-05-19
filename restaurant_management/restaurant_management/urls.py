@@ -11,6 +11,11 @@ from orders.infrastructure.api.views.order_admin_views import OrderViews
 from menu.infrastructure.api.views.menu_views import MenuViews
 from stock.infrastructure.api.views.stock_views import StockViews
 from stock.infrastructure.api.views.ingredient_views import IngredientViews
+from stock.infrastructure.api.views.stock_transaction_views import (
+    register_stock_transaction,
+    adjust_stock_transaction,
+    delete_stock_transaction,
+)
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -43,16 +48,15 @@ router.register(r'ingredients', IngredientViews, basename='ingredient')
 urlpatterns = [
    path('', include(router.urls)),
 
-   # GET: /api/reservations?start_date=...&end_date=...
    path('api/reservations', get_reservations_by_date_range),
-   # GET: /api/reservations/today
    path('api/reservations/today', today_list),
-   # POST: /api/reservations
    path('api/reservations', schedule_reservation),
-   # PUT: /api/reservations/<str:reservation_id>
    path('api/reservations/<str:reservation_id>', update_reservation),
-   # DELETE: /api/reservations/cancel/<str:request_id>
    path('api/reservations/cancel/<str:request_id>', cancel_reservation),
+
+   path('api/stock/transactions', register_stock_transaction, name='register_stock_transaction'),
+   path('api/stock/transactions/<str:transaction_id>', adjust_stock_transaction, name='adjust_stock_transaction'),
+   path('api/stock/transactions/<str:transaction_id>/delete', delete_stock_transaction, name='delete_stock_transaction'),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),

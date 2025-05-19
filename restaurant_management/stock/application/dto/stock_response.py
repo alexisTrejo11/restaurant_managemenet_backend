@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List, Optional
 from datetime import datetime
 
@@ -15,3 +15,6 @@ class StockDTO:
     def __post_init__(self):
         if self.transaction_ids is None:
             self.transaction_ids = []
+
+    def to_dict(self):
+        return asdict(self)

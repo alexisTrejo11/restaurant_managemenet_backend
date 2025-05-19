@@ -36,21 +36,24 @@ def register_stock_transaction(
 @api_view(['PUT'])
 def adjust_stock_transaction(
     request, 
+    transaction_id,
     usecase: AdjustStockMovementUseCase = Provide[TransactionContainer.adjust_transaction_use_case]
     ):
     serializer = StockTransactionInsertSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     
-    transaction_details = usecase.execute(serializer.data)
+    transaction_details = usecase.execute(serializer.data, transaction_id)
 
     return DjangoResponseWrapper.updated(
         data=StockMappers.dto_to_dict(transaction_details),
         entity='Stock Transaction'
     )
 
+
+# TODO: Fix All
 @inject
-@api_view(['PUT'])
-def adjust_stock_transaction(
+@api_view(['DELETE'])
+def delete_stock_transaction(
     request, 
     transaction_id,
     usecase: DeleteStockMovementUseCase = Provide[TransactionContainer.delete_transaction_use_case]

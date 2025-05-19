@@ -62,15 +62,15 @@ class AdjustStockMovementUseCase:
         return updated_stock
     
 
+"""FIX"""
 class DeleteStockMovementUseCase:
     @inject
     def __init__(self, transaction_service: StockTransactionService, stock_service: StockService):
         self.transaction_service = transaction_service
         self.stock_service = stock_service
 
-    def execute(self, transaction_data: dict) -> StockDTO:
-        stock_id = transaction_data.get('stock_id')
+    def execute(self, stock_id) -> StockDTO:
         stock = self.stock_service.get_stock_by_id(stock_id, raise_exception=True)
         
-        new_transacion = StockTransactionMappers.dictToDomain(transaction_data)
+        new_transacion = StockTransactionMappers.dictToDomain(None)
         self.transaction_service.delete_transaction(new_transacion, stock)

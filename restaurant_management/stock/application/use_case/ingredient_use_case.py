@@ -1,9 +1,10 @@
 from typing import List
 from injector import inject
 from ..dto.ingredient_response import IngredientResponse
-from ...domain.entities.ingredient import Ingredient
 from ..mapper.ingredient_mappers import IngredientMappers
 from ...application.repositories.ingredient_repository import IngredientRepository
+from ..dto.ingredient_response import IngredientResponse
+
 
 class GetAllIngredientsUseCase:
     @inject
@@ -19,7 +20,7 @@ class GetIngredientsByIdUseCase:
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
-    def execute(self, ingredient_id: int):
+    def execute(self, ingredient_id: int) -> IngredientResponse:
         ingredient = self.ingredient_repository.get_by_id(ingredient_id)
         if not ingredient:
             raise ValueError("Ingredient Not Found")
@@ -31,7 +32,7 @@ class CreateIngredientUseCase:
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
-    def execute(self, ingredient_data: dict):
+    def execute(self, ingredient_data: dict) -> IngredientResponse:
         ingredient = IngredientMappers.dictToDomain(ingredient_data)
 
         self.ingredient_repository.save(ingredient)
@@ -44,7 +45,7 @@ class UpdateIngredientUseCase:
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
     
-    def execute(self, ingredient_data: dict):
+    def execute(self, ingredient_data: dict) -> IngredientResponse:
         ingredient = IngredientMappers.dictToDomain(ingredient_data)
         ingredient.id = ingredient_data.get('id') if ingredient_data.get('id') else None
 
@@ -58,7 +59,7 @@ class DeleteIngredientUseCase:
     def __init__(self, ingredient_repository: IngredientRepository):
         self.ingredient_repository = ingredient_repository 
 
-    def execute(self, ingredient_id: int):
+    def execute(self, ingredient_id: int) -> None:
         ingredient = self.ingredient_repository.get_by_id(ingredient_id)
         if not ingredient:
             raise ValueError("Ingredient Not Found")

@@ -71,7 +71,7 @@ class ListStocksUseCase:
         :return: Lista de stocks
         """
         try:
-            stocks = self.stock_service.get_all_stocks(active_only=active_only)
+            stocks = self.stock_service.get_all_stocks()
             
             if low_stock_threshold is not None:
                 return [
