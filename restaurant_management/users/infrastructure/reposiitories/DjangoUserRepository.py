@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from ...domain.entities.user import User, UserRole, Gender
 from ...models import UserModel
 from ...domain.ports.output.user_repository import UserRepository
+from core.utils.password.password_handler import PasswordService
 
 class DjangoUserRepository(UserRepository):
     def get_by_id(self, user_id: UUID) -> Optional[User]:
@@ -42,7 +43,7 @@ class DjangoUserRepository(UserRepository):
             user_model.last_name = user.last_name
             user_model.role = user.role.value
             user_model.gender = user.gender.value
-            user_model.password = user.password
+            user_model.password = PasswordService.hash_password(user.password)
             user_model.birth_date = user.birth_date
             user_model.phone_number = user.phone_number
             user_model.last_login = user.last_login
@@ -52,20 +53,21 @@ class DjangoUserRepository(UserRepository):
         except ObjectDoesNotExist:
             # Create a new user
             user_model = UserModel(
-                id=user.id,
                 username=user.username,
                 email=user.email,
                 first_name=user.first_name,
                 last_name=user.last_name,
-                role=user.role.value,
+                role=UserRole.ADMIN.value,
                 gender=user.gender.value,
-                password=user.password,
                 birth_date=user.birth_date,
                 phone_number=user.phone_number,
                 joined_at=user.joined_at,
                 last_login=user.last_login,
                 is_active=user.is_active,
             )
+            user_model.password = PasswordService.hash_password(user.password)
+            user_model.is_superuser = user_model.role is UserRole.ADMIN.value
+            user_model.is_staff = user_model.role is (UserRole.STAFF.value or UserRole.ADMIN.value)
             user_model.save()
             return user
 
@@ -84,13 +86,14 @@ class DjangoUserRepository(UserRepository):
         return UserModel.objects.filter(phone_number=phone_number).exists()
 
     def _map_model_to_entity(self, user_model: UserModel) -> User:
+        role = UserRole(user_model.role)
         return User(
             id=user_model.id,
             username=user_model.username,
             email=user_model.email,
             first_name=user_model.first_name,
             last_name=user_model.last_name,
-            role=UserRole(user_model.role),
+            role= role,
             gender=Gender(user_model.gender),
             password=user_model.password,
             birth_date=user_model.birth_date,

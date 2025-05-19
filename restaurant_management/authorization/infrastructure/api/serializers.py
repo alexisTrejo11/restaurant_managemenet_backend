@@ -1,10 +1,10 @@
-from django.forms import CharField
 from rest_framework import serializers
 import re
 from datetime import  date
-from users.serializers import EnumField
-from restaurant.services.domain.user import Gender, Role
-from datetime import datetime
+from users.domain.valueobjects.gender import Gender
+import datetime
+from users.infrastructure.api.http.api.v1.serializers.serializers import EnumField 
+
 
 class SignupValidator:
     @staticmethod

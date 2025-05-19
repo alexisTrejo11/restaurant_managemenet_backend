@@ -4,13 +4,13 @@ from typing import Optional
 from uuid import UUID
 import logging
 
-from domain.entities.user import User
+from ...domain.entities.user import User
 
 logger = logging.getLogger(__name__)
 
 @dataclass
 class UserResponse:
-    id: UUID
+    id: str
     username: str
     email: str
     first_name: str

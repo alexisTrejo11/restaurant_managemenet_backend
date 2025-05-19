@@ -9,7 +9,7 @@ class CreateUserRequestModel:
     password: str
     first_name: str
     last_name: str
-    role: str
+    role: str = 'GUEST'
     gender: str = "NOT_SPECIFIED"
     birth_date: Optional[datetime] = None
     phone_number: Optional[str] = None

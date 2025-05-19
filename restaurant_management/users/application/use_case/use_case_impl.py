@@ -7,7 +7,6 @@ from ..dto.user_request import UpdateUserRequestModel, CreateUserRequestModel
 from ...domain.entities.user import User, UserRole, Gender
 from ..service.user_validator_service import UserValidator
 
-
 class CreateUserUseCase(UseCase):
     def __init__(self, user_repository: UserRepository, password_service, user_validator : UserValidator):
         self.user_repository = user_repository
@@ -15,7 +14,7 @@ class CreateUserUseCase(UseCase):
         self.validator_service = user_validator
     
     def execute(self, request: CreateUserRequestModel) -> None:
-        self.validator_service.validate_signup_unique_values(request)
+        self.validator_service.validate_creation_unique_values(request)
         
         # Add Mapper
         user = User(

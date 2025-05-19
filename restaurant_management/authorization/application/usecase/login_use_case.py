@@ -1,20 +1,20 @@
-from ....users.domain.ports.output.user_repository import UserRepository
 from typing import Dict
 from django.contrib.auth.hashers import check_password
-from ..session.session_service import SessionService
 from users.domain.entities.user import User
+from ..session.session_service import SessionService
+from users.infrastructure.reposiitories.DjangoUserRepository import UserRepository
 from ..session.user_session import UserSession
 
 class LoginUseCase:
-    def __init__(self, user_repository: UserRepository, sesion_service: SessionService):
+    def __init__(self, user_repository: UserRepository, session_service: SessionService):
         self.user_repository = user_repository
-        self.session_service = sesion_service
+        self.session_service = session_service
     
     def execute(self, login_credentials: Dict) -> UserSession:
-        password = login_credentials.get('password')
+        raw_password = login_credentials.get('password')
         
         user = self.__find_user(login_credentials)
-        self.__check_password(password)
+        self.__check_password(user.password, raw_password)
 
         # Update Last Login
 
@@ -37,6 +37,6 @@ class LoginUseCase:
 
         return user
 
-    def __check_password(self, user: User, raw_password: str) -> None:
-        if not check_password(raw_password, user.password):
+    def __check_password(self, hashed_password: str, raw_password: str) -> None:
+        if not check_password(raw_password, hashed_password):
             raise ValueError("Invalid password")

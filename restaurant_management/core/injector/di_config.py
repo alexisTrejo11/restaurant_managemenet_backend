@@ -1,6 +1,7 @@
 from .app_module import AppModule as MenuContainer
 from .table_container import TableContainer
 from .reservation_container import ReservationContainer
+from .auth_container import AuthContainer
 from .stock_container import StockContainer, StockTransactionContainer, IngredientContainer
 
 menu_container = MenuContainer()
@@ -9,6 +10,7 @@ reservation_container = ReservationContainer()
 stock_container = StockContainer()
 stock_transaction_container = StockTransactionContainer()
 ingredient_container = IngredientContainer()
+auth_container = AuthContainer()
 
 def configure_di():
     menu_container.wire(
@@ -33,5 +35,11 @@ def configure_di():
         modules=["stock.infrastructure.api.views.ingredient_views"
         ],
         packages=["stock"]
+    )
+
+    auth_container.wire(
+          modules=["authorization.infrastructure.api.views"
+        ],
+        packages=["authorization"]
     )
 

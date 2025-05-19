@@ -6,6 +6,11 @@ from reservations.infrastructure.views.reservation_views import (
     update_reservation,
     cancel_reservation,
 )
+from authorization.infrastructure.api.views import (
+    login,
+    logout,
+    signup,
+)
 from orders.infrastructure.api.views.table_views import TableViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
 from menu.infrastructure.api.views.menu_views import MenuViews
@@ -47,6 +52,10 @@ router.register(r'ingredients', IngredientViews, basename='ingredient')
 
 urlpatterns = [
    path('', include(router.urls)),
+
+   path('api/auth/signup/', signup, name='signup'),
+   path('api/auth/login/', login, name='login'),
+   path('api/auth/logout/', logout, name='logout'),
 
    path('api/reservations', get_reservations_by_date_range),
    path('api/reservations/today', today_list),

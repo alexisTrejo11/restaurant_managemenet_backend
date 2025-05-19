@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
-from uuid import UUID, uuid4
 import re
-from valueobjects.user_roles import UserRole
-from valueobjects.gender import Gender
-from exceptions.user_exceptions import *
+from ..valueobjects.user_roles import UserRole
+from ..valueobjects.gender import Gender
+from ..exceptions.user_exceptions import *
 
 @dataclass
 class User:
@@ -14,6 +13,8 @@ class User:
     first_name: str
     last_name: str
     role: UserRole
+    
+    id: int = None
     gender: Gender = Gender.NOT_SPECIFIED
     password: Optional[str] = None
     birth_date: Optional[datetime] = None
@@ -21,8 +22,6 @@ class User:
     joined_at: datetime = field(default_factory=datetime.now)
     last_login: Optional[datetime] = None
     is_active: bool = True
-    id: UUID = field(default_factory=uuid4)
-
     def __post_init__(self):
         """Validates the initial values of the User object."""
         self.validate_email(self.email)

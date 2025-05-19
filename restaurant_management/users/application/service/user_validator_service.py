@@ -1,10 +1,11 @@
 from ..dto.user_request import UpdateUserRequestModel, CreateUserRequestModel
 from ...domain.entities.user import User
-from ..exceptions.app_excpetions import  UniqueFieldAlreadyTaken
+from ..exceptions.app_excpetions import UniqueFieldAlreadyTaken
+from ...infrastructure.reposiitories.DjangoUserRepository import UserRepository
 
 class UserValidator:
-    def __init__(self):
-        pass
+    def __init__(self, user_repository: UserRepository):
+        self.user_repository = user_repository
 
     def validate_creation_unique_values(self, request: CreateUserRequestModel) -> None:
         self.validate_not_duplicated_email(request.email)
@@ -26,8 +27,7 @@ class UserValidator:
         return user
 
     def validate_creation_unique_values(self, request: CreateUserRequestModel) -> None:
-        self.validateEmail(request.email)
-
+        self.validate_not_duplicated_email(request.email)
             
     def validate_not_duplicated_email(self, email):
         exists_by_email = self.user_repository.exists_by_email(email)

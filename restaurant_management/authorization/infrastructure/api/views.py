@@ -1,83 +1,94 @@
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from drf_yasg.utils import swagger_auto_schema
+from dataclasses import asdict
+
+# Serializers
 from .serializers import StaffSignupSerializer, LoginSerializer
-from rest_framework.viewsets import ViewSet
-from core.injector.app_module import AppModule
-from injector import Injector
-from users.serializers import StaffSignupSerializer
-from core.response.django_response import DjangoResponseWrapper
+
+# Use Cases
 from ...application.usecase.login_use_case import LoginUseCase
 from ...application.usecase.signup_use_case import SignUpUseCase
 from ...application.usecase.logout_user_case import LogoutUseCase
-from ....users.application.dto.user_request import CreateUserRequestModel as SignupCredentials
-from dataclasses import asdict
+
+# DTOs
+from users.application.dto.user_request import CreateUserRequestModel as SignupCredentials
+
+# DI
+from dependency_injector.wiring import inject, Provide
+
+# Container
+from core.injector.auth_container import AuthContainer
+
+# Response Wrapper
+from core.response.django_response import DjangoResponseWrapper
 
 
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+@swagger_auto_schema(method='post', operation_description="Register new staff user")
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@inject
+def signup(
+    request,
+    use_case: SignUpUseCase = Provide[AuthContainer.signup_use_case]
+):
+    serializer = StaffSignupSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-from drf_yasg.utils import swagger_auto_schema
-
-container = Injector([AppModule()])
-
-class AuthViews(ViewSet):
-    def __init__(self, **kwargs):
-        self.login_use_case = container.get(LoginUseCase)
-        self.signup_use_case = container.get(SignUpUseCase)
-        self.logout_use_case = container.get(LogoutUseCase)
-        super().__init__(**kwargs)
-
-
-    @swagger_auto_schema(
-        operation_description="Signup staff user",
-        responses={
-            201: "JWT token with successful signup",
-            400: "Bad Request (Validation error)"
-        }
+    data = serializer.validated_data
+    signup_credentials = SignupCredentials(
+        username=data.get('username', data['email']),
+        email=data['email'],
+        password=data['password'],
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        gender=data['gender'],
+        birth_date=data['birth_date'],
+        phone_number=data.get('phone_number', None)
     )
-    def signup(self, request):
-        serializer = StaffSignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        data = serializer.validated_data 
-        signupCredentials = SignupCredentials(
-            username=data.get('username', data['email']),
-            email=data['email'],
-            password=data['password'],
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            gender=data['gender'],
-            birth_date=data['birth_date'],
-            phone_number=data.get('phone_number', None)
-        )
-        
-        userSession = self.signup_use_case.execute(signupCredentials)
-        
-        return DjangoResponseWrapper.success(
-            data=asdict(userSession), 
-            message="Signup Succesfully Proccesed"
-        )
 
+    user_session = use_case.execute(signup_credentials)
 
-    @swagger_auto_schema(
-        operation_description="Login user and get JWT",
-        responses={
-            201: "JWT token with successful login",
-            400: "Bad Request (Validation error)"
-        }
+    return DjangoResponseWrapper.success(
+        data=user_session,
+        message="Signup Successfully Processed"
     )
-    def login(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_session = self.login_use_case.execute(**serializer.data)
-
-        return DjangoResponseWrapper.success(
-            data=asdict(user_session), 
-            message="Login Successfully Processed"
-        )
 
 
-    def log_out(self, request, refresh_token):
-        self.logout_use_case.logout(refresh_token)
+@swagger_auto_schema(method='post', operation_description="Login user and get JWT token")
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@inject
+def login(
+    request,
+    use_case: LoginUseCase = Provide[AuthContainer.login_use_case]
+):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-        return DjangoResponseWrapper.success(
-            message="Logout Successfully Proccesed"
-        )
+    user_session = use_case.execute(serializer.validated_data)
+
+    return DjangoResponseWrapper.success(
+        data=user_session,
+        message="Login Successfully Processed"
+    )
+
+
+@swagger_auto_schema(method='post', operation_description="Logout user by blacklisting refresh token")
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@inject
+def logout(
+    request,
+    use_case: LogoutUseCase = Provide[AuthContainer.logout_use_case]
+):
+    refresh_token = request.data.get('refresh_token')
+
+    if not refresh_token:
+        return DjangoResponseWrapper.bad_request("Refresh token is required")
+
+    try:
+        use_case.logout(refresh_token)
+        return DjangoResponseWrapper.success(message="Logout Successfully Processed")
+    except Exception as e:
+        return DjangoResponseWrapper.bad_request(str(e))

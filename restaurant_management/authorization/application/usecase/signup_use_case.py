@@ -1,8 +1,8 @@
-from ....users.application.dto.user_request import CreateUserRequestModel as SignupCredentials
-from ....users.application.service.user_validator_service import UserValidator as UserValidatorService
-from ....users.domain.ports.output.user_repository import UserRepository
+from users.application.dto.user_request import CreateUserRequestModel as SignupCredentials
+from users.application.service.user_validator_service import UserValidator as UserValidatorService
+from users.domain.ports.output.user_repository import UserRepository
 from ..session.session_service import SessionService
-from users.domain.entities.user import User, UserRole, Gender
+from users.domain.entities.user import User, Gender, UserRole
 
 class SignUpUseCase:
     def __init__(
@@ -23,18 +23,12 @@ class SignUpUseCase:
             email=signup_credentials.email,
             first_name=signup_credentials.first_name,
             last_name=signup_credentials.last_name,
-            role=UserRole(signup_credentials.role),
-            gender=Gender(signup_credentials.gender),
+            password=signup_credentials.password,
+            role=UserRole("GUEST"),
+            gender=signup_credentials.gender,
             birth_date=signup_credentials.birth_date,
             phone_number=signup_credentials.phone_number,
-                )
+            )
 
-        user = self.user_repository.save(user)
-
+        self.user_repository.save(user)
         return self.session_service.create_session(user)
-
-
-
-
-
-

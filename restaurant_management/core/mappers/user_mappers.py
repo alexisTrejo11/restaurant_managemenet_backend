@@ -1,5 +1,7 @@
-from restaurant.models import UserModel
-from restaurant.services.domain.user import Role, User, Gender
+from users.models import UserModel
+from users.domain.valueobjects.gender import Gender
+from users.domain.valueobjects.user_roles import UserRole as Role
+from users.domain.entities.user import User
 from typing import Optional, List
 from datetime import datetime
 
@@ -42,7 +44,7 @@ class UserMapper:
             id=user.id if user.id else None,
             first_name=user.first_name,
             last_name=user.last_name,
-            gender=user.gender.value,
+            gender=user.Gender,
             email=user.email,
             password=user.password,
             birth_date=user.birth_date,
