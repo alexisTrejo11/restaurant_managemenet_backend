@@ -1,6 +1,6 @@
 from injector import inject
 from ..service.stock_transaction_service import StockTransactionService
-from ..service.stock_service_impl import StockService
+from ..service.stock_service import StockService
 from ...domain.exceptions.stock_exceptions import *
 from ..dto.stock_response import StockDTO
 from ..mapper.stock_transaction_mappers import StockTransactionMappers

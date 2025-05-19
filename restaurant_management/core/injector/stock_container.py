@@ -1,5 +1,5 @@
 from dependency_injector import containers, providers
-from stock.infrastructure.repository.django_stock_repository import DjangoStockRepository
+from stock.infrastructure.persistence.repository.django_stock_repository import DjangoStockRepository
 from stock.application.use_case.stock_command_use_case import (
     CreateStockUseCase,
     UpdateStockUseCase,
@@ -14,15 +14,23 @@ from stock.application.use_case.stock_query_use_case import (
     GetStockHistoryUseCase,
 )
 
-from stock.infrastructure.repository.django_stock_transaction import DjangoStockTransactionRepository
+from stock.infrastructure.persistence.repository.django_stock_transaction import DjangoStockTransactionRepository
 from stock.application.service.stock_transaction_service import StockTransactionService
-from stock.application.service.stock_service_impl import StockService
+from stock.application.service.stock_service import StockService
 from stock.application.use_case.stock_transaction_use_case import (
     RegisterStockMovementUseCase,
     AdjustStockMovementUseCase,
     DeleteStockMovementUseCase,
 )
 
+from stock.infrastructure.persistence.repository.django_ingredient_repository import DjangoIngredientRepository
+from stock.application.use_case.ingredient_use_case import (
+    CreateIngredientUseCase,
+    GetAllIngredientsUseCase,
+    GetIngredientsByIdUseCase,
+    UpdateIngredientUseCase,
+    DeleteIngredientUseCase
+)
 
 class StockContainer(containers.DeclarativeContainer):
     """Container with providers."""
@@ -103,3 +111,31 @@ class StockTransactionContainer(containers.DeclarativeContainer):
         stock_service=stock_service
     )
     
+
+class IngredientContainer(containers.DeclarativeContainer):
+    ingredient_repository = providers.Singleton(DjangoIngredientRepository)
+
+    get_all_ingredient_use_case = providers.Factory(
+        GetAllIngredientsUseCase,
+        ingredient_repository=ingredient_repository
+    )
+
+    get_ingredient_by_id_use_case = providers.Factory(
+        GetIngredientsByIdUseCase,
+        ingredient_repository=ingredient_repository
+    )
+
+    create_ingredient_use_case = providers.Factory(
+        CreateIngredientUseCase,
+        ingredient_repository=ingredient_repository
+    )
+
+    update_ingredient_use_case = providers.Factory(
+        UpdateIngredientUseCase,
+        ingredient_repository=ingredient_repository
+    )
+
+    delete_ingredient_use_case = providers.Factory(
+        DeleteIngredientUseCase,
+        ingredient_repository=ingredient_repository
+    )

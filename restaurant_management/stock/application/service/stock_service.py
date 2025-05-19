@@ -1,6 +1,5 @@
-from ...infrastructure.repository.django_stock_repository import StockRepository
+from ..repositories.stock_repository import StockRepository
 from typing import Optional, List
-from core.exceptions import StockNotFoundError
 from injector import inject
 from ...domain.entities.stock import Stock
 from ...domain.entities.ingredient import Ingredient

@@ -1,5 +1,5 @@
 from ...domain.entities.ingredient import Ingredient
-from ...infrastructure.models.ingredient_model import IngredientModel
+from ...infrastructure.persistence.models.ingredient_model import IngredientModel
 from ..dto.ingredient_response import IngredientResponse
 
 class IngredientMappers:

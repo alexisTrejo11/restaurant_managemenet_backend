@@ -2,7 +2,7 @@
 from rest_framework.viewsets import ViewSet
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
-from ...serializers import StockInsertSerializer, StockSerializer
+from ..serializers.serializers import StockInsertSerializer, StockSerializer
 from core.response.django_response import DjangoResponseWrapper
 from rest_framework.decorators import action
 # Use Case
@@ -19,17 +19,15 @@ from stock.application.use_case.stock_command_use_case import (
     DeleteStockUseCase
 )
 # Inject
-from injector import inject
 from core.injector.stock_container import StockContainer
-from dependency_injector.wiring import inject, Provide
+from dependency_injector.wiring import Provide
 
-@inject
 class StockViews(ViewSet):
     permission_classes = [IsAuthenticated]
 
     def __init__(
         self,
-        list_stock_use_case: ListStocksUseCase = Provide[StockContainer.list_stock_use_case],
+        list_stock_use_case: ListStocksUseCase = Provide[StockContainer.clear_stock_use_case],
         get_stock_by_id_use_case: GetStockByIdUseCase = Provide[StockContainer.get_stock_by_id_use_case],
         get_stock_by_ingredient_use_case: GetStockByIngredientUseCase = Provide[StockContainer.get_stock_by_ingredient_use_case],
         get_stock_history_use_case: GetStockHistoryUseCase = Provide[StockContainer.get_stock_history_use_case],

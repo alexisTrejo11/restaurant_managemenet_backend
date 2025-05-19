@@ -1,6 +1,6 @@
 from typing import Optional, List
-from ...domain.entities.ingredient import Ingredient
-from ...application.mapper.ingredient_mappers import IngredientMappers
+from ....domain.entities.ingredient import Ingredient
+from ....application.mapper.ingredient_mappers import IngredientMappers
 from ..models.ingredient_model import IngredientModel
 
 class DjangoIngredientRepository:

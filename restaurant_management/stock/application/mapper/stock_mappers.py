@@ -1,5 +1,5 @@
-from ...domain.entities.stock import Stock, StockTransaction
-from ...infrastructure.models.stock_model import StockModel, StockTransactionModel
+from ...domain.entities.stock import Stock
+from ...infrastructure.persistence.models.stock_model import StockModel
 from .ingredient_mappers import IngredientMappers
 from ..dto.stock_response import StockDTO
 from dataclasses import asdict

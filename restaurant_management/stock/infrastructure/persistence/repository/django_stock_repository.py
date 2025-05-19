@@ -1,8 +1,8 @@
-from ...domain.entities.stock import Stock, StockTransaction
-from ...application.mapper.stock_mappers import StockMappers, StockTransactionMappers
+from ....domain.entities.stock import Stock, StockTransaction
+from ....application.mapper.stock_mappers import StockMappers, StockTransactionMappers
 from ..models.stock_model import StockModel, StockTransactionModel
 from typing import List, Optional
-from ...application.repositories.stock_repository import StockRepository
+from ....application.repositories.stock_repository import StockRepository
 
 class DjangoStockRepository(StockRepository):
      def __init__(self):

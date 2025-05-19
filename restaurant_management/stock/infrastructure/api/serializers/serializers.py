@@ -1,4 +1,3 @@
-from restaurant.services.domain.ingredient import Ingredient
 from rest_framework import serializers
 
 class StockTransactionInsertSerializer(serializers.Serializer):
@@ -35,3 +34,5 @@ class StockSerializer(serializers.Serializer):
     optimal_stock_quantity = serializers.IntegerField()
     stock_transactions = StockTransactionSerializer(many=True) 
     ingredient = IngredientSerializer()
+
+

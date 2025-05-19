@@ -1,5 +1,5 @@
 from injector import inject
-from ..service.stock_service_impl import StockService
+from ..service.stock_service import StockService
 from ...domain.exceptions.stock_exceptions import *
 
 class GetStockByIdUseCase:
