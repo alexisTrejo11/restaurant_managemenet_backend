@@ -30,7 +30,6 @@ class UserMappers:
     @staticmethod
     def domainToModel(user: User) -> UserModel:
         return UserModel(
-            id=str(user.id),
             username=user.username,
             email=user.email,
             first_name=user.first_name,

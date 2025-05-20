@@ -2,7 +2,7 @@ from typing import Dict
 from django.contrib.auth.hashers import check_password
 from users.domain.entities.user import User
 from ..session.session_service import SessionService
-from users.infrastructure.reposiitories.DjangoUserRepository import UserRepository
+from users.infrastructure.repositories.DjangoUserRepository import UserRepository
 from ..session.user_session import UserSession
 
 class LoginUseCase:

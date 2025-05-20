@@ -11,6 +11,13 @@ from authorization.infrastructure.api.views import (
     logout,
     signup,
 )
+from users.infrastructure.api.views.user_views import (
+    get_user_by_email,
+    get_user_by_id,
+    get_user_by_phone,
+    list_users,
+)
+
 from orders.infrastructure.api.views.table_views import TableViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
 from menu.infrastructure.api.views.menu_views import MenuViews
@@ -63,9 +70,14 @@ urlpatterns = [
    path('api/reservations/<str:reservation_id>', update_reservation),
    path('api/reservations/cancel/<str:request_id>', cancel_reservation),
 
-   path('api/stock/transactions', register_stock_transaction, name='register_stock_transaction'),
-   path('api/stock/transactions/<str:transaction_id>', adjust_stock_transaction, name='adjust_stock_transaction'),
-   path('api/stock/transactions/<str:transaction_id>/delete', delete_stock_transaction, name='delete_stock_transaction'),
+    path('api/stock/transactions', register_stock_transaction, name='register_stock_transaction'),
+    path('api/stock/transactions/<str:transaction_id>', adjust_stock_transaction, name='adjust_stock_transaction'),
+    path('api/stock/transactions/<str:transaction_id>/delete', delete_stock_transaction, name='delete_stock_transaction'),
+
+    path('api/admin/users', list_users, name='list_users'),
+    path('api/admin/users/<str:pk>', get_user_by_id, name='get_user_by_id'),
+    path('api/admin/users/email/<str:email>', get_user_by_email, name='get_user_by_email'),
+    path('api/admin/users/phone/<str:phone_number>', get_user_by_phone, name='get_user_by_phone'),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),

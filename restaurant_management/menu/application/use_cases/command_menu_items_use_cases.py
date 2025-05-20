@@ -1,4 +1,4 @@
-from injector import inject
+from dependency_injector.wiring import inject
 from typing import Dict, Any
 from ...core.repositories.menu_item_repository import MenuItemRepository
 from ...core.domain.entities.menu_item import MenuItem

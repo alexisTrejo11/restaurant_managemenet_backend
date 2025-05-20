@@ -3,7 +3,7 @@ import re
 from datetime import  date
 from users.domain.valueobjects.gender import Gender
 import datetime
-from users.infrastructure.api.http.api.v1.serializers.serializers import EnumField 
+from users.infrastructure.api.serializers.serializers import EnumField 
 
 
 class SignupValidator:

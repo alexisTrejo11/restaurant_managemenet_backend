@@ -4,7 +4,7 @@ from authorization.application.usecase.login_use_case import LoginUseCase
 from authorization.application.usecase.signup_use_case import SignUpUseCase
 from authorization.application.usecase.logout_user_case import LogoutUseCase
 from users.application.service.user_validator_service import UserValidator
-from users.infrastructure.reposiitories.DjangoUserRepository import DjangoUserRepository
+from users.infrastructure.repositories.DjangoUserRepository import DjangoUserRepository
 
 class AuthContainer(containers.DeclarativeContainer):
     """Container with providers."""

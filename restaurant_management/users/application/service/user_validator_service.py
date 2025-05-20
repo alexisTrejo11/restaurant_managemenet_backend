@@ -1,9 +1,11 @@
 from ..dto.user_request import UpdateUserRequestModel, CreateUserRequestModel
 from ...domain.entities.user import User
 from ..exceptions.app_excpetions import UniqueFieldAlreadyTaken
-from ...infrastructure.reposiitories.DjangoUserRepository import UserRepository
+from ...infrastructure.repositories.DjangoUserRepository import UserRepository
+from dependency_injector.wiring import inject
 
 class UserValidator:
+    @inject
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 

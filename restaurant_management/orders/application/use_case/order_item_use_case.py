@@ -1,4 +1,4 @@
-from injector import inject
+from dependency_injector.wiring import inject
 from ...core.repositories.order_item_repository import OrderItemRepository
 from ...core.repositories.order_repository import OrderRepository
 from ...core.mappers.order_mappers import OrderItemMapper

@@ -10,7 +10,7 @@ class UserModel(AbstractUser):
     birth_date = models.DateTimeField(null=True, blank=True)
     role = models.CharField(max_length=20)
     joined_at = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(auto_now=True, unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     groups = models.ManyToManyField(
         'auth.Group', related_name='restaurant_usermodel_set', blank=True)

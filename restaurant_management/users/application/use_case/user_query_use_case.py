@@ -1,8 +1,6 @@
-from typing import List, Optional
-from uuid import UUID
-import logging
-from django.core.cache import cache
-from ....core.exceptions.custom_exceptions import EntityNotFoundException 
+from typing import List
+
+from core.exceptions.custom_exceptions import EntityNotFoundException 
 from ...domain.ports.input.use_case import UseCase
 from ...domain.ports.output.user_repository import UserRepository
 from ..dto.user_response import UserResponse
@@ -11,7 +9,7 @@ class GetUserByIdUseCase(UseCase):
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
     
-    def execute(self, user_id: UUID) -> UserResponse:        
+    def execute(self, user_id: int) -> UserResponse:        
         user = self.user_repository.get_by_id(user_id)
         if not user:
             raise EntityNotFoundException("User", user_id) 

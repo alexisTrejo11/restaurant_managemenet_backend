@@ -1,4 +1,4 @@
-from injector import inject
+from dependency_injector.wiring import inject
 from ..service.stock_service import StockService
 from ...domain.exceptions.stock_exceptions import *
 

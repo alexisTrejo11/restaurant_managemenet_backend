@@ -1,4 +1,4 @@
-from injector import inject
+from dependency_injector.wiring import inject
 from typing import List, Optional
 from ...core.domain.entities.table_entity import Table
 from ...core.repositories.table_repository import TableRepository
