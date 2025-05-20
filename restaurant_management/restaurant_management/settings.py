@@ -89,8 +89,7 @@ REST_FRAMEWORK = {
     },
 }
 
-# Remove at migrations
-AUTH_USER_MODEL = 'users.UserModel'
+AUTH_USER_MODEL = 'users.User'
 
 SIMPLE_JWT = {
     'SIGNING_KEY': os.getenv('JWT_SECRET_KEY'),

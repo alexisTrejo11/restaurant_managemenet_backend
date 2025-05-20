@@ -6,17 +6,6 @@ from reservations.infrastructure.views.reservation_views import (
     update_reservation,
     cancel_reservation,
 )
-from authorization.infrastructure.api.views import (
-    login,
-    logout,
-    signup,
-)
-from users.infrastructure.api.views.user_views import (
-    get_user_by_email,
-    get_user_by_id,
-    get_user_by_phone,
-    list_users,
-)
 
 from orders.infrastructure.api.views.table_views import TableViews
 from orders.infrastructure.api.views.order_admin_views import OrderViews
@@ -60,9 +49,6 @@ router.register(r'ingredients', IngredientViews, basename='ingredient')
 urlpatterns = [
    path('', include(router.urls)),
 
-   path('api/auth/signup/', signup, name='signup'),
-   path('api/auth/login/', login, name='login'),
-   path('api/auth/logout/', logout, name='logout'),
 
    path('api/reservations', get_reservations_by_date_range),
    path('api/reservations/today', today_list),
@@ -74,13 +60,22 @@ urlpatterns = [
     path('api/stock/transactions/<str:transaction_id>', adjust_stock_transaction, name='adjust_stock_transaction'),
     path('api/stock/transactions/<str:transaction_id>/delete', delete_stock_transaction, name='delete_stock_transaction'),
 
-    path('api/admin/users', list_users, name='list_users'),
-    path('api/admin/users/<str:pk>', get_user_by_id, name='get_user_by_id'),
-    path('api/admin/users/email/<str:email>', get_user_by_email, name='get_user_by_email'),
-    path('api/admin/users/phone/<str:phone_number>', get_user_by_phone, name='get_user_by_phone'),
+    path('api/users/', include('users.urls')),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
 
 ]
+
+"""
+from authorization.infrastructure.api.views import (
+    login,
+    logout,
+    signup,
+)
+
+   path('api/auth/signup/', signup, name='signup'),
+   path('api/auth/login/', login, name='login'),
+   path('api/auth/logout/', logout, name='logout'),
+"""

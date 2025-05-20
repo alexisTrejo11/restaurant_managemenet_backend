@@ -35,14 +35,16 @@ class DjangoResponseWrapper:
             data = dict(data)
 
         response_body = ApiResponse(
-            data=data,
+            data=None,
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_200_OK,
             message=message
         )
 
-        return Response(data=asdict(response_body), status=status.HTTP_200_OK)
+        response_dict = asdict(response_body)
+        response_dict['data'] = data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @staticmethod
     def success(data=None, message=None) -> Response:

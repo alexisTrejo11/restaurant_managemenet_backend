@@ -1,3 +1,4 @@
+"""
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
@@ -91,3 +92,4 @@ def logout(
         return DjangoResponseWrapper.success(message="Logout Successfully Processed")
     except Exception as e:
         return DjangoResponseWrapper.bad_request(str(e))
+"""
