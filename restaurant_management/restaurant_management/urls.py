@@ -17,12 +17,17 @@ from stock.infrastructure.api.views.stock_transaction_views import (
     adjust_stock_transaction,
     delete_stock_transaction,
 )
+from authorization.views import (
+    login,
+    signup,
+)
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
 
 
 schema_view = get_schema_view(
@@ -49,6 +54,8 @@ router.register(r'ingredients', IngredientViews, basename='ingredient')
 urlpatterns = [
    path('', include(router.urls)),
 
+   path('api/auth/signup/', signup, name='signup'),
+   path('api/auth/login/', login, name='login'),
 
    path('api/reservations', get_reservations_by_date_range),
    path('api/reservations/today', today_list),
@@ -69,13 +76,5 @@ urlpatterns = [
 ]
 
 """
-from authorization.infrastructure.api.views import (
-    login,
-    logout,
-    signup,
-)
-
-   path('api/auth/signup/', signup, name='signup'),
-   path('api/auth/login/', login, name='login'),
    path('api/auth/logout/', logout, name='logout'),
 """

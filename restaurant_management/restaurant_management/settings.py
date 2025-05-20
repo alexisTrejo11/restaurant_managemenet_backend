@@ -89,7 +89,7 @@ REST_FRAMEWORK = {
     },
 }
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.UserModel'
 
 SIMPLE_JWT = {
     'SIGNING_KEY': os.getenv('JWT_SECRET_KEY'),

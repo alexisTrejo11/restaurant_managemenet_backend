@@ -1,9 +1,8 @@
 import logging
 from rest_framework import generics, permissions
-from rest_framework.response import Response
-from .models import User
+from .models import UserModel as User
 from .serializers import UserCreateUpdateSerializer, UserResponseSerializer
-from .user_service import UserService
+from .service.user_service import UserService
 from core.response.django_response import DjangoResponseWrapper
 from rest_framework.pagination import PageNumberPagination
 

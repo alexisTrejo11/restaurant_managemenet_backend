@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import User
+from .models import UserModel as User
 
 class UserCreateUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(

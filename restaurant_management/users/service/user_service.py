@@ -1,4 +1,3 @@
-from .models import User
 import re
 from typing import Optional
 
