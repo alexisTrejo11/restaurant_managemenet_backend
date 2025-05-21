@@ -13,3 +13,4 @@ django-ratelimit
 drf-yasg
 python-dotenv
 dependency-injector
+django-filter

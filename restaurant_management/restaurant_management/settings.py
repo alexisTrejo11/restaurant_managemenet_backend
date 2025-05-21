@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
 
     'users',
     'menu',
@@ -74,11 +75,11 @@ ROOT_URLCONF = 'restaurant_management.urls'
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'core.exceptions.exception_handler.custom_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
-    # JWT
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
     'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # Rate limitng
+
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
@@ -87,6 +88,11 @@ REST_FRAMEWORK = {
         'anon': '40/minute', 
         'user': '40/minute',  
     },
+
+
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
 
 AUTH_USER_MODEL = 'users.UserModel'

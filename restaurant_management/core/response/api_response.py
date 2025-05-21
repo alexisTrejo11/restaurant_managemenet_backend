@@ -11,3 +11,4 @@ class ApiResponse:
     success: bool
     status_code : int
     message: str
+    metadata: dict

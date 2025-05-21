@@ -14,7 +14,7 @@ class DjangoResponseWrapper:
     """
 
     @staticmethod
-    def found(data=None, entity='Entity', param=None, value=None) -> Response:
+    def found(data=None, entity='Entity', param=None, value=None, metadata=None) -> Response:
         """
         Creates a 200 OK response indicating that an entity was successfully retrieved.
         
@@ -39,7 +39,8 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_200_OK,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         response_dict = asdict(response_body)
@@ -47,7 +48,7 @@ class DjangoResponseWrapper:
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @staticmethod
-    def success(data=None, message=None) -> Response:
+    def success(data=None, message=None, metadata=None) -> Response:
         """
         Creates a 200 OK response indicating that the request was successfully completed.
         
@@ -64,18 +65,22 @@ class DjangoResponseWrapper:
         if isinstance(data, dict):
             data = dict(data)
 
+
         response_body = ApiResponse(
-            data=data,
+            data=None,
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_200_OK,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
-        return Response(data=asdict(response_body), status=status.HTTP_200_OK)
+        response_dict = asdict(response_body)
+        response_dict['data']= data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @staticmethod
-    def created(data=None, entity=None) -> Response:
+    def created(data=None, entity=None, metadata=None) -> Response:
         """
         Creates a 201 Created response indicating that an entity was successfully created.
         
@@ -98,13 +103,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_201_CREATED,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_201_CREATED)
 
     @staticmethod
-    def updated(data=None, entity=None) -> Response:
+    def updated(data=None, entity=None, metadata=None) -> Response:
         """
         Creates a 200 OK response indicating that an entity was successfully updated.
         
@@ -127,13 +133,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_200_OK,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_200_OK)
 
     @staticmethod
-    def failure(data=None, message=None, status_code=None) -> Response:
+    def failure(data=None, message=None, status_code=None, metadata=None) -> Response:
         """
         Creates a generic failure response with a customizable status code and message.
         
@@ -159,13 +166,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status_code,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status_code)
 
     @staticmethod
-    def not_found(data=None, entity='Entity', param=None, value=None) -> Response:
+    def not_found(data=None, entity='Entity', param=None, value=None, metadata=None) -> Response:
         """
         Creates a 404 Not Found response indicating that an entity was not found.
         
@@ -190,13 +198,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_404_NOT_FOUND,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_404_NOT_FOUND)
 
     @staticmethod
-    def bad_request(data=None, message=None) -> Response:
+    def bad_request(data=None, message=None, metadata=None) -> Response:
         """
         Creates a 400 Bad Request response indicating that the request was invalid.
         
@@ -218,13 +227,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_400_BAD_REQUEST,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
-    def conflict(message=None) -> Response:
+    def conflict(message=None, metadata=None) -> Response:
         """
         Creates a 409 Conflict response indicating that the request conflicts with the current state of the resource.
         
@@ -242,13 +252,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_409_CONFLICT,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_409_CONFLICT)
 
     @staticmethod
-    def deleted(entity=None) -> Response:
+    def deleted(entity=None, metadata=None) -> Response:
         """
         Creates a 204 No Content response indicating that the request was successful but there is no content to return.
         
@@ -268,13 +279,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_204_NO_CONTENT,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def no_content(message=None) -> Response:
+    def no_content(message=None, metadata=None) -> Response:
         """
         Creates a 204 No Content response indicating that the request was successful but there is no content to return.
         
@@ -292,13 +304,14 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_204_NO_CONTENT,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def internal_server_error(data=None, message=None) -> Response:
+    def internal_server_error(data=None, message=None, metadata=None) -> Response:
         """
         Creates a 500 Internal Server Error response indicating that an unexpected server error occurred.
         
@@ -320,7 +333,8 @@ class DjangoResponseWrapper:
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            message=message
+            message=message,
+            metadata=metadata if metadata else {}
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
