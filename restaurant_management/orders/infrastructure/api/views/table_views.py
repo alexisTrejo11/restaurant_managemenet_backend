@@ -17,7 +17,6 @@ from ....application.use_case.table_query_use_cases import (
 from dependency_injector.wiring import Provide
 from core.injector.table_container import TableContainer
 
-
 class TableViews(ViewSet):
     def __init__(self, 
         get_table_by_id: GetTableByIdUseCase = Provide[TableContainer.get_table_by_id],

@@ -1,7 +1,8 @@
 from django.db import models
 
-class ReservationModel(models.Model):
+class Reservation(models.Model):
     STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
         ('BOOKED', 'Booked'),
         ('ATTENDED', 'Attended'),
         ('NOT_ATTENDED', 'Not Attended'),
