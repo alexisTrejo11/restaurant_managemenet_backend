@@ -2,6 +2,8 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from ..models import MenuItemModel
+from django.core.cache import cache
+
 
 class MenuItemService:
     @staticmethod
@@ -59,3 +61,14 @@ class MenuItemService:
                 f"Invalid status parameter. Valid choices: {', '.join(valid_statuses)}"
             )
         return status
+    
+    @staticmethod
+    def list_all_categories():
+        cached = cache.get('menu_categories')
+        if not cached:
+            cached = [
+                {"id": idx+1, "category": v} 
+                for idx, (v, l) in enumerate(MenuItemModel.CATEGORY_CHOICES)
+            ]
+            cache.set('menu_categories', cached, timeout=86400)
+        return cached

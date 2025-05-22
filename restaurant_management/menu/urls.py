@@ -1,20 +1,24 @@
 from django.urls import path
 from .views import (
-    MenuItemRetrieveUpdateDestroyView,
-    ListActiveItemByStatus,
-    MenuListCreateView
+    MenuDishRetrieveUpdateDestroyView,
+    ListActiveDishesByStatus,
+    MenuDishCreateView
 )
+from .extra_views import list_dish_status
 
 urlpatterns = [
     path('dishes/<int:id>/', 
-         MenuItemRetrieveUpdateDestroyView.as_view(), 
+         MenuDishRetrieveUpdateDestroyView.as_view(), 
          name='menu-item-detail'),
     
     path('dishes/by-status/', 
-         ListActiveItemByStatus.as_view(), 
+         ListActiveDishesByStatus.as_view(), 
          name='menu-dishes-by-status'),
     
     path('dishes/', 
-         MenuListCreateView.as_view(),
+         MenuDishCreateView.as_view(),
          name='menu-dishes-list-create'),
+
+    path('dish-status/', list_dish_status, name='dish-status-list'),
+
 ]

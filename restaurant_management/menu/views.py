@@ -1,25 +1,25 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import NotFound
-from .models import MenuItemModel
-from .serializers import MenuItemSerializer
 from core.response.django_response import DjangoResponseWrapper
 import logging
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from .models import MenuItemModel
+from .serializers import MenuItemSerializer
 from .services.menu_item_service import MenuItemService
 from .filters import MenuItemFilter
+from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
-class MenuItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class MenuDishRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = MenuItemModel.objects.all()
     serializer_class = MenuItemSerializer
     permission_classes = []
     lookup_field = 'id'
 
     def retrieve(self, request, *args, **kwargs):
-        """GET /menu-items/<id>/"""
         logger.info(
             f"Retrieve request for menu item ID: {kwargs.get('id')}",
             extra={'user': request.user.id, 'request_data': request.data}
@@ -29,17 +29,16 @@ class MenuItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance)
         
         logger.info(
-            f"Successfully retrieved menu item ID: {instance.id}",
+            f"Successfully retrieved menu dish ID: {instance.id}",
             extra={'category': instance.category}
         )
         
         return DjangoResponseWrapper.found(
             data=serializer.data,
-            entity="Menu Item",
+            entity="Menu Dish",
         )
 
     def update(self, request, *args, **kwargs):
-        """PUT/PATCH /menu-items/<id>/"""
         logger.info(
             f"Update request for menu item ID: {kwargs.get('id')}",
             extra={
@@ -55,25 +54,24 @@ class MenuItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             self.perform_update(serializer)
             
             logger.info(
-                f"Successfully updated menu item ID: {instance.id}",
+                f"Successfully updated menu dish ID: {instance.id}",
                 extra={'updated_fields': list(request.data.keys())}
             )
             
             return DjangoResponseWrapper.updated(
                 data=serializer.data,
-                entity="Menu item",
+                entity="Menu dish",
             )
         except serializers.ValidationError as e:
             logger.warning(
-                f"Validation error updating menu item: {str(e)}",
+                f"Validation error updating menu dish: {str(e)}",
                 extra={'invalid_data': request.data}
             )
             return DjangoResponseWrapper.bad_request(message=e.detail)
         
     def destroy(self, request, *args, **kwargs):
-        """DELETE /menu-items/<id>/"""
         logger.warning(
-            f"Delete request for menu item ID: {kwargs.get('id')}",
+            f"Delete request for menu dish ID: {kwargs.get('id')}",
             extra={'user': request.user.id}
         )
         try:
@@ -98,8 +96,10 @@ class MenuItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             logger.error(f"Menu item not found. Lookup params: {self.kwargs}")
             raise ValueError("Menu Item Not Found")
 
+
+
 # TODO: Check Filters
-class MenuListCreateView(generics.ListCreateAPIView):
+class MenuDishCreateView(generics.ListCreateAPIView):
     serializer_class = MenuItemSerializer
     permission_classes = []
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -113,7 +113,6 @@ class MenuListCreateView(generics.ListCreateAPIView):
         return MenuItemModel.objects.filter(status='ACTIVE')
 
     def list(self, request, *args, **kwargs):
-        """Listado con filtros"""
         try:
             queryset = self.filter_queryset(self.get_queryset())
             
@@ -184,7 +183,7 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class ListActiveItemByStatus(generics.ListAPIView):
+class ListActiveDishesByStatus(generics.ListAPIView):
     serializer_class = MenuItemSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
@@ -219,3 +218,5 @@ class ListActiveItemByStatus(generics.ListAPIView):
                     'category_filter': self.request.query_params.get('category')
                 }
         )
+    
+
