@@ -1,5 +1,5 @@
 from django.forms import ValidationError
-from users.models import UserModel as User
+from users.models import User
 from django.contrib.auth import authenticate
 
 class AuthService:

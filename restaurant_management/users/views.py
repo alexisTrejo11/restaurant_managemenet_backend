@@ -1,6 +1,6 @@
 import logging
 from rest_framework import generics, permissions
-from .models import UserModel as User
+from .models import User
 from .serializers import UserCreateUpdateSerializer, UserResponseSerializer
 from .service.user_service import UserService
 from core.response.django_response import DjangoResponseWrapper

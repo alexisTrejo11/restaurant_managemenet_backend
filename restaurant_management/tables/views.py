@@ -30,7 +30,7 @@ class TableViews(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         user_id = getattr(request.user, 'id', 'Anonymous')
-        logger.info(f"User {user_id} is requesting details for table ID: {instance}.")
+        logger.info(f"User {user_id} is requesting details for table ID: {instance.id}.")
         
         serializer = self.get_serializer(instance)
 

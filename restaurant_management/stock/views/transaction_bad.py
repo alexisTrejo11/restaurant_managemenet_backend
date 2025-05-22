@@ -10,7 +10,7 @@ from ....application.use_case.stock_transaction_use_case import (
 ) 
 # utils
 from ....application.mapper.stock_mappers import StockMappers
-from ..serializers.serializers import StockTransactionInsertSerializer
+from ..serializers import StockTransactionInsertSerializer
 
 # Inject
 from dependency_injector.wiring import inject, Provide

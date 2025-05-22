@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from ..models import MenuItemModel
+from ..models import MenuItem
 from django.core.cache import cache
 
 
@@ -9,7 +9,7 @@ class MenuItemService:
     @staticmethod
     def validate_category(category: str) -> str:
         """Valida que la categoría exista en las opciones"""
-        valid_categories = dict(MenuItemModel.CATEGORY_CHOICES).keys()
+        valid_categories = dict(MenuItem.CATEGORY_CHOICES).keys()
         if category not in valid_categories:
             raise ValidationError(f"Categoría inválida. Opciones válidas: {', '.join(valid_categories)}")
         return category
@@ -25,20 +25,20 @@ class MenuItemService:
             return ValidationError("Precio no puede superar 10000.00")
 
     @staticmethod
-    def create_menu_item(**kwargs) -> MenuItemModel:
+    def create_menu_item(**kwargs) -> MenuItem:
         """Versión mejorada con más controles"""
         try:
             kwargs['name'] = kwargs['name'].strip().title()
             kwargs.setdefault('status', 'ACTIVE')
-            return MenuItemModel.objects.create(**kwargs)
+            return MenuItem.objects.create(**kwargs)
         except IntegrityError as e:
             raise ValidationError(str(e))
 
     @staticmethod
-    def update_menu_item(instance: MenuItemModel, **kwargs) -> MenuItemModel:
+    def update_menu_item(instance: MenuItem, **kwargs) -> MenuItem:
         """Actualiza un ítem existente con validación de negocio"""
         if 'name' in kwargs:
-            if MenuItemModel.objects.filter(
+            if MenuItem.objects.filter(
                 name__iexact=kwargs['name']
             ).exclude(id=instance.id).exists():
                 raise ValidationError("Ya existe otro ítem con este nombre")
@@ -55,7 +55,7 @@ class MenuItemService:
     
     @staticmethod
     def validate_status(status: str) -> str:
-        valid_statuses = [choice[0] for choice in MenuItemModel.STATUS_CHOICES]
+        valid_statuses = [choice[0] for choice in MenuItem.STATUS_CHOICES]
         if status not in valid_statuses:
             raise ValidationError(
                 f"Invalid status parameter. Valid choices: {', '.join(valid_statuses)}"
@@ -68,7 +68,7 @@ class MenuItemService:
         if not cached:
             cached = [
                 {"id": idx+1, "category": v} 
-                for idx, (v, l) in enumerate(MenuItemModel.CATEGORY_CHOICES)
+                for idx, (v, l) in enumerate(MenuItem.CATEGORY_CHOICES)
             ]
             cache.set('menu_categories', cached, timeout=86400)
         return cached

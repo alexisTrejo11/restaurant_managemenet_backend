@@ -5,7 +5,7 @@ import logging
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import MenuItemModel
+from .models import MenuItem
 from .serializers import MenuItemSerializer
 from .services.menu_item_service import MenuItemService
 from .filters import MenuItemFilter
@@ -14,9 +14,9 @@ from rest_framework.decorators import api_view
 logger = logging.getLogger(__name__)
 
 class MenuDishRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = MenuItemModel.objects.all()
+    queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
-    permission_classes = []
+    permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
 
     def retrieve(self, request, *args, **kwargs):
@@ -110,7 +110,7 @@ class MenuDishCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """Base queryset con filtro de status activo por defecto"""
-        return MenuItemModel.objects.filter(status='ACTIVE')
+        return MenuItem.objects.filter(status='ACTIVE')
 
     def list(self, request, *args, **kwargs):
         try:
@@ -199,7 +199,7 @@ class ListActiveDishesByStatus(generics.ListAPIView):
             }
         )
         MenuItemService.validate_category(category)
-        return MenuItemModel.objects.filter(category=category, status="ACTIVE").order_by('name')
+        return MenuItem.objects.filter(category=category, status="ACTIVE").order_by('name')
 
     def list(self, request, *args, **kwargs):        
         queryset = self.filter_queryset(self.get_queryset())

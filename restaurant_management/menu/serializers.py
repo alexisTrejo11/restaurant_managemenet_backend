@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from decimal import Decimal
-from .models import MenuItemModel
+from .models import MenuItem
 from .services.menu_item_service import MenuItemService
 from django.core.exceptions import ValidationError
 
@@ -12,7 +12,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = MenuItemModel
+        model = MenuItem
         fields = [
             'id',
             'name',
