@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 class TableViews(viewsets.ModelViewSet):
     queryset = Table.objects.all()
     serializer_class = TableSerializer
+    lookup_field = 'number'
+    lookup_url_kwarg = 'number'
+
 
     def list(self, request, *args, **kwargs):
         user_id = getattr(request.user, 'id', 'Anonymous') 
@@ -25,9 +28,9 @@ class TableViews(viewsets.ModelViewSet):
         )
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object(),
+        instance = self.get_object()
         user_id = getattr(request.user, 'id', 'Anonymous')
-        logger.info(f"User {user_id} is requesting details for table ID: {instance.id}.")
+        logger.info(f"User {user_id} is requesting details for table ID: {instance}.")
         
         serializer = self.get_serializer(instance)
 

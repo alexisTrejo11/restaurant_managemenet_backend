@@ -13,7 +13,7 @@ class Reservation(models.Model):
     phone_number = models.CharField(max_length=255)
     customer_number = models.IntegerField()
     email = models.CharField(max_length=255)
-    table = models.ForeignKey('orders.TableModel', on_delete=models.PROTECT, related_name='reservations')
+    table = models.ForeignKey('tables.Table', on_delete=models.PROTECT, related_name='reservations')
     reservation_date = models.DateTimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
