@@ -13,5 +13,5 @@ class Table(models.Model):
         verbose_name_plural = 'Tables'
 
     def __str__(self):
-        return f'Table {self.id} ({self.capacity} capacity)'
+        return f'Table {self.number} ({self.capacity} capacity)'
 

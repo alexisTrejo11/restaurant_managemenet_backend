@@ -35,18 +35,10 @@ urlpatterns = [
    
    path('api/',  include('stock.urls')),
 
+   path('api/orders/',  include('orders.urls')),
+
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-schema'),
 
 ]
-
-"""
-   path('api/auth/logout/', logout, name='logout'),
-
-   path('api/reservations', get_reservations_by_date_range),
-   path('api/reservations/today', today_list),
-   path('api/reservations', schedule_reservation),
-   path('api/reservations/<str:reservation_id>', update_reservation),
-   path('api/reservations/cancel/<str:request_id>', cancel_reservation),
-"""
