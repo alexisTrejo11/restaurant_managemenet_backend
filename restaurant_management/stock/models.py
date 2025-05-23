@@ -150,6 +150,9 @@ class Stock(models.Model):
 
     def __str__(self):
         return f"{self.item.name} - {self.total_stock} {self.item.unit}"
+        
+    def get_transactions(self):
+        return self.transactions.all().order_by('-date')
 
     def clean(self):
         super().clean()

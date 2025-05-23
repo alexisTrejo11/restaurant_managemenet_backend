@@ -49,7 +49,7 @@ class StockViews(ViewSet):
         )
     
     def create(self, request):
-        serializer = self.get_serializer()
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         stock_created = StockService.create_stock(serializer.validated_data)
@@ -74,20 +74,11 @@ class StockViews(ViewSet):
         updated_stock = StockService.update_stock(
             instance=stock,
             validated_data=serializer.validated_data,
-            user=request.user
         )
-
-        logger.info(
-            f"User {user_id} successfully updated stock ID: {updated_stock.id}",
-            extra={
-                'stock_id': updated_stock.id,
-                'updated_fields': list(serializer.validated_data.keys()),
-                'user': user_id
-            }
-        )
-
+        stock_serializer = self.get_serializer(updated_stock)
+        
         return ResponseWrapper.updated(
-            data=self.get_serializer(updated_stock).data,
+            data=stock_serializer.data,
             entity=f"Stock {updated_stock.id}",
             metadata={
                 'updated_fields': list(serializer.validated_data.keys())

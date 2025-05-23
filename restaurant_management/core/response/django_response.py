@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from dataclasses import asdict
 
+#TODO: Remove Data form asdict
 class DjangoResponseWrapper:
     """
     Custom Django Response Wrapper that adds the following fields to HTTP responses:
@@ -99,7 +100,7 @@ class DjangoResponseWrapper:
             data = dict(data)
 
         response_body = ApiResponse(
-            data=data,
+            data=None,
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_201_CREATED,
@@ -107,7 +108,9 @@ class DjangoResponseWrapper:
             metadata=metadata if metadata else {}
         )
 
-        return Response(data=asdict(response_body), status=status.HTTP_201_CREATED)
+        response_dict = asdict(response_body)
+        response_dict['data']= data
+        return Response(data=response_dict, status=status.HTTP_201_CREATED)
 
     @staticmethod
     def updated(data=None, entity=None, metadata=None) -> Response:
@@ -129,7 +132,7 @@ class DjangoResponseWrapper:
             data = dict(data)
 
         response_body = ApiResponse(
-            data=data,
+            data=None,
             timestamp=datetime.now().isoformat(),
             success=True,
             status_code=status.HTTP_200_OK,
@@ -137,7 +140,9 @@ class DjangoResponseWrapper:
             metadata=metadata if metadata else {}
         )
 
-        return Response(data=asdict(response_body), status=status.HTTP_200_OK)
+        response_dict = asdict(response_body)
+        response_dict['data']= data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @staticmethod
     def failure(data=None, message=None, status_code=None, metadata=None) -> Response:
@@ -162,7 +167,7 @@ class DjangoResponseWrapper:
             message = 'Request Has Failed'
 
         response_body = ApiResponse(
-            data=data,
+            data=None,
             timestamp=datetime.now().isoformat(),
             success=False,
             status_code=status_code,
@@ -170,6 +175,8 @@ class DjangoResponseWrapper:
             metadata=metadata if metadata else {}
         )
 
+        response_dict = asdict(response_body)
+        response_dict['data']= data
         return Response(data=asdict(response_body), status=status_code)
 
     @staticmethod
