@@ -4,6 +4,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
+
 class StockItem(models.Model):
     class CategoryChoices(models.TextChoices):
         INGREDIENT = 'INGREDIENT', _('Ingredient')
@@ -60,12 +64,12 @@ class StockItem(models.Model):
         verbose_name_plural = _('Stock Items')
         ordering = ['name']
         constraints = [
-            models.CheckConstraint(
-                check=models.Q(name__length__gt=0),
-                name='non_empty_name'
+            models.UniqueConstraint(
+                fields=['name'],
+                name='unique_stock_item_name'
             ),
             models.CheckConstraint(
-                check=models.Q(unit__length__gt=0),
+                check=models.Q(unit__isnull=False) & ~models.Q(unit=''),
                 name='non_empty_unit'
             )
         ]
@@ -75,6 +79,12 @@ class StockItem(models.Model):
 
     def clean(self):
         super().clean()
+        if not self.name or len(self.name.strip()) == 0:
+            raise ValidationError({'name': _('Name cannot be empty')})
+        
+        if not self.unit or len(self.unit.strip()) == 0:
+            raise ValidationError({'unit': _('Unit cannot be empty')})
+        
         if self.menu_item and self.category != self.CategoryChoices.INGREDIENT:
             raise ValidationError({
                 'menu_item': _('Only ingredients can be linked to menu items')

@@ -7,13 +7,13 @@ logger = logging.getLogger(__name__)
 
 class StockItemService:
     @classmethod
-    def _validate_item_common_fields(cls, name: str, category: str, menu_item_id=None, instance_id=None):
+    def _validate_item_common_fields(cls, name: str, category: str, menu_item_id=None, item_id=None):
         query = StockItem.objects.filter(
             name__iexact=name.strip()
         )
         
-        if instance_id:
-            query = query.exclude(id=instance_id)
+        if item_id:
+            query = query.exclude(id=item_id)
             
         if query.exists():
             raise BusinessRuleViolationException(
@@ -30,9 +30,9 @@ class StockItemService:
         name = validated_data.get('name')
         category = validated_data.get('category')
         menu_item = validated_data.get('menu_item')
-        menu_item_id = menu_item if menu_item.id else None 
+        menu_item_id = menu_item.id if menu_item else None 
 
-        cls._validate_item_common_field(name, category, menu_item_id)
+        cls._validate_item_common_fields(name, category, menu_item_id)
 
         try:
             with transaction.atomic():
@@ -44,28 +44,32 @@ class StockItemService:
 
     
     @classmethod
-    def update_stock_item(cls, validated_data: dict, instance: StockItem) -> StockItem:
+    def update_stock_item(cls, validated_data: dict, item: StockItem) -> StockItem:
         name = validated_data.get('name')
         category = validated_data.get('category')
         menu_item = validated_data.get('menu_item')
-        menu_item_id = menu_item if menu_item.id else None 
+        menu_item_id = menu_item.id if menu_item else None 
 
-        cls._validate_item_common_field(name, category, menu_item_id, instance.id)
+        cls._validate_item_common_fields(name, category, menu_item_id, item.id)
 
         try:
             with transaction.atomic():
-                stock_item = StockItem.objects.create(**validated_data)
-                return stock_item
+                for field, value in validated_data.items():
+                        setattr(item, field, value)
+                
+                item.full_clean()
+                item.save()
+                    
+                return item
         except Exception as e:
-            logger.error(f"Error creating stockn item with data {validated_data}: {e}", exc_info=True)
+            logger.error(f"Error updating stock item with data {validated_data}: {e}", exc_info=True)
             raise
 
-
     @classmethod
-    def delete_stock_item(item: StockItem) -> None:
+    def delete_stock_item(cls, item: StockItem) -> None:
         try:
             with transaction.atomic():
                 item.delete()
         except Exception as e:
             logger.error(f"Error deleting table ID {item.id}: {e}", exc_info=True)
-        raise
+            raise

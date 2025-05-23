@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class StockViews(ViewSet):
     queryset = Stock.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
     serializer_class = StockSerializer
 
     def get_serializer_class(self):
@@ -95,7 +95,7 @@ class StockViews(ViewSet):
         )
 
     def destroy(self, request, pk=None):
-        stock = self.get_stock_or_404()
+        stock = self.get_stock_or_404(pk)
         user_id = getattr(request.user, 'id', 'Anonymous')
         logger.info(f"User {user_id} is attempting to delete stock ID: {stock.id}.")
 

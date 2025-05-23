@@ -16,7 +16,7 @@ router.register(r'stocks/(?P<stock_pk>\d+)/items', StockItemViewSet, basename='s
 urlpatterns = [
     path('', include(router.urls)),
 
-    path('transactions/', register_transaction, name='register-transaction'),
-    path('transactions/<int:transaction_id>/', update_transaction, name='update-transaction'),
-    path('transactions/<int:transaction_id>/delete/', delete_transaction, name='delete-transaction'),
+    path('stocks/transactions/', register_transaction, name='register-transaction'),
+    path('stocks/transactions/<int:transaction_id>/', update_transaction, name='update-transaction'),
+    path('stocks/transactions/<int:transaction_id>/delete/', delete_transaction, name='delete-transaction'),
 ]

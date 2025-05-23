@@ -13,16 +13,17 @@ class User(AbstractUser):
     last_login = models.DateTimeField(auto_now=True, unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     groups = models.ManyToManyField(
-        'auth.Group', related_name='restaurant_usermodel_set', blank=True)
+        'auth.Group', related_name='user_set', blank=True)
     user_permissions = models.ManyToManyField(
-        'auth.Permission', related_name='restaurant_usermodel_set', blank=True)
+        'auth.Permission', related_name='user_set', blank=True)
 
     class Meta:
-        db_table = 'users'
         indexes = [
             models.Index(fields=['email']),
             models.Index(fields=['role']),
         ]
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

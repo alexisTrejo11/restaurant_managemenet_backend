@@ -12,7 +12,7 @@ class StockItemViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing and editing stock item instances.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
     response_wrapper = ResponseWrapper
     serializer_class = StockItemSerializer
     queryset = StockItem.objects.all()
@@ -69,10 +69,10 @@ class StockItemViewSet(viewsets.ModelViewSet):
         user_id = getattr(request.user, 'id', 'Anonymous')
         logger.info(f"User {user_id} is attempting to update stock_item ID: {instance.id} with data: {request.data}.")
 
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial, context={'request': request})
         serializer.is_valid(raise_exception=True)
         
-        updated_stock_item = StockItemService.update_stock_item(instance, serializer.validated_data)
+        updated_stock_item = StockItemService.update_stock_item(serializer.validated_data, instance)
 
         logger.info(f"Stock Item ID: {updated_stock_item.id} updated successfully by user {user_id}.")
         return ResponseWrapper.updated(
