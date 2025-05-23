@@ -1,11 +1,20 @@
 from ..models import Order
-from core.exceptions.custom_exceptions import BusinessRuleViolationException
+from core.exceptions.custom_exceptions import BusinessRuleViolationException, EntityNotFoundException
 from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
 
 class OrderService:
+    @classmethod
+    def get_order(cls, order_id: int) -> Order:
+        try:
+            order = Order.objects.get(id=order_id)
+            return order
+        except Order.DoesNotExist:
+            logger.error(f"Order with ID {order_id} does not exist.")
+            raise EntityNotFoundException(f"Order", order_id)
+    
     @classmethod
     def start_order(cls, validated_data: dict) -> Order:
         """

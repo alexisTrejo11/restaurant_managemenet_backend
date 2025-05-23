@@ -151,32 +151,19 @@ class MenuDishCreateView(generics.ListCreateAPIView):
                 'data': request.data
             }
         )
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            
-            MenuItemService.validate_menu_item_creation(serializer.validated_data)
-            
-            menu_item = serializer.save()
-            
-            logger.info(
-                f"Successfully created menu item ID: {menu_item.id}",
-                extra={'item_id': menu_item.id}
-            )
-            
-            return DjangoResponseWrapper.created(
-                data=serializer.data, 
-                entity="Menu Item"
-            )
-        except serializers.ValidationError as e:
-            logger.warning(
-                "Validation error creating menu item",
-                extra={'errors': e.detail, 'data': request.data}
-            )
-            return DjangoResponseWrapper.bad_request(
-                message="Validation error",
-                data=e.detail
-            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        menu_item = MenuItemService.create_menu_item(**serializer.validated_data)
+        logger.info(
+            f"Successfully created menu item ID: {menu_item.id}",
+            extra={'item_id': menu_item.id}
+        )
+        
+        return DjangoResponseWrapper.created(
+            data=serializer.data, 
+            entity="Menu Item"
+        )
 
 class CustomPagination(PageNumberPagination):
     page_size = 10

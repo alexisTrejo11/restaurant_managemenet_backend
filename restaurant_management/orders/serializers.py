@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 from .models import Order, OrderItem
+from menu.models import MenuItem
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +30,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Menu item is required")
         return value
+
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, required=False)
