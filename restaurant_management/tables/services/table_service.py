@@ -6,6 +6,7 @@ from ..exceptions.exceptions import (
     RestaurantCapacityFull,
     TableNumberAlreadyExists
 )
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -84,3 +85,18 @@ class TableService:
         except Exception as e:
             logger.error(f"Error deleting table ID {instance.id}: {e}", exc_info=True)
             raise
+
+    @classmethod
+    def find_suitable_tables_to_order(cls, party_size) -> List[Table]:
+        all_tables = Table.objects.all()
+
+        suitables_tables = []
+        for table in all_tables:
+            if table.capacity >= party_size:
+                suitables_tables.append(table)
+
+        return sorted(
+            suitables_tables, 
+            key=lambda table: table.capacity
+        )
+    

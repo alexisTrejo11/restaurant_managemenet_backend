@@ -1,9 +1,10 @@
 from rest_framework import viewsets, status
-from .models import Reservation
+from ..models import Reservation
 from core.response.django_response import DjangoResponseWrapper
 from django.shortcuts import get_object_or_404
-from .serializers import ReservationSerializer
+from ..serializers import ReservationSerializer
 import logging
+from ..services.reservation_service import ReservationService
 
 logger = logging.getLogger(__name__)
 
@@ -22,32 +23,28 @@ class ReservationAdminViewSet(viewsets.ViewSet):
             return DjangoResponseWrapper.internal_server_error(message="Error retrieving reservation list.")
         
     def retrieve(self, request, pk=None):
-        try:
-            queryset = Reservation.objects.all()
-            reservation = get_object_or_404(queryset, pk=pk)
-            serializer = ReservationSerializer(reservation)
-            return DjangoResponseWrapper.found(
-                data=serializer.data,
-                entity=f"Reservation {pk}",
-            )
-        except Exception as e:
-            logger.error(f"Error retrieving reservation {pk}: {str(e)}", exc_info=True)
-            return DjangoResponseWrapper.internal_server_error(message=f"Error retrieving reservation {pk}.")
+        queryset = Reservation.objects.all()
+        reservation = get_object_or_404(queryset, pk=pk)
+        
+        serializer = ReservationSerializer(reservation)
+        
+        return DjangoResponseWrapper.found(
+            entity=f"Reservation {pk}",
+            data=serializer.data,
+        )
     
     def create(self, request):
         serializer = ReservationSerializer(data=request.data)
-        try:
-            serializer.is_valid(raise_exception=True)
-            reservation_created = serializer.save() 
-            return DjangoResponseWrapper.created(
-                data=ReservationSerializer(reservation_created).data, 
-                entity="Reservation"
-            )
-        except Exception as e:
-            logger.error(f"Error creating reservation: {str(e)}", exc_info=True)
-            return DjangoResponseWrapper.bad_request(message="Error creating reservation.", data=serializer.errors)
+        serializer.is_valid(raise_exception=True)
+        
+        reservation_created = ReservationService.create_reservation(serializer.validated_data, is_admin=True)
+        
+        return DjangoResponseWrapper.created(
+            data=ReservationSerializer(reservation_created).data, 
+            entity="Reservation"
+        )
 
-
+    # TODO: Fix
     def update(self, request, pk=None):
         try:
             queryset = Reservation.objects.all()
@@ -67,13 +64,9 @@ class ReservationAdminViewSet(viewsets.ViewSet):
 
 
     def destroy(self, request, pk=None):
-        try:
-            queryset = Reservation.objects.all()
-            reservation = get_object_or_404(queryset, pk=pk)
+        queryset = Reservation.objects.all()
+        reservation = get_object_or_404(queryset, pk=pk)
 
-            reservation.delete()
+        reservation.delete()
 
-            return DjangoResponseWrapper.deleted(f"Reservation {pk}")
-        except Exception as e:
-            logger.error(f"Error deleting reservation {pk}: {str(e)}", exc_info=True)
-            return DjangoResponseWrapper.internal_server_error(message=f"Error deleting reservation {pk}.")
+        return DjangoResponseWrapper.deleted(f"Reservation {pk}")

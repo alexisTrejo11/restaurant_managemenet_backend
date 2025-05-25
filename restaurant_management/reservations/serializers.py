@@ -9,7 +9,7 @@ class ReservationSerializer(serializers.ModelSerializer):
             'email', 'table', 'reservation_date', 'status', 
             'created_at', 'cancelled_at'
         ]
-        read_only_fields = ['created_at']
+        read_only_fields = ['created_at', 'cancelled_at', 'table', 'status']
 
     def validate_email(self, value):
         """
@@ -43,12 +43,4 @@ class ReservationSerializer(serializers.ModelSerializer):
         from django.utils import timezone
         if value < timezone.now():
             raise serializers.ValidationError("Reservation date cannot be in the past.")
-        return value
-
-    def validate_status(self, value):
-        """
-        Ensure the status is one of the allowed choices.
-        """
-        if value not in [choice[0] for choice in Reservation.STATUS_CHOICES]:
-            raise serializers.ValidationError(f"'{value}' is not a valid status.")
         return value

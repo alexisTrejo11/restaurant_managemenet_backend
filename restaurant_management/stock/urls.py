@@ -10,13 +10,13 @@ from .views.stock_item_views import StockItemViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'stocks', StockViewSet, basename='stock')
-router.register(r'stocks/(?P<stock_pk>\d+)/items', StockItemViewSet, basename='stock-item')
+router.register(r'', StockViewSet, basename='stock')
+router.register(r'(?P<stock_pk>\d+)/items', StockItemViewSet, basename='stock-item')
 
 urlpatterns = [
     path('', include(router.urls)),
 
-    path('stocks/transactions/', register_transaction, name='register-transaction'),
-    path('stocks/transactions/<int:transaction_id>/', update_transaction, name='update-transaction'),
-    path('stocks/transactions/<int:transaction_id>/delete/', delete_transaction, name='delete-transaction'),
+    path('transactions/', register_transaction, name='register-transaction'),
+    path('transactions/<int:transaction_id>/', update_transaction, name='update-transaction'),
+    path('transactions/<int:transaction_id>/delete/', delete_transaction, name='delete-transaction'),
 ]

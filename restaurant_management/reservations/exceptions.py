@@ -9,6 +9,10 @@ class ReservationDateInvalid(BuissnessLogicError):
     def __init__(self, message: str):
         super().__init__(message=message, code="RESERVATION_DATE_INVALID")
 
+class TableNotAvaialbeForReservation(BuissnessLogicError):
+    def __init__(self, message: str): 
+        super().__init__(message=message, code="NOT_SUITABLE_TABLES_AVAILABLE")
+
 class ReservationHourInvalid(BuissnessLogicError):
     def __init__(self, message: str):
         super().__init__(message=message, code="RESERVATION_HOUR_INVALID")

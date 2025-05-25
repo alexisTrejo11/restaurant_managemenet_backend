@@ -28,14 +28,11 @@ urlpatterns = [
 
    path('api/auth/signup/', signup, name='signup'),
    path('api/auth/login/', login, name='login'),
-
    path('api/users/', include('users.urls')),
-
    path('api/menu/',  include('menu.urls')),
-   
-   path('api/',  include('stock.urls')),
-
+   path('api/stock/',  include('stock.urls')),
    path('api/orders/',  include('orders.urls')),
+   path('api/reservations/',  include('reservations.urls')),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
