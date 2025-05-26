@@ -1,147 +1,102 @@
-from rest_framework.viewsets import ViewSet
-from restaurant_management.payments.service.payment_service import PaymentService
-from common.utils.response import ApiResponse
-from restaurant.serializers import PaymentSerializer
-from datetime import datetime
-from common.injector.app_module import AppModule
-from injector import Injector
-from drf_yasg.utils import swagger_auto_schema
-from common.utils.permission import RoleBasedPermission
+from rest_framework import viewsets 
+from rest_framework.permissions import IsAdminUser
+from .services.payment_service import PaymentService
+from .serializers import PaymentSerializer
+from .models import Payment
+from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from core.pagination import CustomPagination
+import logging
 
-container = Injector([AppModule()])
+logger = logging.getLogger(__name__)
 
-class PaymentViews(ViewSet):
-    # Role Permissions
-    def get_permissions(self):
-        return [RoleBasedPermission(['admin'])]
+class PaymentAdminViews(viewsets.ModelViewSet):
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAdminUser]
+    pagination_class = CustomPagination
 
-    # Payment Service injection
-    def get_payment_service(self):
-        return container.get(PaymentService)
+    def get_queryset(self):
+        """Apply search filters to the base queryset"""
+        queryset = Payment.objects.all()
+        query_params = self.request.query_params
+        search_params = PaymentService.get_search_params(query_params)
+        return Payment.objects.dynamic_search(search_params)
 
-    @swagger_auto_schema(
-        operation_description="Get payment by ID",
-        responses={
-            200: PaymentSerializer,
-            404: "Payment not found"
-        }
-    )
-    def get_payment_by_id(self, request, id):
-        payment_service = self.get_payment_service()
-
-        payment = payment_service.get_payment_by_id(id)
-        if not payment:
-            return ApiResponse.not_found('Payment', 'ID', id)
+    def list(self, request, *args, **kwargs):
+        user_id = getattr(request.user, 'id', 'Anonymous') 
+        logger.info(f"User {user_id} is requesting payment list.")
         
-        payment_data = PaymentSerializer(payment).data 
-        return ApiResponse.found(payment_data, 'Payment', 'ID', id)
-
-
-    @swagger_auto_schema(
-        operation_description="Get payments by status",
-        responses={
-            200: PaymentSerializer(many=True),
-            400: "Invalid payment status"
-        }
-    )
-    def get_payments_by_status(self, request, status):
-        payment_service = self.get_payment_service()
-
-        payment_valid = payment_service.valdiate_payment_status(status)
-        if not payment_valid:
-            return ApiResponse.bad_request('Invalid payment status')
-
-        payments = payment_service.get_payments_by_status(status)
+        query_params = self.request.query_params
+        search_params = PaymentService.get_search_params(query_params)
+        applied_filters = PaymentService.get_applied_filter_names(search_params)
         
-        payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, f'Payments with status [{status}] successfully fetched')
-
-
-    @swagger_auto_schema(
-        operation_description="Get payments by date range",
-        responses={
-            200: PaymentSerializer(many=True),
-            400: "Invalid date format"
-        }
-    )
-    def get_payments_by_data_range(self, request, start_date, end_date):
-        payment_service = self.get_payment_service()
+        queryset = Payment.objects.dynamic_search(search_params)
+        page = self.paginate_queryset(queryset)
         
-        if isinstance(start_date, str):
-            start_date = datetime.fromisoformat(start_date)
-        if isinstance(end_date, str):
-            end_date = datetime.fromisoformat(end_date)
+        logger.info(f"Returning {len(page if page else [])} payments with applied filters: {applied_filters}")
         
-        payments = payment_service.get_complete_payments_by_date_range(start_date, end_date)
+        serializer = self.get_serializer(page, many=True)
+        return ResponseWrapper.found(
+            data=serializer.data,
+            entity="Payment List",
+            metadata={
+                "pagination": self.paginator.get_paginated_response({}).data,
+                "applied_filters": applied_filters
+            }
+        )
+
+    def retrieve(self, request, *args, **kwargs):
+        user_id = getattr(request.user, 'id', 'Anonymous')
+        logger.info(f"User {user_id} is requesting details for payment ID: {instance.id}.")
+
+        instance = self.get_object()
+        logger.info(f"Returning details for table ID: {instance.id}.")
+        
+        serializer = self.get_serializer(instance).data
+        return ResponseWrapper.found(
+            data=serializer.data,
+            entity=f"Payment {instance.id}"
+        )
+ 
+    def create(self, request, *args, **kwargs):
+        user_id = getattr(request.user, 'id', 'Anonymous') 
+        logger.info(f"User {user_id} is requesting to create a Payment.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        payment = PaymentService.create_payment(serializer.validated_data)
+        logger.info(f"Payment ID: {payment.id} created successfully.")
+        
+        serializer = self.get_serializer(payment)
+        return ResponseWrapper.created(
+            data=serializer.data,
+            entity="Payment"
+        )
     
-        payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, f'Payments between {start_date} and {end_date} successfully fetched')
+    def update(self, request, *args, **kwargs):
+        user_id = getattr(request.user, 'id', 'Anonymous') 
+        instance = self.get_object()
+        logger.info(f"User {user_id} is requesting to update Payment Id {instance.id}.")
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    @swagger_auto_schema(
-        operation_description="Get today's payments",
-        responses={
-            200: PaymentSerializer(many=True),
-        }
-    )
-    def get_today_payments(self, request):
-        payment_service = self.get_payment_service()
-
-        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
-
-        payments = payment_service.get_complete_payments_by_date_range(start_date, end_date)
+        payment = PaymentService.update_payment(instance, serializer.validated_data)
+        logger.info(f"Payment ID: {payment.id} updated successfully.")
         
-        payment_data = PaymentSerializer(payments, many=True).data 
-        return ApiResponse.ok(payment_data, 'Today payments successfully fetched')
+        serializer = self.get_serializer(payment)
+        return ResponseWrapper.created(
+            data=serializer.data,
+            entity=f"Payment {payment.id}",
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        user_id = getattr(request.user, 'id', 'Anonymous') 
+        instance = self.get_object()
+        payment_id = instance.id
+        is_hard_delete = self.request.query_params.get("hard_delete", False)
 
+        logger.info(f"User {user_id} is requesting to delete Payment Id {payment_id}.")
+        PaymentService.delete_payment(instance, hard_delete=is_hard_delete)
 
-    @swagger_auto_schema(
-        operation_description="Complete a payment",
-        responses={
-            200: PaymentSerializer,
-            404: "Payment not found",
-            409: "Conflict (payment validation failure)"
-        }
-    )
-    def complete_payment(self, request, id, payment_method):
-        payment_service = self.get_payment_service()
-
-        payment = payment_service.get_payment_by_id(id)
-        if not payment:
-            return ApiResponse.not_found('Payment', 'ID', id)
-        
-        validate_result = payment_service.validate_payment_complete(payment)
-        if validate_result.is_failure():
-            return ApiResponse.conflict(validate_result.get_error_msg())
-
-        payment_complete = payment_service.complete_payment(payment, payment_method)
-        if payment_complete.is_failure():
-            return ApiResponse.conflict(validate_result.get_error_msg())
-
-        payment_data = PaymentSerializer(payment_complete.get_data()).data 
-        return ApiResponse.ok(payment_data, 'Payment successfully completed') 
-
-
-    @swagger_auto_schema(
-        operation_description="Cancel a payment",
-        responses={
-            200: "Payment successfully cancelled",
-            404: "Payment not found",
-            409: "Conflict (payment validation failure)"
-        }
-    )
-    def cancel_payment(self, request, id):
-        payment_service = self.get_payment_service()
-
-        payment = payment_service.get_payment_by_id(id)
-        if not payment:
-            return ApiResponse.not_found('Payment', 'ID', id)
-        
-        validate_result = payment_service.validate_payment_cancel(payment)
-        if validate_result.is_failure():
-            return ApiResponse.conflict(validate_result.get_error_msg())
-
-        payment_service.update_payment_status(payment, 'CANCELLED')
-
-        return ApiResponse.ok(None, 'Payment successfully cancelled')
+        return ResponseWrapper.deleted(f"Payment {payment_id}")

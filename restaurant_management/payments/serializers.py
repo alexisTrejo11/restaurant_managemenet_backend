@@ -1,4 +1,3 @@
-from restaurant.services.domain.ingredient import Ingredient
 from rest_framework import serializers
 
 class PaymentItemSerializer(serializers.Serializer):

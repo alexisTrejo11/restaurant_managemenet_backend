@@ -8,13 +8,11 @@ class PaymentModel(models.Model):
         ('CARD', 'Card'),
         ('TRANSACTION', 'Transaction'),
     ]
-
     PAYMENT_STATUS = [
         ('PENDING', 'Pending'),
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
     ]
-
     CURRENCY_TYPES = [
         ('MXN', 'Mexican Peso'),
         ('USD', 'US Dollar'),

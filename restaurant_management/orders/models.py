@@ -26,7 +26,6 @@ class Order(models.Model):
         self.status = 'COMPLETED'
         self.end_at = timezone.now()
 
-
     def cancel(self):
             self.status = 'CANCELLED'
             self.end_at = timezone.now()
