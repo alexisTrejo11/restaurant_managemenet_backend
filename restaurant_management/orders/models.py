@@ -22,13 +22,13 @@ class Order(models.Model):
     def __str__(self):
         return f'Order {self.id} - Table {self.table.number}'
     
-    def complete(self):
+    def set_as_complete(self):
         self.status = 'COMPLETED'
         self.end_at = timezone.now()
 
-    def cancel(self):
-            self.status = 'CANCELLED'
-            self.end_at = timezone.now()
+    def set_as_cancelled(self):
+        self.status = 'CANCELLED'
+        self.end_at = timezone.now()
 
 
 class OrderItem(models.Model):

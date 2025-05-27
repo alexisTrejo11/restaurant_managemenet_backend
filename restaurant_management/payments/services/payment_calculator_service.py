@@ -8,6 +8,9 @@ class PaymentCalculatorService:
 
     @classmethod
     def calculate_payment_totals(cls, payment: Payment, items: List[PaymentItem]):
+        if len(items) == 0:
+            raise ValueError("Item List is Empty")    
+    
         sub_total = sum(item.total for item in items)
         discount = Decimal('0.00')
         vat = sub_total * cls.DEFAULT_VAT_RATE

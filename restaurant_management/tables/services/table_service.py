@@ -1,12 +1,8 @@
-from ..models import Table
 import logging
 from django.db import transaction
-from ..exceptions.exceptions import (
-    TableCapacityExceeded,
-    RestaurantCapacityFull,
-    TableNumberAlreadyExists
-)
 from typing import List
+from ..models import Table
+from ..exceptions import *
 
 logger = logging.getLogger(__name__)
 

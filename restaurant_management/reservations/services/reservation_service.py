@@ -1,14 +1,12 @@
-from django.utils import timezone
 from django.db import transaction
 from tables.models import Table
-from ..models import Reservation
-from ..exceptions import TableNotAvaialbeForReservation
 from .reservation_validation_service import ReservationValidationService as validatonService
 from tables.services.table_service import TableService
 from typing import List, Optional
 from django.utils.timezone import timedelta
 from .email_service import EmailService
-from shared.exceptions.custom_exceptions import EntityNotFoundException
+from ..models import Reservation
+from ..exceptions import TableNotAvailableForReservation, ReservationNotFound
 
 class ReservationService:
     @classmethod
@@ -16,7 +14,7 @@ class ReservationService:
         try:
             return Reservation.objects.get(id=reservation_id)
         except Reservation.DoesNotExist:
-            raise EntityNotFoundException("Reservation", reservation_id)
+            raise ReservationNotFound("Reservation", reservation_id)
     
     @classmethod
     def get_reservation_by_date_range(cls, start_date, end_date):
@@ -73,11 +71,11 @@ class ReservationService:
     def _assign_table(cls, reservation: Reservation) -> None:
         suitable_tables = TableService.find_suitable_tables_to_order(reservation.customer_number)
         if len(suitable_tables) == 0:
-            raise TableNotAvaialbeForReservation("Not suitables tables for the requested date and customer capacity.")
+            raise TableNotAvailableForReservation()
         
         assigned_table = cls._select_table_with_no_reservation(suitable_tables, reservation)
         if not assigned_table:
-            raise TableNotAvaialbeForReservation("Not suitables tables for the requested date and customer capacity.")
+            raise TableNotAvailableForReservation()
 
         reservation.table = assigned_table
 

@@ -10,7 +10,6 @@ from ..exceptions import (
 )
 from shared.utils.restaurant_information import OPENING_HOUR, CLOSING_HOUR, MAX_CUSTOMERS_PER_RESERVATION
 
-
 class ReservationValidationService:
     @classmethod
     def validate_reservation_date(cls, reservation_date: datetime) -> None:
@@ -61,14 +60,6 @@ class ReservationValidationService:
         cls.validate_reservation_date(reservation.reservation_date)
         cls.validate_reservation_hour(reservation.reservation_date)
         cls.validate_customer_limit(reservation.customer_number)
-
-        # Further business logic for reservation creation could go here, e.g.,
-        # checking table availability. This would involve querying the database.
-        # Example:
-        # if not TableModel.objects.filter(id=table_id, capacity__gte=customer_number).exists():
-        #     raise SomeTableAvailabilityException("Table not available or too small for this number of customers.")
-        # if Reservation.objects.filter(table_id=table_id, reservation_date=reservation_date, status__in=['BOOKED', 'ATTENDED']).exists():
-        #     raise TableAlreadyBookedException("This table is already booked for this time.")
 
 
     @classmethod

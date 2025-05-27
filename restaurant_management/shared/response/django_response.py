@@ -66,7 +66,6 @@ class DjangoResponseWrapper:
         if isinstance(data, dict):
             data = dict(data)
 
-
         response_body = ApiResponse(
             data=None,
             timestamp=datetime.now().isoformat(),
@@ -143,41 +142,6 @@ class DjangoResponseWrapper:
         response_dict = asdict(response_body)
         response_dict['data']= data
         return Response(data=response_dict, status=status.HTTP_200_OK)
-
-    @staticmethod
-    def failure(data=None, message=None, status_code=None, metadata=None) -> Response:
-        """
-        Creates a generic failure response with a customizable status code and message.
-        
-        Args:
-            data (Any, optional): The payload to include in the response. Defaults to None.
-            message (str, optional): A custom failure message. Defaults to 'Request Has Failed'.
-            status_code (int, optional): The HTTP status code to use. Defaults to 400 Bad Request.
-        
-        Returns:
-            Response: A DRF Response object with the specified status code and failure message.
-        """
-        if not status_code:
-            status_code = status.HTTP_400_BAD_REQUEST
-
-        if isinstance(data, dict):
-            data = dict(data)
-
-        if not message:
-            message = 'Request Has Failed'
-
-        response_body = ApiResponse(
-            data=None,
-            timestamp=datetime.now().isoformat(),
-            success=False,
-            status_code=status_code,
-            message=message,
-            metadata=metadata if metadata else {}
-        )
-
-        response_dict = asdict(response_body)
-        response_dict['data']= data
-        return Response(data=asdict(response_body), status=status_code)
 
     @staticmethod
     def not_found(data=None, entity='Entity', param=None, value=None, metadata=None) -> Response:
@@ -318,6 +282,41 @@ class DjangoResponseWrapper:
         return Response(data=asdict(response_body), status=status.HTTP_204_NO_CONTENT)
 
     @staticmethod
+    def failure(data=None, message=None, status_code=None, metadata=None) -> Response:
+        """
+        Creates a generic failure response with a customizable status code and message.
+        
+        Args:
+            data (Any, optional): The payload to include in the response. Defaults to None.
+            message (str, optional): A custom failure message. Defaults to 'Request Has Failed'.
+            status_code (int, optional): The HTTP status code to use. Defaults to 400 Bad Request.
+        
+        Returns:
+            Response: A DRF Response object with the specified status code and failure message.
+        """
+        if not status_code:
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        if isinstance(data, dict):
+            data = dict(data)
+
+        if not message:
+            message = 'Request Has Failed'
+
+        response_body = ApiResponse(
+            data=None,
+            timestamp=datetime.now().isoformat(),
+            success=False,
+            status_code=status_code,
+            message=message,
+            metadata=metadata if metadata else {}
+        )
+
+        response_dict = asdict(response_body)
+        response_dict['data']= data
+        return Response(data=asdict(response_body), status=status_code)
+
+    @staticmethod
     def internal_server_error(data=None, message=None, metadata=None) -> Response:
         """
         Creates a 500 Internal Server Error response indicating that an unexpected server error occurred.
@@ -345,3 +344,5 @@ class DjangoResponseWrapper:
         )
 
         return Response(data=asdict(response_body), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+

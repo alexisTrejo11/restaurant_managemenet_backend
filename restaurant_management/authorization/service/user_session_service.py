@@ -7,12 +7,12 @@ class SessionService:
             token = RefreshToken(refresh_token)
             token.blacklist()
         except Exception as e:
-            raise ValueError(f"Error al cerrar sesión: {str(e)}")
+            raise Exception(f"Error logging out: {str(e)}")
 
     @staticmethod
     def refresh_session(refresh_token, user):
         """
-        Refresca la sesión generando un nuevo access token.
+        Refreshes the session by generating a new access token.
         """
         try:
             refresh = RefreshToken(refresh_token)
@@ -27,7 +27,7 @@ class SessionService:
                 'access_token': str(new_access_token),
             }
         except Exception as e:
-            raise ValueError(f"Error al refrescar la sesión: {str(e)}")
+            raise Exception(f"Error refreshing the session: {str(e)}")
 
     @staticmethod
     def create_session(user) -> dict:

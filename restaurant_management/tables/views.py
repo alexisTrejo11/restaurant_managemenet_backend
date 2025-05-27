@@ -13,7 +13,6 @@ class TableViews(viewsets.ModelViewSet):
     lookup_field = 'number'
     lookup_url_kwarg = 'number'
 
-
     def list(self, request, *args, **kwargs):
         user_id = getattr(request.user, 'id', 'Anonymous') 
         logger.info(f"User {user_id} is requesting table list.")
