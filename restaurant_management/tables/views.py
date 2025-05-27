@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from .models import Table
 from .serializers import TableSerializer
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from .services.table_service import TableService
 import logging
 

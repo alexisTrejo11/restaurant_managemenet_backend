@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from ..serializers import StockTransactionSerializer as TransactionSerializer
 from ..services.stock_transaction_service import StockTransactionService as TransactionService
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper 
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper 
 import logging
 
 logger = logging.getLogger(__name__)

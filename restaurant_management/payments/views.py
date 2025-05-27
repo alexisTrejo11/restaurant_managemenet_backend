@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAdminUser
 from .services.payment_service import PaymentService
 from .serializers import PaymentSerializer
 from .models import Payment
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
-from core.pagination import CustomPagination
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.pagination import CustomPagination
 import logging
 
 logger = logging.getLogger(__name__)

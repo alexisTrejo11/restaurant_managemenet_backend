@@ -1,4 +1,4 @@
-from core.exceptions.custom_exceptions import EntityNotFoundException
+from shared.exceptions.custom_exceptions import EntityNotFoundException
 from ..models.order_item_model import OrderItemModel, OrderModel
 from ...core.domain.entities.order_entity import Order
 from ...core.mappers.order_mappers import OrderMapper, OrderItemMapper

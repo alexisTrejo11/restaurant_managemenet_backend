@@ -8,7 +8,7 @@ from tables.services.table_service import TableService
 from typing import List, Optional
 from django.utils.timezone import timedelta
 from .email_service import EmailService
-from core.exceptions.custom_exceptions import EntityNotFoundException
+from shared.exceptions.custom_exceptions import EntityNotFoundException
 
 class ReservationService:
     @classmethod

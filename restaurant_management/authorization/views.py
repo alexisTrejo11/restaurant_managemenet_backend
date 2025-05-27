@@ -6,7 +6,7 @@ from .serializers import (
     SignUpSerializer,
     LoginSerializer
 )
-from core.response.django_response import DjangoResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper
 from .service.auth_service import AuthService
 from .service.user_session_service import SessionService
 

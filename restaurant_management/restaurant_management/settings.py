@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
 
-
     'tables',
     'users',
     'menu',
@@ -59,7 +58,7 @@ INSTALLED_APPS = [
 DEBUG_PROPAGATE_EXCEPTIONS = True
 
 MIDDLEWARE = [
-    'core.exceptions.json_middleware.JSONExceptionMiddleware',
+    'shared.exceptions.json_middleware.JSONExceptionMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

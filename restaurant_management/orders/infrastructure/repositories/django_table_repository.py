@@ -1,8 +1,8 @@
 from typing import List, Optional
 from ..models.table_model import TableModel
 from reservations.domain.entities.table import Table
-from core.cache.django_cache_manager import CacheManager
-from core.exceptions.custom_exceptions import EntityNotFoundException
+from shared.cache.django_cache_manager import CacheManager
+from shared.exceptions.custom_exceptions import EntityNotFoundException
 from ...core.mappers.table_mappers import TableMapper
 from ...core.repositories.table_repository import TableRepository
 

@@ -3,7 +3,7 @@ from rest_framework import generics, permissions
 from .models import User
 from .serializers import UserCreateUpdateSerializer, UserResponseSerializer
 from .service.user_service import UserService
-from core.response.django_response import DjangoResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper
 from rest_framework.pagination import PageNumberPagination
 
 logger = logging.getLogger(__name__)

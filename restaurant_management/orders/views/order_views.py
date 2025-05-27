@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from ..models import Order
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from ..serializers import OrderSerializer
 import logging
 from ..services.order_service import OrderService

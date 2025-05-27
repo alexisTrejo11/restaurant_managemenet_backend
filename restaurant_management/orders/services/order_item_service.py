@@ -1,7 +1,7 @@
 from typing import List
 from django.db import transaction
 from ..models import OrderItem, Order
-from core.exceptions.custom_exceptions import BusinessRuleViolationException, EntityNotFoundException
+from shared.exceptions.custom_exceptions import BusinessRuleViolationException, EntityNotFoundException
 import logging
 
 logger = logging.getLogger(__name__)

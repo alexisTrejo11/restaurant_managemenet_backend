@@ -8,7 +8,7 @@ from ..exceptions import (
     ReservationCustomerLimitExceeded,
     ReservationCannotChangeStatus
 )
-from core.utils.restaurant_information import OPENING_HOUR, CLOSING_HOUR, MAX_CUSTOMERS_PER_RESERVATION
+from shared.utils.restaurant_information import OPENING_HOUR, CLOSING_HOUR, MAX_CUSTOMERS_PER_RESERVATION
 
 
 class ReservationValidationService:

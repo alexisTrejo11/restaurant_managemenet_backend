@@ -1,4 +1,4 @@
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from ..serializers import OrderItemSerializer
 from ..services.order_service import OrderService
 from ..services.order_item_service import OrderItemService

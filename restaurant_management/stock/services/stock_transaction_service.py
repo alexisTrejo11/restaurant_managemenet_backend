@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from ..models import Stock, StockTransaction
 from ..exceptions.stock_exceptions import InvalidStockFieldError
-from core.exceptions.custom_exceptions import EntityNotFoundException
+from shared.exceptions.custom_exceptions import EntityNotFoundException
 from .stock_service import StockService
 
 class StockTransactionService:

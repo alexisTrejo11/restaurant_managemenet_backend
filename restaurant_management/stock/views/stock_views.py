@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.exceptions import NotFound
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from rest_framework.permissions import IsAuthenticated
 import logging
 from ..models import Stock

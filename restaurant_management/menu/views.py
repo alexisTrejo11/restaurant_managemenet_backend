@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import NotFound
-from core.response.django_response import DjangoResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper
 import logging
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination

@@ -4,9 +4,9 @@ from ...core.repositories.order_repository import OrderRepository
 from ..models.order_model import OrderModel
 from ..models.order_item_model import OrderItemModel
 from ...core.mappers.order_mappers import OrderMapper, OrderItemMapper
-from core.cache.django_cache_manager import CacheManager
+from shared.cache.django_cache_manager import CacheManager
 from django.db.models import Q
-from core.exceptions.custom_exceptions import EntityNotFoundException
+from shared.exceptions.custom_exceptions import EntityNotFoundException
 
 
 ORDER_CACHE_PREFIX = "ORDER_"

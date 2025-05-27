@@ -1,4 +1,4 @@
-from core.repository.common_repository import CommonRepository
+from shared.repository.common_repository import CommonRepository
 from abc import ABC, abstractmethod
 from typing import Optional
 from ...core.domain.entities.order_entity import Order, OrderItem

@@ -1,7 +1,7 @@
 from ..models import StockItem
 import logging
 from django.db import transaction
-from core.exceptions.custom_exceptions import BusinessRuleViolationException
+from shared.exceptions.custom_exceptions import BusinessRuleViolationException
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Optional
 from ...core.domain.entities.table_entity import Table
-from core.repository.common_repository import CommonRepository
+from shared.repository.common_repository import CommonRepository
 
 class TableRepository(CommonRepository[Table]):
     """

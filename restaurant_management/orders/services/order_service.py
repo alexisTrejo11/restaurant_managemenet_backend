@@ -1,5 +1,5 @@
 from ..models import Order
-from core.exceptions.custom_exceptions import BusinessRuleViolationException, EntityNotFoundException
+from shared.exceptions.custom_exceptions import BusinessRuleViolationException, EntityNotFoundException
 from django.db import transaction
 import logging
 

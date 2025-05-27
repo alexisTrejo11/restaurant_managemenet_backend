@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from ..models import Reservation
-from core.response.django_response import DjangoResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper
 from django.shortcuts import get_object_or_404
 from ..serializers import ReservationSerializer
 import logging

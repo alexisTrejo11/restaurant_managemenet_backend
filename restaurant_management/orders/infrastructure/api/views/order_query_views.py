@@ -1,12 +1,12 @@
 from rest_framework.viewsets import ViewSet
-from core.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from ..serializers.order_serializer import *
 from payments.serializers import PaymentSerializer
-from core.injector.app_module import AppModule
+from shared.injector.app_module import AppModule
 from injector import Injector
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from core.utils.permission import RoleBasedPermission
+from shared.utils.permission import RoleBasedPermission
 from rest_framework.permissions import IsAuthenticated
 from ....application.use_case.order_command_use_case import (
     CreateOrderUseCase,
