@@ -33,6 +33,7 @@ urlpatterns = [
    path('api/stock/',  include('stock.urls')),
    path('api/orders/',  include('orders.urls')),
    path('api/reservations/',  include('reservations.urls')),
+   path('api/payments/',  include('payments.urls')),
 
    # Swagger 
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),

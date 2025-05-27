@@ -42,16 +42,12 @@ class OrderService:
         """
         Updates an existing order instance after performing all necessary validations.
         """
-        if new_status:
-            cls._update_order_status(order, new_status)   
-        if new_table:
-            cls._update_order_table(order, new_table)
         try:
             with transaction.atomic():
                 order.save()
                 return order
         except Exception as e:
-            logger.error(f"Error updating order ID {order.id} with data {new_status}, {new_table}: {e}", exc_info=True)
+            logger.error(f"Error updating order ID {order.id} {e}", exc_info=True)
             raise
 
     @classmethod
@@ -70,14 +66,15 @@ class OrderService:
             raise
     
     @classmethod
-    def _update_order_status(cls, order: Order, new_status: str):
+    def update_order_status(cls, order: Order, new_status: str):
         cls._validate_order_in_progress(order)
         
         if new_status:
             if new_status == 'COMPLETED':
-                order.complete()
+                cls.complete_order()
             elif new_status == 'CANCELLED':
-                order.cancel()
+                cls.cancel_order()
+
 
     @classmethod
     def complete_order(cls, order: Order):
@@ -85,7 +82,7 @@ class OrderService:
         order.complete()
         order.save()
         cls._clear_table(order)
-        # Intit Payment
+        return order
 
     @classmethod
     def cancel_order(cls, order: Order):

@@ -1,4 +1,5 @@
-from django.db import models, Q
+from django.db import models
+from django.db.models import Q
 from decimal import Decimal
 from django.utils import timezone
 from datetime import datetime
@@ -112,7 +113,8 @@ class Payment(models.Model):
         return Payment(
             total = Decimal('0.00'),
             sub_total = Decimal('0.00'),
-            total = Decimal('0.00'),
+            vat = Decimal('0.00'),
+            vat_rate = Decimal('0.00'),
             discount = Decimal('0.00'),
             currency_type = "MXN",
             order = order,
@@ -124,7 +126,8 @@ class Payment(models.Model):
         return Payment(
             total = Decimal('0.00'),
             sub_total = Decimal('0.00'),
-            total = Decimal('0.00'),
+            vat = Decimal('0.00'),
+            vat_rate = Decimal('0.00'),
             discount = Decimal('0.00'),
             currency_type = "MXN",
             payment_status = 'PENDING',
@@ -150,7 +153,7 @@ class PaymentItem(models.Model):
         related_name='payment_items'
     )
     order_item = models.OneToOneField(
-        'OrderItem', 
+        'orders.OrderItem', 
         on_delete=models.PROTECT, 
         related_name='payment_item',
         null=True, 

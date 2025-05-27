@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class PaymentAdminViews(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
-    permission_classes = [IsAdminUser]
+    #permission_classes = [IsAdminUser]
     pagination_class = CustomPagination
 
     def get_queryset(self):
@@ -46,12 +46,11 @@ class PaymentAdminViews(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         user_id = getattr(request.user, 'id', 'Anonymous')
-        logger.info(f"User {user_id} is requesting details for payment ID: {instance.id}.")
-
         instance = self.get_object()
-        logger.info(f"Returning details for table ID: {instance.id}.")
+        logger.info(f"User {user_id} is requesting details for payment ID: {instance.id}.")
         
         serializer = self.get_serializer(instance).data
+        logger.info(f"Returning details for table ID: {instance.id}.")
         return ResponseWrapper.found(
             data=serializer.data,
             entity=f"Payment {instance.id}"
