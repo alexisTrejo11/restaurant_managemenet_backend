@@ -30,7 +30,6 @@ urlpatterns = [
   
    path('api/', include(router.urls)),
 
-
    path('api/auth/', include('authorization.urls')),
    path('api/users/', include('users.urls')),
    path('api/menu/',  include('menu.urls')),

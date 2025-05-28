@@ -79,3 +79,62 @@ class ApiErrorResponseSerializer(ApiResponseSerializer):
         child=serializers.ListField(child=serializers.CharField())
     )
 
+
+"""
+ ERROR SERIAlIZERS
+"""
+class BaseErrorResponseSerializer(serializers.Serializer):
+    """
+    Base serializer for all error responses
+    """
+    success = serializers.BooleanField(default=False, help_text='Indicates if the request was successful.')
+    message = serializers.CharField(help_text='Error message describing the issue.')
+    data = serializers.JSONField(help_text='Error details (if any).', allow_null=True, required=False)
+    timestamp = serializers.CharField(help_text='ISO timestamp of the response.')
+    status_code = serializers.IntegerField(help_text='HTTP status code.')
+    metadata = serializers.DictField(help_text='Additional metadata.', required=False)
+
+class UnauthorizedErrorResponseSerializer(BaseErrorResponseSerializer):
+    """
+    Serializer for 401 Unauthorized responses
+    """
+    status_code = serializers.IntegerField(default=401, help_text='HTTP status code for unauthorized requests.')
+    message = serializers.CharField(
+        default="Authentication credentials were not provided or are invalid.",
+        help_text='Authentication error message.'
+    )
+
+class ForbiddenErrorResponseSerializer(BaseErrorResponseSerializer):
+    """
+    Serializer for 403 Forbidden responses
+    """
+    status_code = serializers.IntegerField(default=403, help_text='HTTP status code for forbidden requests.')
+    message = serializers.CharField(
+        default="You do not have permission to perform this action.",
+        help_text='Permission error message.'
+    )
+
+class ValidationErrorResponseSerializer(BaseErrorResponseSerializer):
+    """
+    Serializer for 400 Bad Request responses with validation errors
+    """
+    status_code = serializers.IntegerField(default=400, help_text='HTTP status code for bad requests.')
+    message = serializers.CharField(
+        default="Validation Error",
+        help_text='Validation error message.'
+    )
+    data = serializers.DictField(
+        child=serializers.ListField(child=serializers.CharField()),
+        help_text='Detailed validation errors by field.',
+        required=False
+    )
+
+class ServerErrorResponseSerializer(BaseErrorResponseSerializer):
+    """
+    Serializer for 500 Internal Server Error responses
+    """
+    status_code = serializers.IntegerField(default=500, help_text='HTTP status code for server errors.')
+    message = serializers.CharField(
+        default="An unexpected error occurred.",
+        help_text='Server error message.'
+    )

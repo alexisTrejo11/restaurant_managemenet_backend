@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 from rest_framework import status 
-from shared.response.api_response_serializers import ApiErrorResponseSerializer
-from authorization.serializers import LogoutErrorResponseSerializer, LogoutResponseSerializer, ApiResponseWithTokensSerializer
+from authorization.serializers import LogoutResponseSerializer, ApiResponseWithTokensSerializer
+from shared.open_api.error_response_schema import ErrorResponses
 
 server_error_example = { "application/json": { "success": False, "message": "An unexpected error occurred.", "errors": {} } }
 
@@ -24,25 +24,8 @@ class SignupDocumentationData:
                 }
             }
         ),
-        status.HTTP_400_BAD_REQUEST: openapi.Response(
-            description="Bad Request - Invalid input data or email already registered.",
-            schema=ApiErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "Validation Error",
-                    "errors": {
-                        "email": ["This email is already registered."],
-                        "password2": ["Passwords do not match."]
-                    }
-                }
-            }
-        ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-            description="Internal Server Error - An unexpected error occurred.",
-            schema=ApiErrorResponseSerializer,
-            examples=server_error_example
-        ),
+        status.HTTP_400_BAD_REQUEST: ErrorResponses.get_validation_error_response(),
+        **ErrorResponses.get_common_error_responses() 
     }
     
     singup_operation_description = """
@@ -78,25 +61,8 @@ class LoginDocumentationData:
                 }
             }
         ),
-        status.HTTP_400_BAD_REQUEST: openapi.Response(
-            description="Bad Request - Invalid input data or user not found with given credentials.",
-            schema=ApiErrorResponseSerializer,
-            examples= {
-                "application/json": {
-                    "success": False,
-                    "message": "Login Fail",
-                    "errors": {
-                        "user" : "user not found with given credentials",
-                        "user" : "user acocunt is banned",
-                    },
-                }
-            }
-        ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-            description="Internal Server Error - An unexpected error occurred.",
-            schema=ApiErrorResponseSerializer,
-            examples=server_error_example
-        ),
+        status.HTTP_400_BAD_REQUEST: ErrorResponses.get_validation_error_response(),
+        **ErrorResponses.get_common_error_responses(include_auth=False) 
     }
     
     operation_description = """
@@ -116,7 +82,6 @@ class LogoutDocumentationData:
     """
     Documentation data for logout endpoint
     """
-    
     logout_responses = {
         status.HTTP_200_OK: openapi.Response(
             description="User successfully logged out and refresh token invalidated.",
@@ -132,48 +97,8 @@ class LogoutDocumentationData:
                 }
             }
         ),
-        status.HTTP_400_BAD_REQUEST: openapi.Response(
-            description="Bad Request - Missing or invalid refresh token.",
-            schema=LogoutErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "Refresh Token is Required",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 400,
-                    "metadata": {}
-                }
-            }
-        ),
-        status.HTTP_401_UNAUTHORIZED: openapi.Response(
-            description="Unauthorized - Invalid or expired access token.",
-            schema=LogoutErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "Authentication credentials were not provided or are invalid.",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 401,
-                    "metadata": {}
-                }
-            }
-        ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-            description="Internal Server Error - An unexpected error occurred.",
-            schema=LogoutErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "An unexpected error occurred during logout.",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 500,
-                    "metadata": {}
-                }
-            }
-        ),
+        status.HTTP_400_BAD_REQUEST: ErrorResponses.get_validation_error_response(),
+        **ErrorResponses.get_common_error_responses(include_auth=True)    
     }
     
     operation_description = """
@@ -202,52 +127,7 @@ class LogoutAllDocumentationData:
     """
     Documentation data for logout all sessions endpoint
     """
-    
-    logout_all_responses = {
-        status.HTTP_200_OK: openapi.Response(
-            description="All user sessions successfully invalidated.",
-            schema=LogoutResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": True,
-                    "message": "All sessions logged out.",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 200,
-                    "metadata": {}
-                }
-            }
-        ),
-        status.HTTP_401_UNAUTHORIZED: openapi.Response(
-            description="Unauthorized - Invalid or expired access token.",
-            schema=LogoutErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "Authentication credentials were not provided or are invalid.",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 401,
-                    "metadata": {}
-                }
-            }
-        ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
-            description="Internal Server Error - An unexpected error occurred.",
-            schema=LogoutErrorResponseSerializer,
-            examples={
-                "application/json": {
-                    "success": False,
-                    "message": "An unexpected error occurred during logout.",
-                    "data": None,
-                    "timestamp": "2025-05-28T10:30:00Z",
-                    "status_code": 500,
-                    "metadata": {}
-                }
-            }
-        ),
-    }
-    
+
     operation_description = """
         This endpoint allows authenticated users to logout from ALL active sessions by invalidating 
         all refresh tokens associated with their account.
@@ -272,3 +152,24 @@ class LogoutAllDocumentationData:
     operation_summary = 'Logout user from all active sessions'
     method = 'post'
     operation_id = 'logout_user_all_sessions'
+    logout_all_responses = {
+        status.HTTP_200_OK: openapi.Response(
+            description="User successfully logged out and refresh token invalidated.",
+            schema=LogoutResponseSerializer,
+            examples={
+                "application/json": {
+                    "success": True,
+                    "message": "All Logout successfully processed.",
+                    "data": None,
+                    "timestamp": "2025-05-28T10:30:00Z",
+                    "status_code": 200,
+                    "metadata": {}
+                }
+            }
+        ),
+        status.HTTP_400_BAD_REQUEST: ErrorResponses.get_validation_error_response(),
+        **ErrorResponses.get_common_error_responses(include_auth=True)    
+    }
+
+
+

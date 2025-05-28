@@ -6,7 +6,7 @@ from .service.user_session_service import SessionService
 from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from shared.open_api.auth_response_schema import (
+from .documentation.auth_doc_data import (
     SignupDocumentationData as SignupDocData, 
     LoginDocumentationData as LogDocData,
     LogoutDocumentationData as LogoutDocData,
