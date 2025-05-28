@@ -30,7 +30,6 @@ def signup(request):
         message="Signup Successfully Processed"
     )
 
-
 @swagger_auto_schema(method='post', operation_description="Login user and get JWT token")
 @api_view(['POST'])
 @permission_classes([AllowAny])

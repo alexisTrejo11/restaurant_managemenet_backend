@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('extras_charges', models.DecimalField(decimal_places=2, default=Decimal('0.00'), max_digits=10)),
                 ('total', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('charge_description', models.CharField(default='', max_length=255)),
-                ('menu_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='payment_items', to='menu.menuitem')),
+                ('menu_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='payment_items', to='menu.Dish')),
                 ('menu_item_extra', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='payment_items', to='menu.menuextra')),
                 ('order_item', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='payment_item', to='orders.orderitem')),
                 ('payment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_items', to='payments.payment')),

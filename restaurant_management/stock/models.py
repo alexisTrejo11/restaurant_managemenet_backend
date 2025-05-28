@@ -16,7 +16,7 @@ class StockItem(models.Model):
         OTHER = 'OTHER', _('Other')
 
     menu_item = models.ForeignKey(
-        'menu.MenuItem',
+        'menu.Dish',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

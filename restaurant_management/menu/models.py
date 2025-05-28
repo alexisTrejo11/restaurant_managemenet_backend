@@ -1,6 +1,6 @@
 from django.db import models
 
-class MenuItem(models.Model):
+class Dish(models.Model):
     CATEGORY_CHOICES = [
         ('DRINKS', 'Drinks'),
         ('ALCOHOL_DRINKS', 'Alcohol Drinks'),
@@ -26,9 +26,9 @@ class MenuItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)  
 
     class Meta:
-        db_table = 'menu_items'
-        verbose_name = 'Menu Item'
-        verbose_name_plural = 'Menu Items'
+        db_table = 'dishes'
+        verbose_name = 'Dish'
+        verbose_name_plural = 'Dishes'
 
     def __str__(self):
         return self.name

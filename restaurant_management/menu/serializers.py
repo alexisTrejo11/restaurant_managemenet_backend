@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from decimal import Decimal
-from .models import MenuItem
-from .services.menu_item_service import MenuItemService
+from .models import Dish
+from .services.menu_item_service import DishService
 from django.core.exceptions import ValidationError
 
-class MenuItemSerializer(serializers.ModelSerializer):
+class DishSerializer(serializers.ModelSerializer):
     price = serializers.DecimalField(
         max_digits=10, 
         decimal_places=2,
@@ -12,7 +12,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = MenuItem
+        model = Dish
         fields = [
             'id',
             'name',
@@ -60,7 +60,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
 
     def validate_category(self, value):
         """Valida que la categoría sea válida (case-insensitive)"""
-        return MenuItemService.validate_category(value.upper())
+        return DishService.validate_category(value.upper())
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
@@ -69,6 +69,6 @@ class MenuItemSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Actualiza un ítem del menú con validación de negocio"""
         try:
-            return MenuItemService.update_menu_item(instance, **validated_data)
+            return DishService.update_menu_item(instance, **validated_data)
         except ValidationError as e:
             raise serializers.ValidationError(str(e))

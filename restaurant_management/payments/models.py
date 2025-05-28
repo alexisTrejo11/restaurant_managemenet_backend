@@ -160,7 +160,7 @@ class PaymentItem(models.Model):
         blank=True, 
     )
     menu_item = models.ForeignKey(
-        'menu.MenuItem', 
+        'menu.Dish', 
         on_delete=models.PROTECT, 
         related_name='payment_items',
         null=True, 

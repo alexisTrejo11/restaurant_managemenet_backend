@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ('notes', models.TextField(blank=True, null=True)),
                 ('is_delivered', models.BooleanField(default=False)),
                 ('menu_extra', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='order_items', to='menu.menuextra')),
-                ('menu_item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='order_items', to='menu.menuitem')),
+                ('menu_item', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='order_items', to='menu.Dish')),
                 ('order', models.ForeignKey(default='', on_delete=django.db.models.deletion.CASCADE, related_name='order_items', to='orders.order')),
             ],
             options={

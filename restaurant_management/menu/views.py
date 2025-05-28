@@ -5,17 +5,17 @@ import logging
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import MenuItem
-from .serializers import MenuItemSerializer
-from .services.menu_item_service import MenuItemService
-from .filters import MenuItemFilter
+from .models import Dish
+from .serializers import DishSerializer
+from .services.menu_item_service import DishService
+from .filters import DishFilter
 from rest_framework.decorators import api_view
 
 logger = logging.getLogger(__name__)
 
 class MenuDishRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
+    queryset = Dish.objects.all()
+    serializer_class = DishSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'id'
 
@@ -100,17 +100,17 @@ class MenuDishRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 # TODO: Check Filters
 class MenuDishCreateView(generics.ListCreateAPIView):
-    serializer_class = MenuItemSerializer
+    serializer_class = DishSerializer
     permission_classes = []
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_class = MenuItemFilter
+    filterset_class = DishFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'created_at']
     ordering = ['name']  # Default
 
     def get_queryset(self):
         """Base queryset con filtro de status activo por defecto"""
-        return MenuItem.objects.filter(status='ACTIVE')
+        return Dish.objects.filter(status='ACTIVE')
 
     def list(self, request, *args, **kwargs):
         try:
@@ -154,7 +154,7 @@ class MenuDishCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        menu_item = MenuItemService.create_menu_item(**serializer.validated_data)
+        menu_item = DishService.create_menu_item(**serializer.validated_data)
         logger.info(
             f"Successfully created menu item ID: {menu_item.id}",
             extra={'item_id': menu_item.id}
@@ -171,7 +171,7 @@ class CustomPagination(PageNumberPagination):
     max_page_size = 100
 
 class ListActiveDishesByStatus(generics.ListAPIView):
-    serializer_class = MenuItemSerializer
+    serializer_class = DishSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['category']  
@@ -185,8 +185,8 @@ class ListActiveDishesByStatus(generics.ListAPIView):
                 'query_params': self.request.query_params
             }
         )
-        MenuItemService.validate_category(category)
-        return MenuItem.objects.filter(category=category, status="ACTIVE").order_by('name')
+        DishService.validate_category(category)
+        return Dish.objects.filter(category=category, status="ACTIVE").order_by('name')
 
     def list(self, request, *args, **kwargs):        
         queryset = self.filter_queryset(self.get_queryset())

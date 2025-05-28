@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils import timezone
 from .models import Order, OrderItem
-from menu.models import MenuItem
+from menu.models import Dish
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:

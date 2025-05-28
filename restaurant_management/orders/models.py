@@ -32,7 +32,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    menu_item = models.ForeignKey('menu.MenuItem', on_delete=models.PROTECT, related_name='order_items')
+    menu_item = models.ForeignKey('menu.Dish', on_delete=models.PROTECT, related_name='order_items')
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items', default="")
     added_at = models.DateTimeField(auto_now_add=True)
     menu_extra = models.ForeignKey('menu.MenuExtra', on_delete=models.PROTECT, related_name='order_items', null=True)

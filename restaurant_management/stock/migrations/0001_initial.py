@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(choices=[('INGREDIENT', 'Ingredient'), ('UTENSIL', 'Utensil'), ('CONTAINER', 'Container'), ('OTHER', 'Other')], default='OTHER', help_text='Classification of the stock item', max_length=15, verbose_name='Category')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At')),
-                ('menu_item', models.ForeignKey(blank=True, help_text='Associated menu item (for ingredients only)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='stock_items', to='menu.menuitem', verbose_name='Menu Item')),
+                ('menu_item', models.ForeignKey(blank=True, help_text='Associated menu item (for ingredients only)', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='stock_items', to='menu.Dish', verbose_name='Menu Item')),
             ],
             options={
                 'verbose_name': 'Stock Item',

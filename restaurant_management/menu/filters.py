@@ -1,8 +1,8 @@
 import django_filters
-from .models import MenuItem
+from .models import Dish
 from decimal import Decimal
 
-class MenuItemFilter(django_filters.FilterSet):
+class DishFilter(django_filters.FilterSet):
     min_price = django_filters.NumberFilter(
         field_name='price', 
         lookup_expr='gte',
@@ -14,16 +14,16 @@ class MenuItemFilter(django_filters.FilterSet):
         help_text="Filtra por precio máximo"
     )
     category = django_filters.ChoiceFilter(
-        choices=MenuItem.CATEGORY_CHOICES,
+        choices=Dish.CATEGORY_CHOICES,
         lookup_expr='iexact'
     )
     status = django_filters.ChoiceFilter(
-        choices=MenuItem.STATUS_CHOICES,
+        choices=Dish.STATUS_CHOICES,
         help_text="Filtra por estado (ACTIVE/INACTIVE)"
     )
 
     class Meta:
-        model = MenuItem
+        model = Dish
         fields = {
             'name': ['icontains'],
             'description': ['icontains']
