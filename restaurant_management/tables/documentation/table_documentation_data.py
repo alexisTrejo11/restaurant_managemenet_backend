@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 from ..serializers import TableSerializer
-from shared.response.api_response_serializers import ApiErrorResponseSerializer, ApiResponseSerializer
+from shared.response.api_response_serializers import ApiResponseSerializer, NotFoundErrorResponseSerializer, ValidationErrorResponseSerializer
 from rest_framework import serializers
 from shared.open_api.error_response_schema import ErrorResponses
 
@@ -69,7 +69,7 @@ class TableDocumentationData:
     #4XX
     not_found_response = openapi.Response(
         description="Table not found",
-        schema=ApiErrorResponseSerializer,
+        schema=NotFoundErrorResponseSerializer,
         examples={
             "application/json": {
                 "success": False,
@@ -82,7 +82,7 @@ class TableDocumentationData:
     )
     validation_error_response = openapi.Response(
         description="Validation error",
-        schema=ApiErrorResponseSerializer,
+        schema=ValidationErrorResponseSerializer,
         examples={
             "application/json": {
                 "success": False,

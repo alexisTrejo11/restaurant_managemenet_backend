@@ -1,15 +1,36 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from ..models import Reservation
 from shared.response.django_response import DjangoResponseWrapper
-from django.shortcuts import get_object_or_404
 from ..serializers import ReservationSerializer
-import logging
 from ..services.reservation_service import ReservationService
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from ..documentation.reservation_doc_data import ReservationAdminDocumentationData as ReservationDocData
+
+import logging
 
 logger = logging.getLogger(__name__)
 
 # TODO: Add Filters
 class ReservationAdminViewSet(viewsets.ViewSet):
+    @swagger_auto_schema(
+        operation_id='list_reservations_admin',
+        operation_summary=ReservationDocData.list_operation_summary,
+        operation_description=ReservationDocData.list_operation_description,
+        manual_parameters=[
+            openapi.Parameter('date', openapi.IN_QUERY, description="Filter by reservation date (YYYY-MM-DD)", type=openapi.TYPE_STRING),
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by status (pending/confirmed/cancelled)", type=openapi.TYPE_STRING),
+            openapi.Parameter('customer_id', openapi.IN_QUERY, description="Filter by customer ID", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            status.HTTP_200_OK: ReservationDocData.list_response,
+            status.HTTP_401_UNAUTHORIZED: ReservationDocData.unauthorized_reponse,
+            status.HTTP_403_FORBIDDEN: ReservationDocData.forbidden_reponse,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: ReservationDocData.server_error_reponse
+        },
+        tags=['Reservations (Admin)']
+    )
     def list(self, request):
         try:
             queryset = Reservation.objects.all()
@@ -21,7 +42,19 @@ class ReservationAdminViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f"Error listing reservations: {str(e)}", exc_info=True)
             return DjangoResponseWrapper.internal_server_error(message="Error retrieving reservation list.")
-        
+    
+    @swagger_auto_schema(
+        operation_id='retrieve_reservation_admin',
+        operation_summary=ReservationDocData.retrieve_operation_summary,
+        operation_description=ReservationDocData.retrieve_operation_description,
+        responses={
+            status.HTTP_200_OK: ReservationDocData.reservation_response,
+            status.HTTP_404_NOT_FOUND: ReservationDocData.not_found_response,
+            status.HTTP_401_UNAUTHORIZED: ReservationDocData.unauthorized_reponse,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: ReservationDocData.server_error_reponse
+        },
+        tags=['Reservations (Admin)']
+    )
     def retrieve(self, request, pk=None):
         queryset = Reservation.objects.all()
         reservation = get_object_or_404(queryset, pk=pk)
@@ -33,6 +66,20 @@ class ReservationAdminViewSet(viewsets.ViewSet):
             data=serializer.data,
         )
     
+    @swagger_auto_schema(
+        operation_id='create_reservation_admin',
+        operation_summary=ReservationDocData.create_operation_summary,
+        operation_description=ReservationDocData.create_operation_description,
+        request_body=ReservationSerializer,
+        responses={
+            status.HTTP_201_CREATED: ReservationDocData.reservation_response,
+            status.HTTP_400_BAD_REQUEST: ReservationDocData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: ReservationDocData.unauthorized_reponse,
+            status.HTTP_403_FORBIDDEN: ReservationDocData.forbidden_reponse,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: ReservationDocData.server_error_reponse
+        },
+        tags=['Reservations (Admin)']
+    )
     def create(self, request):
         serializer = ReservationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -44,7 +91,21 @@ class ReservationAdminViewSet(viewsets.ViewSet):
             entity="Reservation"
         )
 
-    # TODO: Fix
+    @swagger_auto_schema(
+        operation_id='update_reservation_admin',
+        operation_summary=ReservationDocData.update_operation_summary,
+        operation_description=ReservationDocData.update_operation_description,
+        request_body=ReservationSerializer,
+        responses={
+            status.HTTP_200_OK: ReservationDocData.reservation_response,
+            status.HTTP_400_BAD_REQUEST: ReservationDocData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: ReservationDocData.unauthorized_reponse,
+            status.HTTP_403_FORBIDDEN: ReservationDocData.forbidden_reponse,
+            status.HTTP_404_NOT_FOUND: ReservationDocData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: ReservationDocData.server_error_reponse
+        },
+        tags=['Reservations (Admin)']
+    )
     def update(self, request, pk=None):
         try:
             queryset = Reservation.objects.all()
@@ -62,7 +123,19 @@ class ReservationAdminViewSet(viewsets.ViewSet):
             logger.error(f"Error updating reservation {pk}: {str(e)}", exc_info=True)
             return DjangoResponseWrapper.bad_request(message=f"Error updating reservation {pk}.", data=serializer.errors)
 
-
+    @swagger_auto_schema(
+        operation_id='delete_reservation_admin',
+        operation_summary=ReservationDocData.destroy_operation_summary,
+        operation_description=ReservationDocData.destroy_operation_description,
+        responses={
+            status.HTTP_204_NO_CONTENT: 'Reservation deleted successfully',
+            status.HTTP_401_UNAUTHORIZED: ReservationDocData.unauthorized_reponse,
+            status.HTTP_403_FORBIDDEN: ReservationDocData.forbidden_reponse,
+            status.HTTP_404_NOT_FOUND: ReservationDocData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: ReservationDocData.server_error_reponse
+        },
+        tags=['Reservations (Admin)']
+    )
     def destroy(self, request, pk=None):
         queryset = Reservation.objects.all()
         reservation = get_object_or_404(queryset, pk=pk)

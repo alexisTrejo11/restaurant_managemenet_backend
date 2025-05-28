@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from shared.response.api_response import ApiResponse
 
+"""
+Success Responses
+"""
 class ApiResponseSerializer(serializers.Serializer):
     """
     Serializer for the standardized ApiResponse structure.
@@ -68,18 +71,6 @@ class ApiResponseWithListSerializer(ApiResponseSerializer):
     
     metadata = PaginationMetadataSerializer(help_text='Pagination information')
 
-class ApiErrorResponseSerializer(ApiResponseSerializer):
-    """
-    ApiResponse serializer specifically for error responses.
-    """
-    success = serializers.BooleanField(default=False, help_text='Always False for error responses')
-    data = serializers.DictField(
-        help_text='Error details',
-        required=False,
-        child=serializers.ListField(child=serializers.CharField())
-    )
-
-
 """
  ERROR SERIAlIZERS
 """
@@ -93,6 +84,16 @@ class BaseErrorResponseSerializer(serializers.Serializer):
     timestamp = serializers.CharField(help_text='ISO timestamp of the response.')
     status_code = serializers.IntegerField(help_text='HTTP status code.')
     metadata = serializers.DictField(help_text='Additional metadata.', required=False)
+
+class NotFoundErrorResponseSerializer(BaseErrorResponseSerializer):
+    """
+    Serializer for 404 Not Found responses
+    """
+    status_code = serializers.IntegerField(default=404, help_text='HTTP status code for not found requests.')
+    message = serializers.CharField(
+        default="The requested resource was not found.",
+        help_text='Not found error message.'
+    )
 
 class UnauthorizedErrorResponseSerializer(BaseErrorResponseSerializer):
     """

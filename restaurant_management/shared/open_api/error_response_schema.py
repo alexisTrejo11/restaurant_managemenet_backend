@@ -7,6 +7,23 @@ class ErrorResponses:
     Centralized authentication error responses for reuse across endpoints
     """
     @staticmethod
+    def get_not_found_response():
+        return openapi.Response(
+            description="Not Found - The requested resource was not found.",
+            schema=NotFoundErrorResponseSerializer,
+            examples={
+                "application/json": {
+                    "success": False,
+                    "message": "The requested resource was not found.",
+                    "data": None,
+                    "timestamp": "2025-05-28T10:30:00Z",
+                    "status_code": 404,
+                    "metadata": {}
+                }
+            }
+        )
+
+    @staticmethod
     def get_unauthorized_response():
         return openapi.Response(
             description="Unauthorized - Authentication credentials were not provided or are invalid.",
