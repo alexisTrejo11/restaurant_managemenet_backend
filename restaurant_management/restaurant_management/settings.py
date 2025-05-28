@@ -17,21 +17,15 @@ import tempfile
 import datetime
 from dotenv import load_dotenv
 
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 load_dotenv()
-
 SECRET_KEY = os.getenv('SECRET_KEY')
-
 DEBUG = True
-
 ALLOWED_HOSTS = []
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -42,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
@@ -72,7 +67,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'restaurant_management.urls'
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'core.exceptions.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'shared.exceptions.exception_handler.custom_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -125,7 +120,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'restaurant_management.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -177,11 +171,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-import logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -199,6 +189,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

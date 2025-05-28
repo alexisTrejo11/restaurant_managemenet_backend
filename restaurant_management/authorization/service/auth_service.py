@@ -1,23 +1,37 @@
-from django.forms import ValidationError
 from users.models import User
+from shared.utils.result import Result
 
 #TODO: Implement Result Pattern
 class AuthService:
     @staticmethod
-    def validate_signup_data(email: str, password: str, password2: str) -> None:
+    def validate_signup_data(validated_data) -> Result:
         """Validates registration data before creating the user"""
+        email = validated_data['email']
+        password = validated_data['password']
+        password2 = validated_data['password2']
+        
         if User.objects.filter(email=email).exists():
-            raise ValidationError("The email is already registered")
+            return Result.error("The email is already registered")
         
         if password != password2:
-            raise ValidationError("Passwords do not match")
+            return Result.error("Passwords do not match")
 
     @staticmethod
-    def authenticate_user(email: str, password: str) -> User:
-        try:
-            user = User.objects.get(email=email)
-            if user.check_password(password) and user.is_active:
-                return user
-            raise ValidationError("Invalid credentials")
-        except User.DoesNotExist:
-            raise ValidationError("User not found")
+    def authenticate_user(validated_data) -> Result:
+        email = validated_data['email']
+        password = validated_data['password']
+        
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Result.error("Invalid credentials")
+        
+        if not user.check_password(password):
+            return Result.error("Invalid credentials")
+ 
+        if not user.is_active:
+           return Result.error("Account is disabled.")
+
+        return Result.success(data=user)
+    
+
+    

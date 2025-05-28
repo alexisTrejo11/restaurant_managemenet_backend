@@ -1,13 +1,36 @@
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from django.utils import timezone
 
 class SessionService:
     @staticmethod
-    def delete_session(refresh_token):
+    def invalidate_all_sessions(user):
         try:
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            tokens = OutstandingToken.objects.filter(user=user)
+            for token in tokens:
+                if not BlacklistedToken.objects.filter(token=token).exists():
+                    BlacklistedToken.objects.create(token=token)
+            
+            # Delete outstanding tokens --> tokens.delete()
+            return True
         except Exception as e:
-            raise Exception(f"Error logging out: {str(e)}")
+            raise Exception(f"Error invalidating all tokens: {str(e)}")
+
+
+    def invalidate_session(refresh_token):
+        try:
+            refresh = RefreshToken(refresh_token)
+            refresh.blacklist()
+            
+            access_token = AccessToken(refresh.access_token)
+            access_token.set_exp(from_time=timezone.now())  
+            
+            return True
+        except TokenError as e:
+            raise Exception(f"Token error: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Error invalidating current tokens: {str(e)}")
 
     @staticmethod
     def refresh_session(refresh_token, user):
@@ -42,3 +65,5 @@ class SessionService:
             'refresh_token': str(refresh_token),
             'access_token': str(access_token),
         }
+    
+    
