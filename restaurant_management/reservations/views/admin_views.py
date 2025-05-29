@@ -1,12 +1,14 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from ..models import Reservation
-from shared.response.django_response import DjangoResponseWrapper
-from ..serializers import ReservationSerializer
-from ..services.reservation_service import ReservationService
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+from ..models import Reservation
+from ..serializers import ReservationSerializer
+from ..services.reservation_service import ReservationService
 from ..documentation.reservation_doc_data import ReservationAdminDocumentationData as ReservationDocData
+
+from shared.response.django_response import DjangoResponseWrapper
 
 import logging
 
@@ -32,17 +34,13 @@ class ReservationAdminViewSet(viewsets.ViewSet):
         tags=['Reservations (Admin)']
     )
     def list(self, request):
-        try:
-            queryset = Reservation.objects.all()
-            serializer = ReservationSerializer(queryset, many=True)
-            return DjangoResponseWrapper.found(
-                data=serializer.data,
-                entity="Reservation List",
-            )
-        except Exception as e:
-            logger.error(f"Error listing reservations: {str(e)}", exc_info=True)
-            return DjangoResponseWrapper.internal_server_error(message="Error retrieving reservation list.")
-    
+        queryset = Reservation.objects.all()
+        serializer = ReservationSerializer(queryset, many=True)
+        return DjangoResponseWrapper.found(
+            data=serializer.data,
+            entity="Reservation List",
+        )
+
     @swagger_auto_schema(
         operation_id='retrieve_reservation_admin',
         operation_summary=ReservationDocData.retrieve_operation_summary,
@@ -107,21 +105,17 @@ class ReservationAdminViewSet(viewsets.ViewSet):
         tags=['Reservations (Admin)']
     )
     def update(self, request, pk=None):
-        try:
-            queryset = Reservation.objects.all()
-            existing_reservation = get_object_or_404(queryset, pk=pk)
+        queryset = Reservation.objects.all()
+        existing_reservation = get_object_or_404(queryset, pk=pk)
 
-            serializer = ReservationSerializer(existing_reservation, data=request.data, partial=False)
-            serializer.is_valid(raise_exception=True)
+        serializer = ReservationSerializer(existing_reservation, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
 
-            reservation_updated = serializer.save()
-            return DjangoResponseWrapper.updated(
-                data=ReservationSerializer(reservation_updated).data, 
-                entity=f"Reservation {pk}"
-            )
-        except Exception as e:
-            logger.error(f"Error updating reservation {pk}: {str(e)}", exc_info=True)
-            return DjangoResponseWrapper.bad_request(message=f"Error updating reservation {pk}.", data=serializer.errors)
+        reservation_updated = serializer.save()
+        return DjangoResponseWrapper.updated(
+            data=ReservationSerializer(reservation_updated).data, 
+            entity=f"Reservation {pk}"
+        )
 
     @swagger_auto_schema(
         operation_id='delete_reservation_admin',
@@ -139,7 +133,5 @@ class ReservationAdminViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None):
         queryset = Reservation.objects.all()
         reservation = get_object_or_404(queryset, pk=pk)
-
         reservation.delete()
-
         return DjangoResponseWrapper.deleted(f"Reservation {pk}")

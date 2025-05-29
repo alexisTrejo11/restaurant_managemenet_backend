@@ -1,13 +1,36 @@
-from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
+from rest_framework import status, permissions
+from rest_framework.decorators import api_view, permission_classes
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+import logging
+
 from ..serializers import OrderItemSerializer
 from ..services.order_service import OrderService
 from ..services.order_item_service import OrderItemService
-from rest_framework.decorators import api_view
-import logging
+from ..documentation.order_item_doc_data import OrderItemDocumentationData
+
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 
 logger = logging.getLogger(__name__)
 
-# TODO: Add Permisions
+@swagger_auto_schema(
+    method='post',
+    operation_id=OrderItemDocumentationData.add_items_operation_id,
+    operation_summary=OrderItemDocumentationData.add_items_operation_summary,
+    operation_description=OrderItemDocumentationData.add_items_operation_description,
+    request_body=OrderItemSerializer(many=True),
+    responses={
+        status.HTTP_201_CREATED: OrderItemDocumentationData.order_items_list_response,
+        status.HTTP_400_BAD_REQUEST: OrderItemDocumentationData.add_items_validation_error_response,
+        status.HTTP_401_UNAUTHORIZED: OrderItemDocumentationData.unauthorized_response,
+        status.HTTP_404_NOT_FOUND: OrderItemDocumentationData.order_not_found_response,
+        status.HTTP_500_INTERNAL_SERVER_ERROR: OrderItemDocumentationData.server_error_response
+    },
+    tags=['Order Items']
+)
+@permission_classes([permissions.IsAuthenticated])
 @api_view(['POST'])
 def add_order_item(request, order_id):
     """
@@ -38,6 +61,32 @@ def add_order_item(request, order_id):
         entity=f"Order {order_id} Items"
     )
 
+@swagger_auto_schema(
+    method='post',
+    operation_id=OrderItemDocumentationData.delete_items_operation_id,
+    operation_summary=OrderItemDocumentationData.delete_items_operation_summary,
+    operation_description=OrderItemDocumentationData.delete_items_operation_description,
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'order_item_ids': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='List of order item IDs to delete'
+            )
+        },
+        required=['order_item_ids']
+    ),
+    responses={
+        status.HTTP_200_OK: OrderItemDocumentationData.success_no_data_response,
+        status.HTTP_400_BAD_REQUEST: OrderItemDocumentationData.delete_items_validation_error_response,
+        status.HTTP_401_UNAUTHORIZED: OrderItemDocumentationData.unauthorized_response,
+        status.HTTP_404_NOT_FOUND: OrderItemDocumentationData.order_or_items_not_found_response,
+        status.HTTP_500_INTERNAL_SERVER_ERROR: OrderItemDocumentationData.server_error_response
+    },
+    tags=['Order Items']
+)
+@permission_classes([permissions.IsAuthenticated])
 @api_view(['POST'])
 def delete_order_item(request, order_id): 
     """

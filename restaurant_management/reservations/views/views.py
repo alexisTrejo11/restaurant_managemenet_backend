@@ -1,15 +1,19 @@
-import logging
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
-from ..serializers import ReservationSerializer
-from ..services.reservation_service import ReservationService
+from rest_framework import status
 from django.utils import timezone
-from datetime import timedelta
+
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+from datetime import timedelta
+import logging
+
 from ..documentation.reservation_doc_data import ReservationDocumentationData as ReservationDocData
-from rest_framework import status
+from ..serializers import ReservationSerializer
+from ..services.reservation_service import ReservationService
+
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -32,25 +36,21 @@ def request_user_reservation(request):
     user_id = getattr(request.user, 'id', 'Anonymous')
     logger.info(f"User {user_id} is requesting to create a reservation with data: {request.data}")
 
-    try:
-        serializer = ReservationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    serializer = ReservationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-        reservation_created = ReservationService.create_reservation(
-            validated_data=serializer.validated_data,
-            is_admin=False
-        )
+    reservation_created = ReservationService.create_reservation(
+        validated_data=serializer.validated_data,
+        is_admin=False
+    )
 
-        reservation_serialized = ReservationSerializer(reservation_created)
-        logger.info(f"Reservation created successfully by user {user_id}. ID: {reservation_created.id}")
+    reservation_serialized = ReservationSerializer(reservation_created)
+    logger.info(f"Reservation created successfully by user {user_id}. ID: {reservation_created.id}")
 
-        return ResponseWrapper.success(
-            data=reservation_serialized.data,
-            message="Reservation Requested. To confirm your reservation, please check your email.",
-        )
-    except Exception as e:
-        logger.error(f"Error creating reservation by user {user_id}: {str(e)}", exc_info=True)
-        raise
+    return ResponseWrapper.success(
+        data=reservation_serialized.data,
+        message="Reservation Requested. To confirm your reservation, please check your email.",
+    )
 
 @swagger_auto_schema(
     method='get',
@@ -71,24 +71,20 @@ def get_today_reservations(request):
     user_id = user.id
     logger.info(f"User {user_id} is requesting today's reservations")
 
-    try:
-        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        tomorrow = today + timedelta(days=2) - timedelta(microseconds=1)
+    today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=2) - timedelta(microseconds=1)
 
-        reservations = ReservationService.get_reservation_by_date_range(today, tomorrow)
-        if len(reservations) == 0:
-            return ResponseWrapper.success(data=[], message="No Reservations Were Scheduled Today")
+    reservations = ReservationService.get_reservation_by_date_range(today, tomorrow)
+    if len(reservations) == 0:
+        return ResponseWrapper.success(data=[], message="No Reservations Were Scheduled Today")
 
-        logger.info(f"User {user_id} retrieved {len(reservations)} reservations.")
-        
-        reservations_serialized = ReservationSerializer(reservations, many=True)
-        return ResponseWrapper.success(
-            data=reservations_serialized.data,
-            message="Today's reservations retrieved successfully."
-        )
-    except Exception as e:
-        logger.error(f"Error fetching today's reservations for user {user_id}: {str(e)}", exc_info=True)
-        raise
+    logger.info(f"User {user_id} retrieved {len(reservations)} reservations.")
+    
+    reservations_serialized = ReservationSerializer(reservations, many=True)
+    return ResponseWrapper.success(
+        data=reservations_serialized.data,
+        message="Today's reservations retrieved successfully."
+    )
 
 @swagger_auto_schema(
     method='patch',
@@ -96,14 +92,7 @@ def get_today_reservations(request):
     operation_summary=ReservationDocData.update_status_operation_summary,
     operation_description=ReservationDocData.update_status_operation_description,
     manual_parameters=[
-        openapi.Parameter(
-            'new_status',
-            openapi.IN_PATH,
-            description="New status (PENDING/CONFIRMED/CANCELLED)",
-            type=openapi.TYPE_STRING,
-            required=True
-        )
-    ],
+        openapi.Parameter('new_status', openapi.IN_PATH, description="New status (PENDING/CONFIRMED/CANCELLED)", type=openapi.TYPE_STRING, required=True)],
     responses={
         status.HTTP_200_OK: ReservationDocData.status_update_response,
         status.HTTP_400_BAD_REQUEST: ReservationDocData.invalid_status_response,
@@ -129,11 +118,7 @@ def update_status_reservation(request, reservation_id: int, new_status: str):
         logger.warning(f"User {user_id} provided an invalid status: {new_status} for reservation {reservation_id}.")
         return ResponseWrapper.bad_request(message="Invalid status")
 
-    try:
-        ReservationService.update_status_reservation(reservation_id, new_status)
-        logger.info(f"Reservation {reservation_id} was successfully updated to status: {new_status} by user {user_id}.")
-        
-        return ResponseWrapper.success(message=f"Reservation Successfully Set As {new_status}")
-    except Exception as e:
-        logger.error(f"Error updating reservation {reservation_id} by user {user_id}: {str(e)}", exc_info=True)
-        return ResponseWrapper.internal_server_error(message=str(e))
+    ReservationService.update_status_reservation(reservation_id, new_status)
+    logger.info(f"Reservation {reservation_id} was successfully updated to status: {new_status} by user {user_id}.")
+    
+    return ResponseWrapper.success(message=f"Reservation Successfully Set As {new_status}")

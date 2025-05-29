@@ -5,7 +5,6 @@ from .views.views import (
     get_today_reservations,
 )
 
-
 from .views.admin_views import ReservationAdminViewSet
 from rest_framework.routers import DefaultRouter
 

@@ -1,23 +1,44 @@
 from rest_framework.viewsets import ModelViewSet
-from ..models import Order
-from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
-from ..serializers import OrderSerializer
-import logging
-from ..services.order_service import OrderService
-from ..services.order_item_service import OrderItemService
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework import status
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+import logging
+
+from ..documentation.order_doc_data import OrderDocumentationData
+from ..serializers import OrderSerializer
+from ..models import Order
+from ..services.order_service import OrderService
 from payments.services.payment_service import PaymentService
 from payments.serializers import PaymentSerializer
 
-# TODO: Add Permisions
+from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 
 logger = logging.getLogger(__name__)
 
 class OrderViewsSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_id='list_orders',
+        operation_summary=OrderDocumentationData.list_operation_summary,
+        operation_description=OrderDocumentationData.list_operation_description,
+        manual_parameters=[
+            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by order status", type=openapi.TYPE_STRING),
+            openapi.Parameter('table_id', openapi.IN_QUERY, description="Filter by table ID", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.order_list_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     def list(self, request, *args, **kwargs):
         user_id = getattr(request.user, 'id', 'Anonymous') 
         logger.info(f"User {user_id} is requesting order list.")
@@ -31,10 +52,22 @@ class OrderViewsSet(ModelViewSet):
             entity="Order List",
         )
 
+    @swagger_auto_schema(
+        operation_id='retrieve_order',
+        operation_summary=OrderDocumentationData.retrieve_operation_summary,
+        operation_description=OrderDocumentationData.retrieve_operation_description,
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.order_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_404_NOT_FOUND: OrderDocumentationData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     def retrieve(self, request, *args, **kwargs):
         order = self.get_object()
         user_id = getattr(request.user, 'id', 'Anonymous') 
-        logger.info(f"User {user_id} is requesting retriving order {order.id}.")
+        logger.info(f"User {user_id} is requesting retrieving order {order.id}.")
         
         serializer = self.get_serializer(order)
         
@@ -44,6 +77,19 @@ class OrderViewsSet(ModelViewSet):
             entity=f"Order {order.id}",
         )
 
+    @swagger_auto_schema(
+        operation_id='create_order',
+        operation_summary=OrderDocumentationData.create_operation_summary,
+        operation_description=OrderDocumentationData.create_operation_description,
+        request_body=OrderSerializer,
+        responses={
+            status.HTTP_201_CREATED: OrderDocumentationData.order_response,
+            status.HTTP_400_BAD_REQUEST: OrderDocumentationData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     def create(self, request, *args, **kwargs):
         user_id = getattr(request.user, 'id', 'Anonymous') 
         logger.info(f"User {user_id} is requesting creating order.")
@@ -59,6 +105,24 @@ class OrderViewsSet(ModelViewSet):
             entity=f"Order {order.id}",
         )
     
+
+    @swagger_auto_schema(
+        operation_id='update_order',
+        operation_summary=OrderDocumentationData.update_operation_summary,
+        operation_description=OrderDocumentationData.update_operation_description,
+        manual_parameters=[
+            openapi.Parameter( 'status', openapi.IN_QUERY, description="New status for the order", type=openapi.TYPE_STRING),
+            openapi.Parameter( 'table_id', openapi.IN_QUERY, description="New table ID for the order", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.order_response,
+            status.HTTP_400_BAD_REQUEST: OrderDocumentationData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_404_NOT_FOUND: OrderDocumentationData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     def update(self, request, *args, **kwargs):
         order = self.get_object()
         user_id = getattr(request.user, 'id', 'Anonymous')
@@ -76,6 +140,23 @@ class OrderViewsSet(ModelViewSet):
             entity=f"Order {order.id}",
         )
 
+    @swagger_auto_schema(
+        operation_id='update_order',
+        operation_summary=OrderDocumentationData.update_operation_summary,
+        operation_description=OrderDocumentationData.update_operation_description,
+        manual_parameters=[
+            openapi.Parameter('status', openapi.IN_QUERY, description="New status for the order", type=openapi.TYPE_STRING),
+            openapi.Parameter('table_id', openapi.IN_QUERY, description="New table ID for the order", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.order_response,
+            status.HTTP_400_BAD_REQUEST: OrderDocumentationData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_404_NOT_FOUND: OrderDocumentationData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     def destroy(self, request, *args, **kwargs):
         order = self.get_object()
         order_id = order.id
@@ -89,6 +170,19 @@ class OrderViewsSet(ModelViewSet):
             entity=f"Order {order_id}",
         )
     
+    @swagger_auto_schema(
+        operation_id='complete_order',
+        operation_summary=OrderDocumentationData.complete_operation_summary,
+        operation_description=OrderDocumentationData.complete_operation_description,
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.order_response,
+            status.HTTP_400_BAD_REQUEST: OrderDocumentationData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_404_NOT_FOUND: OrderDocumentationData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     @action(detail=True, methods=['patch'])
     def complete(self, request, *args, **kwargs):
         order = self.get_object()
@@ -104,6 +198,19 @@ class OrderViewsSet(ModelViewSet):
             message=f"Order {order.id} Succesfully Completed. A Payment with Id {payment.id} was inited pending to be paid"
         )
     
+    @swagger_auto_schema(
+        operation_id='cancel_order',
+        operation_summary=OrderDocumentationData.cancel_operation_summary,
+        operation_description=OrderDocumentationData.cancel_operation_description,
+        responses={
+            status.HTTP_200_OK: OrderDocumentationData.success_no_data,
+            status.HTTP_400_BAD_REQUEST: OrderDocumentationData.validation_error_response,
+            status.HTTP_401_UNAUTHORIZED: OrderDocumentationData.unauthorized_reponse,
+            status.HTTP_404_NOT_FOUND: OrderDocumentationData.not_found_response,
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OrderDocumentationData.server_error_reponse
+        },
+        tags=['Orders']
+    )
     @action(detail=True, methods=['patch'])
     def cancel(self, request, *args, **kwargs):
         order = self.get_object()
