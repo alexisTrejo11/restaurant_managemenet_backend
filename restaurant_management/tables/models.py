@@ -2,7 +2,7 @@ from django.db import models
 
 class Table(models.Model):
     capacity = models.IntegerField()
-    number = models.IntegerField(unique=True)
+    number = models.CharField(unique=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)  

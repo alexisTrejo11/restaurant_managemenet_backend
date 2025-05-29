@@ -75,7 +75,6 @@ class PaymentQuerySet(models.QuerySet):
         
         return queryset
 
-
 class Payment(models.Model):
     PAYMENT_METHODS = [
         ('CASH', 'Cash'),
@@ -85,6 +84,7 @@ class Payment(models.Model):
     PAYMENT_STATUS = [
         ('PENDING', 'Pending'),
         ('COMPLETED', 'Completed'),
+        ('REFUNDED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
     ]
     CURRENCY_TYPES = [
