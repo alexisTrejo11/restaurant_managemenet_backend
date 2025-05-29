@@ -1,7 +1,6 @@
 from users.models import User
 from shared.utils.result import Result
 
-#TODO: Implement Result Pattern
 class AuthService:
     @staticmethod
     def validate_signup_data(validated_data) -> Result:
@@ -15,6 +14,8 @@ class AuthService:
         
         if password != password2:
             return Result.error("Passwords do not match")
+        
+        return Result.success()
 
     @staticmethod
     def authenticate_user(validated_data) -> Result:

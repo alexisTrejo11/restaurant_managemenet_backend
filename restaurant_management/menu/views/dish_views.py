@@ -36,7 +36,7 @@ class DishViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        return Dish.objects.filter(status='ACTIVE')
+        return Dish.objects.filter()
 
     @swagger_auto_schema(
         operation_id='list_dishes',
@@ -73,7 +73,7 @@ class DishViewSet(viewsets.ModelViewSet):
         
         return ResponseWrapper.found(
             data=serializer.data,
-            message="Dish List",
+            entity="Dish List",
             metadata={
                 'total_items': queryset.count(),
                 'filters_applied': query_params_dict
@@ -122,10 +122,7 @@ class DishViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         logger.info(
             "Create request for new menu item",
-            extra={
-                'user': request.user.id,
-                'data': request.data
-            }
+            extra={'user': request.user.id,'data': request.data}
         )
         
         serializer = self.get_serializer(data=request.data)
@@ -137,7 +134,8 @@ class DishViewSet(viewsets.ModelViewSet):
             extra={'item_id': menu_item.id}
         )
         
-        return ResponseWrapper.created(data=serializer.data, entity="Dish")
+        menu_serialized = self.get_serializer(menu_item)
+        return ResponseWrapper.created(data=menu_serialized.data, entity="Dish")
 
     @swagger_auto_schema(
         operation_id='update_dish',
@@ -156,10 +154,7 @@ class DishViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         logger.info(
             f"Update request for menu item ID: {kwargs.get('id')}",
-            extra={
-                'user': request.user.id,
-                'request_data': request.data,
-            }
+            extra={'user': request.user.id,'request_data': request.data}
         )
         instance = self.get_object()
         
@@ -172,7 +167,6 @@ class DishViewSet(viewsets.ModelViewSet):
             f"Successfully updated menu dish ID: {instance.id}",
             extra={'updated_fields': list(request.data.keys())}
         )
-        
         return ResponseWrapper.updated(data=serializer.data, entity="Menu dish")
 
     @swagger_auto_schema(

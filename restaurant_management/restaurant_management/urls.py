@@ -28,13 +28,13 @@ urlpatterns = [
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
   
-   path('api/', include(router.urls)),
+   path('v1/api/', include(router.urls)),
 
-   path('api/auth/', include('authorization.urls')),
-   path('api/users/', include('users.urls')),
-   path('api/menu/',  include('menu.urls')),
-   path('api/stock/',  include('stock.urls')),
-   path('api/orders/',  include('orders.urls')),
-   path('api/reservations/',  include('reservations.urls')),
-   path('api/payments/',  include('payments.urls')),
+   path('v1/api/auth/', include('authorization.urls')),
+   path('v1/api/users/', include('users.urls')),
+   path('v1/api/menu/',  include('menu.urls')),
+   path('v1/api/stock/',  include('stock.urls')),
+   path('v1/api/orders/',  include('orders.urls')),
+   path('v1/api/reservations/',  include('reservations.urls')),
+   path('v1/api/payments/',  include('payments.urls')),
 ]

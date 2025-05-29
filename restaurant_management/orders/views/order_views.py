@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class OrderViewsSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     @swagger_auto_schema(
         operation_id='list_orders',

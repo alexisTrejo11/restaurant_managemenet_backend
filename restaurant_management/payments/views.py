@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 class PaymentAdminViews(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
-    permission_classes = [IsAdminUser]
     pagination_class = CustomPagination
 
     @swagger_auto_schema(
@@ -83,7 +82,7 @@ class PaymentAdminViews(viewsets.ModelViewSet):
         instance = self.get_object()
         logger.info(f"User {user_id} is requesting details for payment ID: {instance.id}.")
         
-        serializer = self.get_serializer(instance).data
+        serializer = self.get_serializer(instance)
         logger.info(f"Returning details for table ID: {instance.id}.")
         return ResponseWrapper.found(
             data=serializer.data,

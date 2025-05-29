@@ -5,6 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from shared.response.django_response import DjangoResponseWrapper as ResponseWrapper
 from typing import Dict, Any, Optional
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,8 @@ def custom_exception_handler(exc: Exception, context: Dict[str, Any]) -> Respons
     response = drf_exception_handler(exc, context)
     
     if isinstance(exc, Http404):
-        return ResponseWrapper.not_found(
+        return ResponseWrapper.failure(
+            status_code=404,
             data={'type': 'NotFound'},
             message=str(exc) or "Resource not found"
         )
@@ -122,9 +125,21 @@ def normalize_error_details(details: Any) -> Optional[Dict]:
     return {'message': str(details)}
 
 def get_error_message(exc: Exception) -> str:
-    """Extract appropriate error message from exception"""
-    if hasattr(exc, 'detail'):
-        if isinstance(exc.detail, dict):
-            return "Validation failed"
-        return str(exc.detail)
+    """Extract appropriate error message from exception, handling DRF and SimpleJWT specifics."""
+    if isinstance(exc, (InvalidToken, TokenError)):
+        if hasattr(exc, 'detail') and isinstance(exc.detail, dict):  
+            if 'messages' in exc.detail and isinstance(exc.detail['messages'], list):
+                if exc.detail['messages']:
+                    first_message = exc.detail['messages'][0]
+                    if isinstance(first_message, dict) and 'message' in first_message:
+                        return str(first_message['message'])
+            if 'detail' in exc.detail:
+                return str(exc.detail['detail'])
+
+    if isinstance(exc, APIException):
+        if hasattr(exc, 'detail'):
+            if isinstance(exc.detail, dict):
+                return "Validation failed or complex error details"
+            return str(exc.detail)
+        
     return str(exc) if str(exc) else "Request failed"

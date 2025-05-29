@@ -25,7 +25,8 @@ class OrderItemService:
             BusinessRuleViolationException: If item limits are exceeded
         """
         cls._validate_item_length_limit(items_validated_data)
-        
+        cls._validate_active_order(order)
+
         try:
             with transaction.atomic():
                 items = cls._generate_items(order, items_validated_data)
@@ -59,8 +60,7 @@ class OrderItemService:
                     found_ids = set(existing_items.values_list('id', flat=True))
                     missing_ids = set(items_ids) - found_ids
                     raise EntityNotFoundException(
-                        f"Order Items not found in order {order.id}", 
-                        list(missing_ids)
+                        f"Order Items {list(missing_ids)} not found in order {order.id}", 
                     )
                 
                 existing_items.delete()
@@ -106,3 +106,10 @@ class OrderItemService:
             raise BusinessRuleViolationException(
                 f"Cannot process more than {cls.MAX_ALLOWED_ITEMS_PER_REQUEST} items at once"
             )
+        
+    @classmethod
+    def _validate_active_order(cls, order: Order):
+        if order.status != "IN_PROGRESS":
+            raise BusinessRuleViolationException(
+                f"Order Finished Can't Add any item"
+                )

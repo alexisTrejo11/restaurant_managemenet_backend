@@ -83,10 +83,8 @@ class OrderService:
         Only allows deletion of orders that are in a modifiable state.
         """
         cls._validate_order_modifiability(order, for_deletion=True)
-
         try:
             with transaction.atomic():
-                cls._clear_table(order)
                 order_id = order.id
                 order.delete()
                 logger.info(f"Order {order_id} deleted successfully.")

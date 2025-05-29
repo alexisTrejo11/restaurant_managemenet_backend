@@ -1,23 +1,16 @@
-class CustomException(Exception):
-    """
-    Base class for all custom exceptions.
-    """
-    def __init__(self, message: str, status_code: int = 500):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
+from rest_framework.exceptions import APIException
 
 
-class EntityNotFoundException(CustomException):
+class EntityNotFoundException(APIException):
     """
     Exception raised when an entity is not found in the database.
     """
-    def __init__(self, entity_name: str, entity_id: int):
-        message = f"{entity_name} with ID {entity_id} not found."
-        super().__init__(message=message, status_code=404)
+    status_code = 404
+    default_detail = "Entity Not Found"
+    default_code = "entity_not_found"
 
 
-class InvalidFilterException(CustomException):
+class InvalidFilterException(APIException):
     """
     Exception raised when filter parameters are invalid.
     """
@@ -26,16 +19,16 @@ class InvalidFilterException(CustomException):
         super().__init__(message=message, status_code=400)
 
 
-class BusinessRuleViolationException(CustomException):
+class BusinessRuleViolationException(APIException):
     """
     Exception raised when a business rule is violated.
     """
-    def __init__(self, rule_description: str):
-        message = f"Business rule violation: {rule_description}."
-        super().__init__(message=message, status_code=409)
+    status_code = 400
+    default_detail = "BusinessRuleViolation"
+    default_code = "stock_error"
 
 
-class DomainException(CustomException):
+class DomainException(APIException):
     """
     Exception raised when a domain rule is violated.
     """
